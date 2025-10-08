@@ -29,19 +29,19 @@ def run():
         users_data = [
             {
                 "email": "john.doe@example.com",
-                "password": "password123",
+                "password": "pass123",
                 "full_name": "John Doe",
                 "phone": "+1234567890"
             },
             {
                 "email": "jane.smith@example.com", 
-                "password": "password123",
+                "password": "pass123",
                 "full_name": "Jane Smith",
                 "phone": "+1234567891"
             },
             {
                 "email": "bob.wilson@example.com",
-                "password": "password123", 
+                "password": "pass123", 
                 "full_name": "Bob Wilson",
                 "phone": "+1234567892"
             }
@@ -336,20 +336,20 @@ def run():
                     db.add(review)
 
         db.commit()
-        print("✅ Database seeded successfully!")
-        print("📊 Created:")
+        print("Database seeded successfully!")
+        print("Created:")
         print(f"   - {len(users_data) + 1} users (including admin)")
         print(f"   - {len(categories_data)} categories")
         print(f"   - {len(products_data)} products")
         print(f"   - {len(variant_data)} product variants")
         print(f"   - {len(coupons_data)} coupons")
         print("   - Sample orders and reviews")
-        print("\n🔑 Admin login: admin@example.com / admin123")
-        print("👥 Regular users: john.doe@example.com, jane.smith@example.com, bob.wilson@example.com / password123")
+        print("\nAdmin login: admin@example.com / admin123")
+        print("Regular users: john.doe@example.com, jane.smith@example.com, bob.wilson@example.com / pass123")
         
     except Exception as e:
         db.rollback()
-        print(f"❌ Error seeding database: {e}")
+        print(f"Error seeding database: {e}")
         raise
     finally:
         db.close()

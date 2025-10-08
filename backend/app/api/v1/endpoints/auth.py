@@ -63,6 +63,8 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
             "id": str(user.id),
             "email": user.email,
             "full_name": user.full_name,
+            "is_staff": bool(user.is_staff),
+            "is_superuser": bool(user.is_superuser),
         },
     }
 

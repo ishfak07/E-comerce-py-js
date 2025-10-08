@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api, setAuthToken } from '../lib/api'
 
-type User = { id: string; email: string; full_name?: string | null }
+type User = { id: string; email: string; full_name?: string | null; is_staff?: boolean; is_superuser?: boolean }
 
 type AuthContextType = {
   user: User | null

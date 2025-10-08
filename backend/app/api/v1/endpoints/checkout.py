@@ -28,8 +28,9 @@ class CheckoutRequest(BaseModel):
 
 @router.post("")
 def checkout(payload: CheckoutRequest, db: Session = Depends(get_db)):
-    if payload.payment_method != "stripe":
-        raise HTTPException(status_code=400, detail="Only stripe is supported for now")
+    # support stripe and bank_transfer
+    if payload.payment_method not in ("stripe", "bank_transfer"):
+        raise HTTPException(status_code=400, detail="Unsupported payment method")
 
     # Minimal placeholder: total derived from cart would be calculated here
     total_amount = 100.00
@@ -44,7 +45,10 @@ def checkout(payload: CheckoutRequest, db: Session = Depends(get_db)):
             total_amount = max(0.0, total_amount - discount)
 
     amount_cents = int(round(total_amount * 100))
-    pi = create_payment_intent(amount_cents, metadata={"cart_id": payload.cart_id or "na"})
+    # For stripe: create payment intent
+    payment_intent = None
+    if payload.payment_method == "stripe":
+        payment_intent = create_payment_intent(amount_cents, metadata={"cart_id": payload.cart_id or "na"})
 
     order = Order(
         status="pending",
@@ -54,11 +58,24 @@ def checkout(payload: CheckoutRequest, db: Session = Depends(get_db)):
         shipping_address=payload.shipping_address.model_dump(),
         billing_address=payload.shipping_address.model_dump(),
         payment_status="unpaid",
-        payment_intent_id=pi["id"],
+        payment_method=payload.payment_method,
+        payment_intent_id=(payment_intent["id"] if payment_intent else None),
     )
     db.add(order)
     db.commit()
 
-    return {"order_id": order.id, "payment_intent_client_secret": pi["client_secret"]}
+    if payload.payment_method == "stripe":
+        return {"order_id": order.id, "payment_intent_client_secret": payment_intent["client_secret"]}
+
+    # bank_transfer: return instructions to the client
+    bank_info = {
+        "name": "Ishfaque Mif",
+        "bank": "BOC",
+        "branch": "Puttalam",
+        "account_number": "89001476",
+        "whatsapp": "0768976222",
+        "instructions": "Please transfer the total amount to the above account and send a payment confirmation (screenshot) to the WhatsApp number. You may upload the payment screenshot on your orders page.",
+    }
+    return {"order_id": order.id, "bank_transfer": bank_info}
 
 

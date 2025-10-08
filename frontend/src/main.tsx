@@ -11,6 +11,8 @@ import AppShell from './AppShell'
 import { AuthProvider } from './context/AuthProvider'
 import { CartProvider } from './lib/cart'
 import AdminOrders from './pages/AdminOrders'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminRoute from './components/AdminRoute'
 import Shop from './pages/Shop'
 import About from './pages/About'
 import Contact from './pages/Contact'
@@ -24,6 +26,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Routes>
             <Route element={<AppShell />}>
               <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/product/:slug" element={<ProductDetail />} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/about" element={<About />} />
@@ -32,7 +35,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/register" element={<Register />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             </Route>
           </Routes>
         </CartProvider>

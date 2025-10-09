@@ -5,8 +5,8 @@ Run: python backend\seed_admins.py
 import os
 from datetime import datetime
 
-from backend.app.db.mongo import init_mongo_client, get_sync_mongo_client
-from backend.app.core.security import get_password_hash
+from app.db.mongo import init_mongo_client, get_sync_mongo_client
+from app.core.security import get_password_hash
 
 
 def main():

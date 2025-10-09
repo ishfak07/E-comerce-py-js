@@ -6,6 +6,7 @@ from .endpoints.products import router as products_router
 from .endpoints.checkout import router as checkout_router
 from .endpoints.webhooks import router as webhooks_router
 from .endpoints.admin_orders import router as admin_orders_router
+from .endpoints.admin_stream import router as admin_stream_router
 
 
 api_router_v1 = APIRouter()
@@ -17,5 +18,6 @@ api_router_v1.include_router(products_router, tags=["products"])
 api_router_v1.include_router(checkout_router, tags=["checkout"])
 api_router_v1.include_router(webhooks_router, tags=["webhooks"])
 api_router_v1.include_router(admin_orders_router, tags=["admin"])
+api_router_v1.include_router(admin_stream_router, tags=["admin"])
 
 

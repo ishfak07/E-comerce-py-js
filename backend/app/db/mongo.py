@@ -7,12 +7,15 @@ try:
 except Exception:
     pymongo = None
 
+from backend.app.core.config import settings as app_settings
+
 _async_client: Optional[AsyncIOMotorClient] = None
 _sync_client = None
 
 
 def get_mongo_url() -> str | None:
-    return os.environ.get("MONGO_URL")
+    """Return MONGO_URL from environment or from application settings (loaded from .env)."""
+    return os.environ.get("MONGO_URL") or getattr(app_settings, "mongo_url", None)
 
 
 def init_mongo_client():

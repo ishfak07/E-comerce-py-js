@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     # Database (PostgreSQL) - optional when using MongoDB only
     database_url: str | None = Field(default=None, env="DATABASE_URL")
 
+    # MongoDB (Atlas/local)
+    mongo_url: Optional[str] = Field(default=None, env="MONGO_URL")
+
     # Redis (optional)
     redis_url: Optional[str] = None
 

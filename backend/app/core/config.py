@@ -24,6 +24,8 @@ class Settings(BaseSettings):
 
     # MongoDB (Atlas/local)
     mongo_url: Optional[str] = Field(default=None, env="MONGO_URL")
+    # Mongo database name to use (defaults to 'ecommerce')
+    mongo_db_name: str = Field(default="ecommerce", env="MONGO_DB")
 
     # Redis (optional)
     redis_url: Optional[str] = None

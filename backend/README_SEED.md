@@ -4,10 +4,10 @@ When bcrypt binaries are not available on your system (common on Windows), the p
 
 Steps to start the database and seed locally (PowerShell):
 
-1) Start PostgreSQL with Docker-compose (from repo root):
+1) Start MongoDB with Docker-compose (from repo root):
 
 ```powershell
-docker-compose up -d db
+docker-compose up -d mongo
 ```
 
 2) Install Python dependencies for the backend (use a virtualenv):
@@ -32,22 +32,20 @@ python -m backend.app.seed
 python backend\seed_no_hash.py
 ```
 
-4) Connection details (for tools like DBeaver):
+4) Connection details (Mongo):
 
 - Host: localhost
-- Port: 5432
+- Port: 27017
 - Database: ecommerce
-- Username: postgres
-- Password: postgres
 
-JDBC/connection string:
+Mongo URI:
 
-postgresql://postgres:postgres@localhost:5432/ecommerce
+mongodb://localhost:27017/ecommerce
 
 Test accounts created by the seed:
 
-- Admin: admin@example.com / admin123
-- User: john.doe@example.com / pass123
+-- Admin: admin@example.com / adminpass
+-- User: user@example.com / userpass
 
 Notes:
 - The `sha256$<hex>` stored hash format is used as a fallback and is supported by the app's `verify_password` implementation.

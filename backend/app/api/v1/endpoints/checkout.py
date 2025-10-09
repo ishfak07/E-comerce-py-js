@@ -1,9 +1,9 @@
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from typing import Any
 
-from ....db.session import get_db
-from ....models.models import Order, OrderItem, Coupon
+from ....dependencies.mongo import get_mongo_db
 from ....services.payments import create_payment_intent
 
 
@@ -27,7 +27,7 @@ class CheckoutRequest(BaseModel):
 
 
 @router.post("")
-def checkout(payload: CheckoutRequest, db: Session = Depends(get_db)):
+def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
     # support stripe and bank_transfer
     if payload.payment_method not in ("stripe", "bank_transfer"):
         raise HTTPException(status_code=400, detail="Unsupported payment method")
@@ -35,13 +35,14 @@ def checkout(payload: CheckoutRequest, db: Session = Depends(get_db)):
     # Minimal placeholder: total derived from cart would be calculated here
     total_amount = 100.00
     discount = 0.0
-    if payload.coupon:
-        coupon = db.get(Coupon, payload.coupon)
-        if coupon and coupon.active:
-            if coupon.type == "percent":
-                discount = total_amount * float(coupon.value) / 100.0
+    if payload.coupon and db is not None:
+        coupons = db.get_collection("coupons")
+        coupon = coupons.find_one({"code": payload.coupon})
+        if coupon and coupon.get("active"):
+            if coupon.get("type") == "percent":
+                discount = total_amount * float(coupon.get("value", 0)) / 100.0
             else:
-                discount = float(coupon.value)
+                discount = float(coupon.get("value", 0))
             total_amount = max(0.0, total_amount - discount)
 
     amount_cents = int(round(total_amount * 100))
@@ -50,22 +51,26 @@ def checkout(payload: CheckoutRequest, db: Session = Depends(get_db)):
     if payload.payment_method == "stripe":
         payment_intent = create_payment_intent(amount_cents, metadata={"cart_id": payload.cart_id or "na"})
 
-    order = Order(
-        status="pending",
-        total_amount=total_amount,
-        shipping_amount=0,
-        taxes=0,
-        shipping_address=payload.shipping_address.model_dump(),
-        billing_address=payload.shipping_address.model_dump(),
-        payment_status="unpaid",
-        payment_method=payload.payment_method,
-        payment_intent_id=(payment_intent["id"] if payment_intent else None),
-    )
-    db.add(order)
-    db.commit()
+    # Create a Mongo order document
+    order_doc: dict[str, Any] = {
+        "status": "pending",
+        "total_amount": total_amount,
+        "shipping_amount": 0,
+        "taxes": 0,
+        "shipping_address": payload.shipping_address.model_dump(),
+        "billing_address": payload.shipping_address.model_dump(),
+        "payment_status": "unpaid",
+        "payment_method": payload.payment_method,
+        "payment_intent_id": (payment_intent["id"] if payment_intent else None),
+    }
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    orders = db.get_collection("orders")
+    res = orders.insert_one(order_doc)
+    order_id = str(res.inserted_id)
 
     if payload.payment_method == "stripe":
-        return {"order_id": order.id, "payment_intent_client_secret": payment_intent["client_secret"]}
+        return {"order_id": order_id, "payment_intent_client_secret": payment_intent["client_secret"]}
 
     # bank_transfer: return instructions to the client
     bank_info = {
@@ -76,6 +81,6 @@ def checkout(payload: CheckoutRequest, db: Session = Depends(get_db)):
         "whatsapp": "0768976222",
         "instructions": "Please transfer the total amount to the above account and send a payment confirmation (screenshot) to the WhatsApp number. You may upload the payment screenshot on your orders page.",
     }
-    return {"order_id": order.id, "bank_transfer": bank_info}
+    return {"order_id": order_id, "bank_transfer": bank_info}
 
 

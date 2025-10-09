@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import Session
+from typing import Any
 
 from ....core.security import (
     create_access_token,
@@ -8,11 +8,15 @@ from ....core.security import (
     get_password_hash,
     verify_password,
 )
-from ....db.session import get_db
-from ....models.models import User
-
+from ....dependencies.mongo import get_mongo_db
 
 router = APIRouter(prefix="/auth")
+
+
+class MongoUser(dict):
+    pass
+
+
 
 
 class RegisterRequest(BaseModel):
@@ -34,37 +38,45 @@ class TokenResponse(BaseModel):
 
 
 @router.post("/register")
-def register(payload: RegisterRequest, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == payload.email).first()
+def register(payload: RegisterRequest, db=Depends(get_mongo_db)):
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    users = db.get_collection("users")
+    existing = users.find_one({"email": payload.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already in use")
-    user = User(
-        email=payload.email,
-        password_hash=get_password_hash(payload.password),
-        full_name=payload.full_name,
-        is_active=True,
-    )
-    db.add(user)
-    db.commit()
-    return {"message": "verify your email"}
+    user_doc: dict[str, Any] = {
+        "email": payload.email,
+        "password_hash": get_password_hash(payload.password),
+        "full_name": payload.full_name,
+        "is_active": True,
+        "is_staff": False,
+        "is_superuser": False,
+    }
+    res = users.insert_one(user_doc)
+    return {"message": "verify your email", "id": str(res.inserted_id)}
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
-    user: User | None = db.query(User).filter(User.email == payload.email).first()
-    if not user or not verify_password(payload.password, user.password_hash):
+def login(payload: LoginRequest, db=Depends(get_mongo_db)):
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    users = db.get_collection("users")
+    user = users.find_one({"email": payload.email})
+    if not user or not verify_password(payload.password, user.get("password_hash")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    access = create_access_token(str(user.id))
-    refresh = create_refresh_token(str(user.id))
+    user_id = str(user.get("_id"))
+    access = create_access_token(user_id)
+    refresh = create_refresh_token(user_id)
     return {
         "access_token": access,
         "refresh_token": refresh,
         "user": {
-            "id": str(user.id),
-            "email": user.email,
-            "full_name": user.full_name,
-            "is_staff": bool(user.is_staff),
-            "is_superuser": bool(user.is_superuser),
+            "id": user_id,
+            "email": user.get("email"),
+            "full_name": user.get("full_name"),
+            "is_staff": bool(user.get("is_staff", False)),
+            "is_superuser": bool(user.get("is_superuser", False)),
         },
     }
 
@@ -74,25 +86,29 @@ class RefreshRequest(BaseModel):
 
 
 @router.post("/refresh", response_model=TokenResponse)
-def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
+def refresh(payload: RefreshRequest, db=Depends(get_mongo_db)):
     from ....core.security import decode_token
+
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
 
     decoded = decode_token(payload.refresh_token)
     if not decoded or decoded.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     user_id = decoded.get("sub")
-    user: User | None = db.get(User, user_id)
+    users = db.get_collection("users")
+    user = users.find_one({"_id": user_id}) if user_id else None
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    access = create_access_token(str(user.id))
-    refresh_token = create_refresh_token(str(user.id))
+    access = create_access_token(str(user.get("_id")))
+    refresh_token = create_refresh_token(str(user.get("_id")))
     return {
         "access_token": access,
         "refresh_token": refresh_token,
         "user": {
-            "id": str(user.id),
-            "email": user.email,
-            "full_name": user.full_name,
+            "id": str(user.get("_id")),
+            "email": user.get("email"),
+            "full_name": user.get("full_name"),
         },
     }
 

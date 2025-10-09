@@ -1,10 +1,6 @@
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func
-from sqlalchemy.orm import Session
-
 from ....dependencies.auth import require_admin
-from ....db.session import get_db
-from ....models.models import Order
+from ....dependencies.mongo import get_mongo_db
 
 
 router = APIRouter(prefix="/admin/orders")
@@ -15,7 +11,7 @@ def list_orders(
     status: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     size: int = Query(default=20, ge=1, le=200),
-    db: Session = Depends(get_db),
+    db=Depends(get_mongo_db),
     _admin=Depends(require_admin),
 ):
     """Return paginated admin orders.
@@ -25,30 +21,34 @@ def list_orders(
     - page: 1-based page number
     - size: page size
     """
-    stmt = select(Order)
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    orders = db.get_collection("orders")
+    query: dict = {}
     if status:
-        stmt = stmt.where(Order.status == status)
-    total_stmt = select(func.count()).select_from(stmt.subquery())
-    total = db.execute(total_stmt).scalar() or 0
-
-    stmt = stmt.order_by(Order.created_at.desc())
-    offset = (page - 1) * size
-    items = db.execute(stmt.offset(offset).limit(size)).scalars().all()
-    return {"items": [o for o in items], "total": total, "page": page, "size": size}
+        query["status"] = status
+    total = orders.count_documents(query)
+    cursor = orders.find(query).sort("created_at", -1).skip((page - 1) * size).limit(size)
+    items = list(cursor)
+    return {"items": items, "total": total, "page": page, "size": size}
 
 
 @router.get("/{order_id}")
-def get_order(order_id: int, db: Session = Depends(get_db), _admin=Depends(require_admin)):
-    return db.get(Order, order_id)
+def get_order(order_id: str, db=Depends(get_mongo_db), _admin=Depends(require_admin)):
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    orders = db.get_collection("orders")
+    return orders.find_one({"_id": order_id})
 
 
 @router.put("/{order_id}/status")
-def update_status(order_id: int, new_status: str, db: Session = Depends(get_db), _admin=Depends(require_admin)):
-    order = db.get(Order, order_id)
-    if not order:
+def update_status(order_id: str, new_status: str, db=Depends(get_mongo_db), _admin=Depends(require_admin)):
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    orders = db.get_collection("orders")
+    res = orders.update_one({"_id": order_id}, {"$set": {"status": new_status}})
+    if res.matched_count == 0:
         return {"detail": "not found"}
-    order.status = new_status
-    db.commit()
     return {"ok": True}
 
 

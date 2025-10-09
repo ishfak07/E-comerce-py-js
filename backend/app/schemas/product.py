@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 class ProductVariantOut(BaseModel):
-    id: int
+    id: str | int
     sku: str
     attributes: dict
     price: Optional[float] = None
@@ -17,7 +17,7 @@ class ProductVariantOut(BaseModel):
 
 
 class ProductOut(BaseModel):
-    id: int
+    id: str | int
     sku: str
     name: str
     slug: str
@@ -25,9 +25,9 @@ class ProductOut(BaseModel):
     short_description: Optional[str] = None
     price: float
     compare_at_price: Optional[float] = None
-    images: list[str]
-    tags: list[str]
-    attributes: dict
+    images: list[str] = []
+    tags: list[str] = []
+    attributes: dict = {}
     stock: int
     is_published: bool
     available_from: Optional[datetime] = None

@@ -1,9 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import select, and_, or_
-
-from ....db.session import get_db
-from ....models.models import Product, Category
+from ....dependencies.mongo import get_mongo_db
 from ....schemas.product import ProductListResponse, ProductOut
 
 
@@ -12,7 +8,7 @@ router = APIRouter(prefix="/products")
 
 @router.get("", response_model=ProductListResponse)
 def list_products(
-    db: Session = Depends(get_db),
+    db=Depends(get_mongo_db),
     q: str | None = Query(default=None),
     category: str | None = Query(default=None),
     min_price: float | None = Query(default=None, ge=0),
@@ -21,41 +17,81 @@ def list_products(
     size: int = Query(default=20, ge=1, le=100),
     sort: str | None = Query(default=None),
 ):
-    stmt = select(Product).where(Product.is_published.is_(True))
-
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    products = db.get_collection("products")
+    query: dict = {"is_published": True}
     if q:
-        like = f"%{q}%"
-        stmt = stmt.where(or_(Product.name.ilike(like), Product.slug.ilike(like)))
+        query["$or"] = [{"name": {"$regex": q, "$options": "i"}}, {"slug": {"$regex": q, "$options": "i"}}]
     if category:
-        cat = db.execute(select(Category.id).where(Category.slug == category)).scalar()
-        if cat:
-            stmt = stmt.where(Product.category_id == cat)
+        query["category"] = category
     if min_price is not None:
-        stmt = stmt.where(Product.price >= min_price)
+        query["price"] = query.get("price", {})
+        query["price"]["$gte"] = min_price
     if max_price is not None:
-        stmt = stmt.where(Product.price <= max_price)
+        query["price"] = query.get("price", {})
+        query["price"]["$lte"] = max_price
 
+    cursor = products.find(query)
+    # sorting
     if sort == "price_asc":
-        stmt = stmt.order_by(Product.price.asc())
+        cursor = cursor.sort("price", 1)
     elif sort == "price_desc":
-        stmt = stmt.order_by(Product.price.desc())
+        cursor = cursor.sort("price", -1)
     else:
-        stmt = stmt.order_by(Product.created_at.desc())
+        cursor = cursor.sort("created_at", -1)
 
-    total = db.execute(stmt.with_only_columns(Product.id)).unique().all()
-    total_count = len(total)
+    total_count = products.count_documents(query)
+    raw_items = list(cursor.skip((page - 1) * size).limit(size))
+    def map_doc(d: dict) -> dict:
+        return {
+            "id": str(d.get("_id")),
+            "sku": d.get("sku", ""),
+            "name": d.get("name"),
+            "slug": d.get("slug"),
+            "description": d.get("description"),
+            "short_description": d.get("short_description"),
+            "price": float(d.get("price", 0)),
+            "compare_at_price": d.get("compare_at_price"),
+            "images": d.get("images", []),
+            "tags": d.get("tags", []),
+            "attributes": d.get("attributes", {}),
+            "stock": int(d.get("stock", 0)),
+            "is_published": bool(d.get("is_published", False)),
+            "available_from": d.get("available_from"),
+            "category_id": d.get("category_id"),
+            "variants": d.get("variants", []),
+        }
 
-    stmt = stmt.limit(size).offset((page - 1) * size)
-    items = db.execute(stmt).scalars().all()
+    items = [map_doc(d) for d in raw_items]
     return ProductListResponse(items=items, total=total_count, page=page, size=size)
 
 
 @router.get("/{slug}", response_model=ProductOut)
-def get_product(slug: str, db: Session = Depends(get_db)):
-    stmt = select(Product).where(Product.slug == slug, Product.is_published.is_(True))
-    product = db.execute(stmt).scalar_one_or_none()
+def get_product(slug: str, db=Depends(get_mongo_db)):
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    products = db.get_collection("products")
+    product = products.find_one({"slug": slug, "is_published": True})
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    return product
+    return {
+        "id": str(product.get("_id")),
+        "sku": product.get("sku", ""),
+        "name": product.get("name"),
+        "slug": product.get("slug"),
+        "description": product.get("description"),
+        "short_description": product.get("short_description"),
+        "price": float(product.get("price", 0)),
+        "compare_at_price": product.get("compare_at_price"),
+        "images": product.get("images", []),
+        "tags": product.get("tags", []),
+        "attributes": product.get("attributes", {}),
+        "stock": int(product.get("stock", 0)),
+        "is_published": bool(product.get("is_published", False)),
+        "available_from": product.get("available_from"),
+        "category_id": product.get("category_id"),
+        "variants": product.get("variants", []),
+    }
 
 

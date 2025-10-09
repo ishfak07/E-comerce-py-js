@@ -19,11 +19,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
     ]
 
-    # Database (PostgreSQL)
-    database_url: str = Field(
-        default="postgresql+psycopg://postgres:postgres@localhost:5432/ecommerce",
-        env="DATABASE_URL",
-    )
+    # Database (PostgreSQL) - optional when using MongoDB only
+    database_url: str | None = Field(default=None, env="DATABASE_URL")
 
     # Redis (optional)
     redis_url: Optional[str] = None

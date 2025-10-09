@@ -4,6 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .api.v1.router import api_router_v1
 from .db.mongo import init_mongo_client, close_mongo_client, get_mongo_url
+import logging
+
+logger = logging.getLogger("ecommerce.app")
 
 
 def create_app() -> FastAPI:
@@ -30,12 +33,25 @@ def create_app() -> FastAPI:
     # Mongo init (optional)
     @app.on_event("startup")
     async def _init_mongo():
-        if get_mongo_url():
-            init_mongo_client()
+        logger.info("startup: checking MONGO_URL")
+        try:
+            if get_mongo_url():
+                logger.info("startup: initializing mongo client")
+                init_mongo_client()
+                logger.info("startup: mongo client initialized")
+            else:
+                logger.info("startup: no mongo url configured")
+        except Exception as e:
+            logger.exception("startup: exception during mongo init: %s", e)
 
     @app.on_event("shutdown")
     async def _close_mongo():
-        close_mongo_client()
+        logger.info("shutdown: closing mongo client")
+        try:
+            close_mongo_client()
+            logger.info("shutdown: mongo client closed")
+        except Exception:
+            logger.exception("shutdown: error closing mongo client")
 
     return app
 

@@ -5,8 +5,8 @@ import os
 from getpass import getpass
 from datetime import datetime
 
-from backend.app.db.mongo import get_sync_mongo_client, init_mongo_client
-from backend.app.core.security import get_password_hash
+from app.db.mongo import get_sync_mongo_client, init_mongo_client
+from app.core.security import get_password_hash
 
 
 def main():

@@ -3,8 +3,8 @@ from fastapi.responses import StreamingResponse
 import json
 import asyncio
 
-from ...dependencies.mongo import get_mongo_db
-from ...db.mongo import get_mongo_client
+from app.dependencies.mongo import get_mongo_db
+from app.db.mongo import get_mongo_client
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 

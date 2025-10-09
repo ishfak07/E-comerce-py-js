@@ -7,7 +7,7 @@ try:
 except Exception:
     pymongo = None
 
-from .core.config import settings as app_settings
+from ..core.config import settings as app_settings
 
 _async_client: Optional[AsyncIOMotorClient] = None
 _sync_client = None

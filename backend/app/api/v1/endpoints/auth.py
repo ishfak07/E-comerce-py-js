@@ -52,6 +52,7 @@ def register(payload: RegisterRequest, db=Depends(get_mongo_db)):
         existing = users.find_one({"email": payload.email})
         logger.debug(f"Existing user: {existing}")
         if existing:
+            logger.warning("Email already in use")
             raise HTTPException(status_code=400, detail="Email already in use")
         user_doc: dict[str, Any] = {
             "email": payload.email,
@@ -61,6 +62,7 @@ def register(payload: RegisterRequest, db=Depends(get_mongo_db)):
             "is_staff": False,
             "is_superuser": False,
         }
+        logger.debug(f"User document to insert: {user_doc}")
         res = users.insert_one(user_doc)
         logger.debug(f"Inserted user ID: {res.inserted_id}")
         return {"message": "verify your email", "id": str(res.inserted_id)}

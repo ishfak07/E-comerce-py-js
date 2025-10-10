@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, Iterator
 import logging
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -58,3 +58,27 @@ def close_mongo_client():
         except Exception:
             pass
         _sync_client = None
+
+
+# Modify get_mongo_db to log database operations
+def get_mongo_db() -> Iterator:
+    try:
+        sync_client = get_sync_mongo_client()
+        db_name = getattr(app_settings, "mongo_db_name", None) or sync_client and sync_client.get_default_database().name
+        logger.debug(f"Database name: {db_name}")
+        if sync_client is not None:
+            db = sync_client.get_database(db_name)
+            logger.debug(f"Sync database instance: {db}")
+            yield db
+            return
+        async_client = get_mongo_client()
+        if async_client is None:
+            logger.error("Async MongoDB client is not initialized")
+            yield None
+            return
+        db = async_client.get_database(db_name)
+        logger.debug(f"Async database instance: {db}")
+        yield db
+    except Exception as e:
+        logger.error(f"Error in get_mongo_db: {e}")
+        yield None

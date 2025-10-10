@@ -44,13 +44,14 @@ class TokenResponse(BaseModel):
 @router.post("/register")
 def register(payload: RegisterRequest, db=Depends(get_mongo_db)):
     try:
+        logger.debug("Register endpoint called with payload: %s", payload.dict())
         if db is None:
             logger.error("MongoDB is not configured")
             raise RuntimeError("MongoDB is not configured")
         users = db.get_collection("users")
-        logger.debug(f"Users collection: {users}")
+        logger.debug("Users collection: %s", users)
         existing = users.find_one({"email": payload.email})
-        logger.debug(f"Existing user: {existing}")
+        logger.debug("Existing user: %s", existing)
         if existing:
             logger.warning("Email already in use")
             raise HTTPException(status_code=400, detail="Email already in use")
@@ -62,12 +63,12 @@ def register(payload: RegisterRequest, db=Depends(get_mongo_db)):
             "is_staff": False,
             "is_superuser": False,
         }
-        logger.debug(f"User document to insert: {user_doc}")
+        logger.debug("User document to insert: %s", user_doc)
         res = users.insert_one(user_doc)
-        logger.debug(f"Inserted user ID: {res.inserted_id}")
+        logger.debug("Inserted user ID: %s", res.inserted_id)
         return {"message": "verify your email", "id": str(res.inserted_id)}
     except Exception as e:
-        logger.error(f"Unhandled exception in register: {e}")
+        logger.error("Unhandled exception in register: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

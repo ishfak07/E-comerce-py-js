@@ -2,7 +2,7 @@
 
 Use this script to start the backend from PowerShell or via Start-Process.
 Example:
-  .\.venv\Scripts\python.exe backend\run_server.py
+    ./.venv/Scripts/python.exe backend/run_server.py
 """
 import sys
 import os

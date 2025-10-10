@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from typing import Any
+import logging
 
 from ....core.security import (
     create_access_token,
@@ -11,6 +12,9 @@ from ....core.security import (
 from ....dependencies.mongo import get_mongo_db
 
 router = APIRouter(prefix="/auth")
+
+logger = logging.getLogger("auth")
+logger.setLevel(logging.DEBUG)
 
 
 class MongoUser(dict):
@@ -40,9 +44,12 @@ class TokenResponse(BaseModel):
 @router.post("/register")
 def register(payload: RegisterRequest, db=Depends(get_mongo_db)):
     if db is None:
+        logger.error("MongoDB is not configured")
         raise RuntimeError("MongoDB is not configured")
     users = db.get_collection("users")
+    logger.debug(f"Users collection: {users}")
     existing = users.find_one({"email": payload.email})
+    logger.debug(f"Existing user: {existing}")
     if existing:
         raise HTTPException(status_code=400, detail="Email already in use")
     user_doc: dict[str, Any] = {
@@ -54,6 +61,7 @@ def register(payload: RegisterRequest, db=Depends(get_mongo_db)):
         "is_superuser": False,
     }
     res = users.insert_one(user_doc)
+    logger.debug(f"Inserted user ID: {res.inserted_id}")
     return {"message": "verify your email", "id": str(res.inserted_id)}
 
 

@@ -27,7 +27,7 @@ def main() -> None:
     while True:
         try:
             print("Starting uvicorn server...")
-            uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+            uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info")
         except Exception as exc:
             print("uvicorn raised exception:", exc)
         print("uvicorn stopped — restarting in 2s (or Ctrl+C to quit)")
@@ -39,4 +39,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8001, reload=True)

@@ -7,6 +7,7 @@ from .db.mongo import init_mongo_client, close_mongo_client, get_mongo_url
 import logging
 
 logger = logging.getLogger("ecommerce.app")
+logger.setLevel(logging.DEBUG)
 
 
 def create_app() -> FastAPI:
@@ -52,6 +53,16 @@ def create_app() -> FastAPI:
             logger.info("shutdown: mongo client closed")
         except Exception:
             logger.exception("shutdown: error closing mongo client")
+
+    @app.on_event("startup")
+    async def startup_event():
+        try:
+            logger.debug("Application startup initiated")
+            init_mongo_client()
+            logger.debug("MongoDB client initialized")
+        except Exception as e:
+            logger.error(f"Error during application startup: {e}")
+            raise
 
     return app
 

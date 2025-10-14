@@ -10,6 +10,7 @@ from ....core.security import (
     verify_password,
 )
 from ....dependencies.mongo import get_mongo_db
+from bson import ObjectId
 
 router = APIRouter(prefix="/auth")
 
@@ -112,11 +113,13 @@ def refresh(payload: RefreshRequest, db=Depends(get_mongo_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     user_id = decoded.get("sub")
     users = db.get_collection("users")
-    user = users.find_one({"_id": user_id}) if user_id else None
+    lookup_id = ObjectId(user_id) if user_id else None
+    user = users.find_one({"_id": lookup_id}) if lookup_id else None
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    access = create_access_token(str(user.get("_id")))
-    refresh_token = create_refresh_token(str(user.get("_id")))
+    uid = str(user.get("_id"))
+    access = create_access_token(uid)
+    refresh_token = create_refresh_token(uid)
     return {
         "access_token": access,
         "refresh_token": refresh_token,

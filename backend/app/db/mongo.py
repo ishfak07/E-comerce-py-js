@@ -18,8 +18,18 @@ logger.setLevel(logging.DEBUG)
 
 
 def get_mongo_url() -> str | None:
-    """Return MONGO_URL from environment or from application settings (loaded from .env)."""
-    return os.environ.get("MONGO_URL") or getattr(app_settings, "mongo_url", None)
+    """Return the Mongo connection URL.
+
+    Priority:
+    1. Environment variable MONGO_URL
+    2. settings.mongo_url loaded from .env
+    3. Sensible local default for development
+    """
+    return (
+        os.environ.get("MONGO_URL")
+        or getattr(app_settings, "mongo_url", None)
+        or "mongodb://localhost:27017/ecommerce"
+    )
 
 
 def init_mongo_client():

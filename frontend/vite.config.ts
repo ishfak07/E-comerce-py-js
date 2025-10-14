@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
@@ -7,10 +7,12 @@ export default defineConfig({
     environment: 'jsdom'
   },
   server: {
-    port: 5173,
+    // Use 5174 to avoid conflicts and match current setup
+    port: 5174,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        // Point to local backend started by run_server.py
+        target: 'http://localhost:8001',
         changeOrigin: true,
       }
     }

@@ -42,6 +42,7 @@ export default function Header() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'nav-link active' : 'nav-link'
 
+  const inAdmin = location.pathname.startsWith('/admin')
   return (
     <header className="header">
       <div className="container header-inner">
@@ -61,20 +62,24 @@ export default function Header() {
         </div>
 
         <nav id="main-menu" className={`nav ${open ? 'open' : ''}`} aria-label="Main navigation">
-          <NavLink to="/" end className={linkClass}>Home</NavLink>
-          <NavLink to="/shop" className={linkClass}>Shop</NavLink>
-          <NavLink to="/about" className={linkClass}>About</NavLink>
-          <NavLink to="/contact" className={linkClass}>Contact</NavLink>
-          <Link to="/cart" className="nav-link cart-link">
-            Cart
-            <span className="badge" aria-label={`${count} items in cart`}>{count}</span>
-          </Link>
+          {!inAdmin && (
+            <>
+              <NavLink to="/" end className={linkClass}>Home</NavLink>
+              <NavLink to="/shop" className={linkClass}>Shop</NavLink>
+              <NavLink to="/about" className={linkClass}>About</NavLink>
+              <NavLink to="/contact" className={linkClass}>Contact</NavLink>
+              <Link to="/cart" className="nav-link cart-link">
+                Cart
+                <span className="badge" aria-label={`${count} items in cart`}>{count}</span>
+              </Link>
+            </>
+          )}
 
           <div className="divider" aria-hidden />
 
           {user ? (
             <div className="user-wrap" ref={menuRef}>
-              {user.is_staff && (
+              {user.is_staff && !inAdmin && (
                 <Link to="/admin" className="nav-link">Admin</Link>
               )}
               <button

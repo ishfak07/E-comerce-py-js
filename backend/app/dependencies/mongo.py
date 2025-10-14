@@ -35,16 +35,6 @@ def get_mongo_db() -> Iterator:
         except Exception:
             pass
 
-    # Fallback to async motor client if only that is available (not ideal in sync endpoints)
-    async_client = get_mongo_client()
-    if async_client is not None:
-        try:
-            db = async_client.get_database(db_name)
-            yield db
-            return
-        except Exception:
-            pass
-
     # Final fallback: simple file-based store to keep app usable without MongoDB
     fallback_path = Path(__file__).parents[2] / "data" / f"{db_name}.json"
     yield FileDatabase(fallback_path)

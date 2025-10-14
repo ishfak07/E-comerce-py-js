@@ -1,16 +1,21 @@
 import os
 from typing import Optional, Iterator
 import logging
+from typing import Any
 
-from motor.motor_asyncio import AsyncIOMotorClient
+# Optional imports for Mongo clients
+try:
+    from motor.motor_asyncio import AsyncIOMotorClient  # type: ignore
+except Exception:  # pragma: no cover - motor may be missing in dev
+    AsyncIOMotorClient = None  # type: ignore
 try:
     import pymongo
-except Exception:
+except Exception:  # pragma: no cover
     pymongo = None
 
 from ..core.config import settings as app_settings
 
-_async_client: Optional[AsyncIOMotorClient] = None
+_async_client: Optional[Any] = None
 _sync_client = None
 
 logger = logging.getLogger("mongo")
@@ -39,8 +44,9 @@ def init_mongo_client():
         logger.error("MongoDB URL is not configured")
         return None
     try:
-        _async_client = AsyncIOMotorClient(url)
-        logger.debug("Async MongoDB client initialized")
+        if AsyncIOMotorClient is not None:
+            _async_client = AsyncIOMotorClient(url)
+            logger.debug("Async MongoDB client initialized")
         if pymongo is not None:
             _sync_client = pymongo.MongoClient(url)
             logger.debug("Sync MongoDB client initialized")
@@ -49,7 +55,7 @@ def init_mongo_client():
     return _async_client
 
 
-def get_mongo_client() -> Optional[AsyncIOMotorClient]:
+def get_mongo_client() -> Optional[Any]:
     return _async_client
 
 

@@ -48,7 +48,13 @@ def init_mongo_client():
             _async_client = AsyncIOMotorClient(url)
             logger.debug("Async MongoDB client initialized")
         if pymongo is not None:
-            _sync_client = pymongo.MongoClient(url)
+            # Short timeouts so an unavailable Mongo doesn't stall requests
+            _sync_client = pymongo.MongoClient(
+                url,
+                serverSelectionTimeoutMS=500,
+                connectTimeoutMS=500,
+                socketTimeoutMS=1000,
+            )
             logger.debug("Sync MongoDB client initialized")
     except Exception as e:
         logger.error(f"Error initializing MongoDB client: {e}")

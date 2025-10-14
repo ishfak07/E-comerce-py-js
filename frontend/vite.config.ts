@@ -7,7 +7,7 @@ export default defineConfig({
     environment: 'jsdom'
   },
   server: {
-    // Use 5174 to avoid conflicts and match current setup
+    // Prefer 5174; if it's occupied Vite will bump to the next. We'll list 5174-5176 to allow small range.
     port: 5174,
     proxy: {
       '/api': {

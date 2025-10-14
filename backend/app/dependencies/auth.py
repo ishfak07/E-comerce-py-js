@@ -5,6 +5,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from ..core.security import decode_token
 from bson import ObjectId
+
+def _maybe_objectid(value):
+    try:
+        if isinstance(value, str) and len(value) == 24:
+            return ObjectId(value)
+    except Exception:
+        pass
+    return value
 from ..dependencies.mongo import get_mongo_db
 
 
@@ -25,7 +33,7 @@ def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User DB not available")
     users = db.get_collection("users")
     # Mongo stores _id as ObjectId; convert if needed
-    lookup_id = ObjectId(user_id) if user_id and not isinstance(user_id, ObjectId) else user_id
+    lookup_id = _maybe_objectid(user_id)
     user = users.find_one({"_id": lookup_id}) if lookup_id else None
     if not user or not user.get("is_active", True):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive or missing user")

@@ -12,6 +12,14 @@ from ....core.security import (
 from ....dependencies.mongo import get_mongo_db
 from bson import ObjectId
 
+def _maybe_objectid(value):
+    try:
+        if isinstance(value, str) and len(value) == 24:
+            return ObjectId(value)
+    except Exception:
+        pass
+    return value
+
 router = APIRouter(prefix="/auth")
 
 logger = logging.getLogger("auth")
@@ -113,7 +121,7 @@ def refresh(payload: RefreshRequest, db=Depends(get_mongo_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     user_id = decoded.get("sub")
     users = db.get_collection("users")
-    lookup_id = ObjectId(user_id) if user_id else None
+    lookup_id = _maybe_objectid(user_id) if user_id else None
     user = users.find_one({"_id": lookup_id}) if lookup_id else None
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

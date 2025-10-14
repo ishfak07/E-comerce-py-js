@@ -181,6 +181,3 @@ class FileDatabase:
         if name == "ping":
             return {"ok": 1}
         return {"ok": 1}
-
-
-

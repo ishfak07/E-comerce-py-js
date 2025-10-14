@@ -7,6 +7,14 @@ Example:
 import sys
 import os
 import time
+from pathlib import Path
+
+# Load environment variables from .env file
+from dotenv import load_dotenv
+
+# Load .env from project root
+project_root = Path(__file__).parent.parent
+load_dotenv(dotenv_path=project_root / ".env")
 
 # Ensure backend package is importable
 ROOT = os.path.abspath(os.path.dirname(__file__))

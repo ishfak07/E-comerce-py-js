@@ -36,5 +36,15 @@
       "is_superuser": false,
       "_id": "17ecfcd2-352d-4111-9e22-b01e42efddc4"
     }
+    ,
+    {
+      "email": "admin@example.com",
+      "password_hash": "sha256$240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+      "full_name": "Admin User",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": true,
+      "_id": "00000000-0000-0000-0000-000000000001"
+    }
   ]
 }

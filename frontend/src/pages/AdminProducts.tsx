@@ -9,7 +9,8 @@ export default function AdminProducts(){
   const [error, setError] = useState<string|null>(null)
 
   async function load(){
-    try{ const r = await api.get('/admin/products'); setItems(r.data.items) }catch(e:any){ setError(e?.response?.data?.detail||'Failed to load') }
+    try{ const r = await api.get('/admin/products'); setItems(r.data.items) }
+    catch(e:any){ if (e?.response?.status === 401){ try{ window.location.href = '/login' }catch(_){}; return } setError(e?.response?.data?.detail||'Failed to load') }
   }
   useEffect(()=>{ load() },[])
 

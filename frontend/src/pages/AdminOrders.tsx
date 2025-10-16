@@ -17,6 +17,9 @@ export default function AdminOrders() {
       setTotal(res.data.total)
       setPage(res.data.page)
     } catch (err) {
+      // Redirect to login on 401
+      const status = (err as any)?.response?.status
+      if (status === 401) { try { window.location.href = '/login' } catch(_){}; return }
       console.error('Failed to fetch orders', err)
     }
   }

@@ -6,7 +6,14 @@ export default function AdminDashboardHome(){
   const [error, setError] = useState<string | null>(null)
   useEffect(() => { (async () => {
     try { const r = await api.get('/admin/metrics'); setData(r.data) }
-    catch (e:any) { setError(e?.response?.data?.detail || 'Failed to load metrics') }
+    catch (e:any) {
+      const status = e?.response?.status
+      if (status === 401) {
+        try { window.location.href = '/login' } catch (_) {}
+        return
+      }
+      setError(e?.response?.data?.detail || 'Failed to load metrics')
+    }
   })() }, [])
   if (error) return <div className="alert error">{error}</div>
   if (!data) return <div>Loading…</div>

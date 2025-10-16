@@ -7,6 +7,19 @@ export default function AdminUsers(){
   const [items, setItems] = useState<U[]>([])
   const [error, setError] = useState<string|null>(null)
   async function load(){ try{ const r = await api.get('/admin/users'); setItems(r.data.items) } catch(e:any){ setError(e?.response?.data?.detail||'Failed to load') } }
+  
+  // guard 401 -> redirect to login
+  useEffect(()=>{
+    const origLoad = load
+    const wrapped = async () => {
+      try { await origLoad() }
+      catch (e:any) {
+        if (e?.response?.status === 401) { try{ window.location.href = '/login' } catch(_){} }
+      }
+    }
+    // run it once to ensure redirect if unauthorized
+    wrapped()
+  }, [])
   useEffect(()=>{ load() },[])
   async function block(id:string, b:boolean){ await api.put(`/admin/users/${id}/block`, null, { params: { block: b } }); await load() }
   async function remove(id:string){ await api.delete(`/admin/users/${id}`); await load() }

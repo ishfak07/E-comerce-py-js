@@ -89,6 +89,7 @@ api.interceptors.response.use(
         isRefreshing = false
         // clear tokens on failure
         try { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token') } catch (ex) {}
+        try { window.location.href = '/login' } catch (_) {}
         return Promise.reject(err)
       }
     }

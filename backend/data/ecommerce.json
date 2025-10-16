@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "email": "smoke_1760526722@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "Smoke Test",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "83a8f45e-d000-493f-9f16-1444234eff53"
+    },
+    {
+      "email": "smoke_1760526734@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "Smoke Test",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "7c08884b-cf04-452f-9be4-854b20877082"
+    }
+  ]
+}

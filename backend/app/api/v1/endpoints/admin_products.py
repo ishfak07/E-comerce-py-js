@@ -5,6 +5,8 @@ from bson import ObjectId
 from fastapi import UploadFile, File
 from pathlib import Path
 import shutil
+import uuid
+import os
 from ....core.config import settings
 
 router = APIRouter(prefix="/admin/products")
@@ -14,11 +16,17 @@ router = APIRouter(prefix="/admin/products")
 def upload_image(file: UploadFile = File(...), _admin=Depends(require_admin)):
     uploads = Path(__file__).parents[3] / 'static' / 'uploads'
     uploads.mkdir(parents=True, exist_ok=True)
-    dest = uploads / file.filename
+    # Create a safe unique filename to avoid collisions/overwrites
+    # Keep the original extension when possible
+    original = os.path.basename(file.filename or '')
+    _, ext = os.path.splitext(original)
+    unique = f"{uuid.uuid4().hex}{ext}"
+    dest = uploads / unique
+    # Write file in binary mode
     with dest.open('wb') as f:
         shutil.copyfileobj(file.file, f)
     # return a path that the frontend can request (served statically by dev server)
-    return {"url": f"/static/uploads/{file.filename}"}
+    return {"url": f"/static/uploads/{unique}"}
 
 
 def _maybe_oid(v):

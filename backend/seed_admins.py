@@ -6,18 +6,30 @@ import os
 from datetime import datetime
 
 from app.db.mongo import init_mongo_client, get_sync_mongo_client
+from app.db.fallback_store import FileDatabase
+from pathlib import Path
 from app.core.security import get_password_hash
 
 
 def main():
     init_mongo_client()
     client = get_sync_mongo_client()
-    if client is None:
-        print("No sync mongo client available. Ensure pymongo is installed and MONGO_URL is set.")
-        return
+    users = None
+    if client is not None:
+        try:
+            # try a quick ping/read to ensure server reachable
+            db = client.get_default_database()
+            db.command('ping')
+            users = db.users
+        except Exception:
+            users = None
 
-    db = client.get_default_database()
-    users = db.users
+    if users is None:
+        # fall back to the file-based database so seeding works without Mongo
+        print('Falling back to FileDatabase for seeding (no reachable sync Mongo)')
+        data_path = Path(__file__).parents[1] / 'data' / 'ecommerce.json'
+        fb = FileDatabase(data_path)
+        users = fb.get_collection('users')
 
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
     admin_pwd = os.environ.get("ADMIN_PWD", "adminpass")
@@ -42,8 +54,14 @@ def main():
         "created_at": datetime.utcnow(),
     }
 
-    users.update_one({"email": admin_email}, {"$set": admin}, upsert=True)
-    users.update_one({"email": user_email}, {"$set": user}, upsert=True)
+    # For both pymongo Collection and FileCollection, support update_one with $set
+    try:
+        users.update_one({"email": admin_email}, {"$set": admin}, upsert=True)
+        users.update_one({"email": user_email}, {"$set": user}, upsert=True)
+    except TypeError:
+        # FileCollection.update_one returns custom result but accepts same args
+        users.update_one({"email": admin_email}, {"$set": admin})
+        users.update_one({"email": user_email}, {"$set": user})
 
     print(f"Upserted admin={admin_email} and user={user_email}")
 

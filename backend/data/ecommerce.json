@@ -17,6 +17,15 @@
       "is_staff": false,
       "is_superuser": false,
       "_id": "7c08884b-cf04-452f-9be4-854b20877082"
+    },
+    {
+      "email": "smoke_1760590795@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "Smoke Test",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "6dcc984d-8037-4f29-8cd6-b26d744fe9e8"
     }
   ]
 }

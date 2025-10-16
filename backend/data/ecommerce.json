@@ -35,8 +35,7 @@
       "is_staff": false,
       "is_superuser": false,
       "_id": "17ecfcd2-352d-4111-9e22-b01e42efddc4"
-    }
-    ,
+    },
     {
       "email": "admin@example.com",
       "password_hash": "sha256$240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
@@ -45,6 +44,16 @@
       "is_staff": true,
       "is_superuser": true,
       "_id": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "email": "memberofpfc20@gmail.com",
+      "password_hash": "sha256$8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "full_name": "Ishfaque",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "f7028bde-0cc0-423b-8153-aae475d8c21d"
     }
-  ]
+  ],
+  "products": []
 }

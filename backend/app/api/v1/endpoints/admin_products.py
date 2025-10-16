@@ -2,8 +2,23 @@ from fastapi import APIRouter, Depends, HTTPException
 from ....dependencies.auth import require_admin
 from ....dependencies.mongo import get_mongo_db
 from bson import ObjectId
+from fastapi import UploadFile, File
+from pathlib import Path
+import shutil
+from ....core.config import settings
 
 router = APIRouter(prefix="/admin/products")
+
+
+@router.post('/upload')
+def upload_image(file: UploadFile = File(...), _admin=Depends(require_admin)):
+    uploads = Path(__file__).parents[3] / 'static' / 'uploads'
+    uploads.mkdir(parents=True, exist_ok=True)
+    dest = uploads / file.filename
+    with dest.open('wb') as f:
+        shutil.copyfileobj(file.file, f)
+    # return a path that the frontend can request (served statically by dev server)
+    return {"url": f"/static/uploads/{file.filename}"}
 
 
 def _maybe_oid(v):

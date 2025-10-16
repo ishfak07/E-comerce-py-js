@@ -1,7 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// Types
+/* =========================
+   Types
+   ========================= */
+
+type Currency = 'USD' | 'LKR' | 'EUR'
+
 type Product = {
   id: number
   name: string
@@ -14,13 +19,15 @@ type Product = {
   createdAt?: string
 }
 
+type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'canceled'
+
 type Order = {
   id: number
   number: string
   customerId: number
   customerName: string
   total: number
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'canceled'
+  status: OrderStatus
   createdAt: string
 }
 
@@ -37,12 +44,15 @@ type SiteSettings = {
   siteName: string
   supportEmail: string
   supportPhone: string
-  currency: 'USD' | 'LKR' | 'EUR'
+  currency: Currency
   brandColor: string
   bankTransferNote: string
 }
 
-// Demo seed
+/* =========================
+   Demo seed
+   ========================= */
+
 const seedProducts: Product[] = [
   { id: 1001, name: 'Classic Tee', slug: 'classic-tee', price: 19.99, stock: 48, category: 'Apparel', active: true, createdAt: '2025-02-01' },
   { id: 1002, name: 'Leather Backpack', slug: 'leather-backpack', price: 89.99, stock: 12, category: 'Bags', active: true, createdAt: '2025-02-10' },
@@ -75,43 +85,163 @@ const seedSettings: SiteSettings = {
     'Bank transfer accepted: Name: Ishfaque Mif · Bank: BOC · Branch: Puttalam · Account: 89001476 · WhatsApp: +94 76 897 6222. Include order number as reference.',
 }
 
-// Helpers
-function formatMoney(x: number, currency: SiteSettings['currency']) {
+/* =========================
+   Helpers
+   ========================= */
+
+function formatMoney(x: number, currency: Currency) {
   const sym = currency === 'USD' ? '$' : currency === 'LKR' ? 'Rs ' : '€'
   return `${sym}${x.toFixed(2)}`
 }
 
-// Reusable UI
-function Modal({
-  open,
-  title,
-  onClose,
-  children,
-  actions,
-}: {
+function safeString(v: unknown): string {
+  return typeof v === 'string' ? v : ''
+}
+
+function stableSort<T>(array: T[], comparator: (a: T, b: T) => number): T[] {
+  // Decorate-sort-undecorate for stability
+  return array
+    .map((el, index) => ({ el, index }))
+    .sort((a, b) => {
+      const order = comparator(a.el, b.el)
+      if (order !== 0) return order
+      return a.index - b.index
+    })
+    .map(({ el }) => el)
+}
+
+function defaultComparator(a: unknown, b: unknown): number {
+  const at = typeof a
+  const bt = typeof b
+  if (at === 'number' && bt === 'number') return (a as number) - (b as number)
+  return String(a ?? '').localeCompare(String(b ?? ''))
+}
+
+/* =========================
+   Reusable UI
+   ========================= */
+
+type ModalProps = {
   open: boolean
   title: string
   onClose: () => void
   children: React.ReactNode
   actions?: React.ReactNode
-}) {
+  labelledById?: string
+  describedById?: string
+}
+
+function useFocusTrap(active: boolean, containerRef: React.RefObject<HTMLElement>, onEscape?: () => void) {
+  useEffect(() => {
+    if (!active || !containerRef.current) return
+    const container = containerRef.current
+    const focusableSelectors = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',')
+
+    const previouslyFocused = document.activeElement as HTMLElement | null
+
+    const focusFirst = () => {
+      const focusables = Array.from(container.querySelectorAll<HTMLElement>(focusableSelectors))
+      const first = focusables[0]
+      if (first) first.focus()
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        onEscape?.()
+        return
+      }
+      if (e.key === 'Tab') {
+        const focusables = Array.from(container.querySelectorAll<HTMLElement>(focusableSelectors)).filter(
+          (el) => el.offsetParent !== null || el.getClientRects().length > 0
+        )
+        if (focusables.length === 0) {
+          e.preventDefault()
+          return
+        }
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        const current = document.activeElement as HTMLElement
+        if (e.shiftKey) {
+          if (!current || current === first) {
+            e.preventDefault()
+            last.focus()
+          }
+        } else {
+          if (!current || current === last) {
+            e.preventDefault()
+            first.focus()
+          }
+        }
+      }
+    }
+
+    // Move focus in
+    const timer = setTimeout(focusFirst, 0)
+    document.addEventListener('keydown', handleKeyDown, true)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('keydown', handleKeyDown, true)
+      // Restore focus out
+      previouslyFocused?.focus?.()
+    }
+  }, [active, containerRef, onEscape])
+}
+
+function Modal({ open, title, onClose, children, actions, labelledById, describedById }: ModalProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(open, cardRef, onClose)
+
   if (!open) return null
+  const titleId = labelledById || 'modal-title'
+  const descId = describedById || 'modal-desc'
+
   return (
-    <div className="modal">
+    <div className="modal" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descId}>
       <div className="modal-backdrop" onClick={onClose} />
-      <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div className="modal-card" ref={cardRef}>
         <div className="modal-head">
-          <h3 id="modal-title">{title}</h3>
-          <button className="icon-btn" onClick={onClose} aria-label="Close">✕</button>
+          <h3 id={titleId}>{title}</h3>
+          <button className="icon-btn" onClick={onClose} aria-label="Close dialog">
+            ✕
+          </button>
         </div>
-        <div className="modal-body">{children}</div>
+        <div className="modal-body" id={descId}>
+          {children}
+        </div>
         {actions && <div className="modal-actions">{actions}</div>}
       </div>
     </div>
   )
 }
 
-function Table<T>({
+type ColumnDef<T> = {
+  key: keyof T | 'actions'
+  label: string
+  width?: string
+  render?: (row: T) => React.ReactNode
+  sortable?: boolean
+}
+
+type TableProps<T> = {
+  columns: ColumnDef<T>[]
+  rows: T[]
+  keyField: keyof T
+  onSort?: (key: string) => void
+  sortKey?: string
+  sortDir?: 'asc' | 'desc'
+  empty?: string
+}
+
+function Table<T extends Record<string, unknown>>({
   columns,
   rows,
   keyField,
@@ -119,15 +249,7 @@ function Table<T>({
   sortKey,
   sortDir,
   empty,
-}: {
-  columns: { key: keyof T | string; label: string; width?: string; render?: (row: T) => React.ReactNode; sortable?: boolean }[]
-  rows: T[]
-  keyField: keyof T
-  onSort?: (key: string) => void
-  sortKey?: string
-  sortDir?: 'asc' | 'desc'
-  empty?: string
-}) {
+}: TableProps<T>) {
   return (
     <div className="table-wrap">
       <table className="admin-table">
@@ -138,7 +260,13 @@ function Table<T>({
                 <div className="th-inner">
                   <span>{c.label}</span>
                   {c.sortable && onSort && (
-                    <button className="sort-btn" onClick={() => onSort(String(c.key))} aria-label={`Sort by ${c.label}`}>
+                    <button
+                      className="sort-btn"
+                      onClick={() => onSort(String(c.key))}
+                      aria-label={`Sort by ${c.label}`}
+                      title={`Sort by ${c.label}`}
+                      type="button"
+                    >
                       {sortKey === c.key ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
                     </button>
                   )}
@@ -150,13 +278,15 @@ function Table<T>({
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="empty">{empty || 'No data'}</td>
+              <td colSpan={columns.length} className="empty">
+                {empty || 'No data'}
+              </td>
             </tr>
           ) : (
             rows.map((r) => (
               <tr key={String(r[keyField])}>
                 {columns.map((c) => (
-                  <td key={String(c.key)}>{c.render ? c.render(r) : String((r as any)[c.key])}</td>
+                  <td key={String(c.key)}>{c.render ? c.render(r) : String(r[c.key as keyof T] ?? '')}</td>
                 ))}
               </tr>
             ))
@@ -167,15 +297,16 @@ function Table<T>({
   )
 }
 
-// Admin Root
+/* =========================
+   Admin Root
+   ========================= */
+
+type Tab = 'dashboard' | 'products' | 'orders' | 'customers' | 'settings'
+
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  // In a real app, protect route: if not admin, redirect.
-  // Example:
-  // const { user } = useAuth()
-  // useEffect(() => { if (!user?.is_staff) navigate('/') }, [user])
 
-  const [tab, setTab] = useState<'dashboard' | 'products' | 'orders' | 'customers' | 'settings'>('dashboard')
+  const [tab, setTab] = useState<Tab>('dashboard')
 
   const [products, setProducts] = useState<Product[]>(seedProducts)
   const [orders, setOrders] = useState<Order[]>(seedOrders)
@@ -193,75 +324,74 @@ export default function AdminDashboard() {
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
 
-  function onSort(key: string) {
-    if (sortKey === key) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setSortKey(key)
+  const onSort = useCallback((key: string) => {
+    setSortKey((prev) => {
+      if (prev === key) {
+        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+        return prev
+      }
       setSortDir('asc')
-    }
-  }
+      return key
+    })
+  }, [])
 
+  // Derived filters + stable sort
   const filteredProducts = useMemo(() => {
-    let rows = [...products]
-    if (query.trim()) {
-      const s = query.toLowerCase()
-      rows = rows.filter(
-        (p) =>
-          p.name.toLowerCase().includes(s) ||
-          p.slug.toLowerCase().includes(s) ||
-          (p.category || '').toLowerCase().includes(s),
-      )
-    }
+    const s = query.trim().toLowerCase()
+    let rows = s
+      ? products.filter((p) => {
+          const n = p.name.toLowerCase()
+          const sl = p.slug.toLowerCase()
+          const cat = (p.category || '').toLowerCase()
+          return n.includes(s) || sl.includes(s) || cat.includes(s)
+        })
+      : [...products]
+
     if (sortKey) {
-      rows.sort((a: any, b: any) => {
+      rows = stableSort(rows, (a: any, b: any) => {
         const va = a[sortKey]
         const vb = b[sortKey]
-        if (typeof va === 'number' && typeof vb === 'number') return sortDir === 'asc' ? va - vb : vb - va
-        return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
+        const cmp = defaultComparator(va, vb)
+        return sortDir === 'asc' ? cmp : -cmp
       })
     }
     return rows
   }, [products, query, sortKey, sortDir])
 
   const filteredOrders = useMemo(() => {
-    let rows = [...orders]
-    if (query.trim()) {
-      const s = query.toLowerCase()
-      rows = rows.filter(
-        (o) =>
-          o.number.toLowerCase().includes(s) ||
-          o.customerName.toLowerCase().includes(s) ||
-          o.status.toLowerCase().includes(s),
-      )
-    }
+    const s = query.trim().toLowerCase()
+    let rows = s
+      ? orders.filter((o) => {
+          const num = o.number.toLowerCase()
+          const cn = o.customerName.toLowerCase()
+          const st = o.status.toLowerCase()
+          return num.includes(s) || cn.includes(s) || st.includes(s)
+        })
+      : [...orders]
+
     if (sortKey) {
-      rows.sort((a: any, b: any) => {
+      rows = stableSort(rows, (a: any, b: any) => {
         const va = a[sortKey]
         const vb = b[sortKey]
-        if (typeof va === 'number' && typeof vb === 'number') return sortDir === 'asc' ? va - vb : vb - va
-        return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
+        const cmp = defaultComparator(va, vb)
+        return sortDir === 'asc' ? cmp : -cmp
       })
     }
     return rows
   }, [orders, query, sortKey, sortDir])
 
   const filteredCustomers = useMemo(() => {
-    let rows = [...customers]
-    if (query.trim()) {
-      const s = query.toLowerCase()
-      rows = rows.filter(
-        (c) =>
-          c.name.toLowerCase().includes(s) ||
-          c.email.toLowerCase().includes(s),
-      )
-    }
+    const s = query.trim().toLowerCase()
+    let rows = s
+      ? customers.filter((c) => c.name.toLowerCase().includes(s) || c.email.toLowerCase().includes(s))
+      : [...customers]
+
     if (sortKey) {
-      rows.sort((a: any, b: any) => {
+      rows = stableSort(rows, (a: any, b: any) => {
         const va = a[sortKey]
         const vb = b[sortKey]
-        if (typeof va === 'number' && typeof vb === 'number') return sortDir === 'asc' ? va - vb : vb - va
-        return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va))
+        const cmp = defaultComparator(va, vb)
+        return sortDir === 'asc' ? cmp : -cmp
       })
     }
     return rows
@@ -278,16 +408,16 @@ export default function AdminDashboard() {
       category: '',
       active: true,
       createdAt: new Date().toISOString().slice(0, 10),
+      images: [],
     })
     setShowProdModal(true)
   }
   function openEditProduct(p: Product) {
-    setEditingProduct({ ...p })
+    setEditingProduct({ ...p, images: [...(p.images || [])] })
     setShowProdModal(true)
   }
   function saveProduct() {
     if (!editingProduct) return
-    // TODO: Replace with API call
     setProducts((prev) => {
       const exists = prev.some((x) => x.id === editingProduct.id)
       if (exists) return prev.map((x) => (x.id === editingProduct.id ? editingProduct : x))
@@ -296,8 +426,7 @@ export default function AdminDashboard() {
     setShowProdModal(false)
   }
   function deleteProduct(id: number) {
-    if (!confirm('Delete this product?')) return
-    // TODO: API delete
+    if (!window.confirm('Delete this product?')) return
     setProducts((prev) => prev.filter((p) => p.id !== id))
   }
 
@@ -308,7 +437,6 @@ export default function AdminDashboard() {
   }
   function saveOrder() {
     if (!editingOrder) return
-    // TODO: API update
     setOrders((prev) => prev.map((o) => (o.id === editingOrder.id ? editingOrder : o)))
     setShowOrderModal(false)
   }
@@ -319,19 +447,58 @@ export default function AdminDashboard() {
   const lowStock = products.filter((p) => p.stock <= 10).length
   const activeProducts = products.filter((p) => p.active).length
 
+  // Reset sort when tab changes to avoid confusing cross-entity keys
+  useEffect(() => {
+    setSortKey('')
+    setSortDir('asc')
+    setQuery('')
+  }, [tab])
+
   return (
     <div className="admin">
       <aside className="sidebar">
         <div className="brand">Admin</div>
         <nav className="menu" aria-label="Admin navigation">
-          <button className={`menu-item ${tab === 'dashboard' ? 'active' : ''}`} onClick={() => setTab('dashboard')}>Dashboard</button>
-          <button className={`menu-item ${tab === 'products' ? 'active' : ''}`} onClick={() => setTab('products')}>Products</button>
-          <button className={`menu-item ${tab === 'orders' ? 'active' : ''}`} onClick={() => setTab('orders')}>Orders</button>
-          <button className={`menu-item ${tab === 'customers' ? 'active' : ''}`} onClick={() => setTab('customers')}>Customers</button>
-          <button className={`menu-item ${tab === 'settings' ? 'active' : ''}`} onClick={() => setTab('settings')}>Settings</button>
+          <button
+            className={`menu-item ${tab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setTab('dashboard')}
+            type="button"
+          >
+            Dashboard
+          </button>
+          <button
+            className={`menu-item ${tab === 'products' ? 'active' : ''}`}
+            onClick={() => setTab('products')}
+            type="button"
+          >
+            Products
+          </button>
+          <button
+            className={`menu-item ${tab === 'orders' ? 'active' : ''}`}
+            onClick={() => setTab('orders')}
+            type="button"
+          >
+            Orders
+          </button>
+          <button
+            className={`menu-item ${tab === 'customers' ? 'active' : ''}`}
+            onClick={() => setTab('customers')}
+            type="button"
+          >
+            Customers
+          </button>
+          <button
+            className={`menu-item ${tab === 'settings' ? 'active' : ''}`}
+            onClick={() => setTab('settings')}
+            type="button"
+          >
+            Settings
+          </button>
         </nav>
         <div className="sidebar-foot">
-          <button className="btn btn-ghost" onClick={() => navigate('/')}>View site</button>
+          <button className="btn btn-ghost" onClick={() => navigate('/')} type="button">
+            View site
+          </button>
         </div>
       </aside>
 
@@ -344,7 +511,11 @@ export default function AdminDashboard() {
             onChange={(e) => setQuery(e.target.value)}
           />
           <div className="top-actions">
-            {tab === 'products' && <button className="btn btn-primary" onClick={openCreateProduct}>Add product</button>}
+            {tab === 'products' && (
+              <button className="btn btn-primary" onClick={openCreateProduct} type="button">
+                Add product
+              </button>
+            )}
           </div>
         </header>
 
@@ -383,7 +554,12 @@ export default function AdminDashboard() {
                     { key: 'number', label: 'Order', sortable: true },
                     { key: 'customerName', label: 'Customer', sortable: true },
                     { key: 'total', label: 'Total', sortable: true, render: (r) => formatMoney(r.total, settings.currency) },
-                    { key: 'status', label: 'Status', sortable: true, render: (r) => <span className={`pill ${r.status}`}>{r.status}</span> },
+                    {
+                      key: 'status',
+                      label: 'Status',
+                      sortable: true,
+                      render: (r) => <span className={`pill ${r.status}`}>{r.status}</span>,
+                    },
                     { key: 'createdAt', label: 'Date', sortable: true },
                   ]}
                   rows={[...orders].slice(0, 5)}
@@ -403,18 +579,48 @@ export default function AdminDashboard() {
                   onSort={onSort}
                   empty="No products found"
                   columns={[
-                    { key: 'name', label: 'Name', sortable: true, render: (r) => <div className="cell-main"><div className="cell-strong">{r.name}</div><div className="cell-muted">{r.slug}</div></div> },
-                    { key: 'category', label: 'Category', sortable: true },
+                    {
+                      key: 'name',
+                      label: 'Name',
+                      sortable: true,
+                      render: (r) => (
+                        <div className="cell-main">
+                          <div className="cell-strong">{r.name}</div>
+                          <div className="cell-muted">{r.slug}</div>
+                        </div>
+                      ),
+                    },
+                    { key: 'category', label: 'Category', sortable: true, render: (r) => safeString(r.category) },
                     { key: 'price', label: 'Price', sortable: true, render: (r) => formatMoney(r.price, settings.currency) },
-                    { key: 'stock', label: 'Stock', sortable: true, render: (r) => <span className={r.stock <= 10 ? 'danger' : ''}>{r.stock}</span> },
-                    { key: 'active', label: 'Active', sortable: true, render: (r) => <span className={`pill ${r.active ? 'paid' : 'canceled'}`}>{r.active ? 'Yes' : 'No'}</span> },
-                    { key: 'createdAt', label: 'Created', sortable: true },
-                    { key: 'actions', label: 'Actions', render: (r) => (
-                      <div className="actions">
-                        <button className="btn btn-ghost" onClick={() => openEditProduct(r)}>Edit</button>
-                        <button className="btn btn-ghost danger" onClick={() => deleteProduct(r.id)}>Delete</button>
-                      </div>
-                    )},
+                    {
+                      key: 'stock',
+                      label: 'Stock',
+                      sortable: true,
+                      render: (r) => <span className={r.stock <= 10 ? 'danger' : ''}>{r.stock}</span>,
+                    },
+                    {
+                      key: 'active',
+                      label: 'Active',
+                      sortable: true,
+                      render: (r) => (
+                        <span className={`pill ${r.active ? 'paid' : 'canceled'}`}>{r.active ? 'Yes' : 'No'}</span>
+                      ),
+                    },
+                    { key: 'createdAt', label: 'Created', sortable: true, render: (r) => safeString(r.createdAt) },
+                    {
+                      key: 'actions',
+                      label: 'Actions',
+                      render: (r) => (
+                        <div className="actions">
+                          <button className="btn btn-ghost" onClick={() => openEditProduct(r)} type="button">
+                            Edit
+                          </button>
+                          <button className="btn btn-ghost danger" onClick={() => deleteProduct(r.id)} type="button">
+                            Delete
+                          </button>
+                        </div>
+                      ),
+                    },
                   ]}
                   rows={filteredProducts}
                 />
@@ -436,13 +642,24 @@ export default function AdminDashboard() {
                     { key: 'number', label: 'Order', sortable: true },
                     { key: 'customerName', label: 'Customer', sortable: true },
                     { key: 'total', label: 'Total', sortable: true, render: (r) => formatMoney(r.total, settings.currency) },
-                    { key: 'status', label: 'Status', sortable: true, render: (r) => <span className={`pill ${r.status}`}>{r.status}</span> },
+                    {
+                      key: 'status',
+                      label: 'Status',
+                      sortable: true,
+                      render: (r) => <span className={`pill ${r.status}`}>{r.status}</span>,
+                    },
                     { key: 'createdAt', label: 'Date', sortable: true },
-                    { key: 'actions', label: 'Actions', render: (r) => (
-                      <div className="actions">
-                        <button className="btn btn-ghost" onClick={() => openEditOrder(r)}>Update</button>
-                      </div>
-                    ) },
+                    {
+                      key: 'actions',
+                      label: 'Actions',
+                      render: (r) => (
+                        <div className="actions">
+                          <button className="btn btn-ghost" onClick={() => openEditOrder(r)} type="button">
+                            Update
+                          </button>
+                        </div>
+                      ),
+                    },
                   ]}
                   rows={filteredOrders}
                 />
@@ -464,7 +681,12 @@ export default function AdminDashboard() {
                     { key: 'name', label: 'Name', sortable: true },
                     { key: 'email', label: 'Email', sortable: true },
                     { key: 'orders', label: 'Orders', sortable: true },
-                    { key: 'totalSpent', label: 'Total Spent', sortable: true, render: (r) => formatMoney(r.totalSpent, settings.currency) },
+                    {
+                      key: 'totalSpent',
+                      label: 'Total Spent',
+                      sortable: true,
+                      render: (r) => formatMoney(r.totalSpent, settings.currency),
+                    },
                     { key: 'createdAt', label: 'Since', sortable: true },
                   ]}
                   rows={filteredCustomers}
@@ -480,19 +702,36 @@ export default function AdminDashboard() {
                 <div className="form-grid">
                   <div className="field">
                     <label htmlFor="siteName">Site name</label>
-                    <input id="siteName" value={settings.siteName} onChange={(e) => setSettings({ ...settings, siteName: e.target.value })} />
+                    <input
+                      id="siteName"
+                      value={settings.siteName}
+                      onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
+                    />
                   </div>
                   <div className="field">
                     <label htmlFor="supportEmail">Support email</label>
-                    <input id="supportEmail" type="email" value={settings.supportEmail} onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })} />
+                    <input
+                      id="supportEmail"
+                      type="email"
+                      value={settings.supportEmail}
+                      onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
+                    />
                   </div>
                   <div className="field">
                     <label htmlFor="supportPhone">Support phone</label>
-                    <input id="supportPhone" value={settings.supportPhone} onChange={(e) => setSettings({ ...settings, supportPhone: e.target.value })} />
+                    <input
+                      id="supportPhone"
+                      value={settings.supportPhone}
+                      onChange={(e) => setSettings({ ...settings, supportPhone: e.target.value })}
+                    />
                   </div>
                   <div className="field">
                     <label htmlFor="currency">Currency</label>
-                    <select id="currency" value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value as any })}>
+                    <select
+                      id="currency"
+                      value={settings.currency}
+                      onChange={(e) => setSettings({ ...settings, currency: e.target.value as Currency })}
+                    >
                       <option value="USD">USD</option>
                       <option value="LKR">LKR</option>
                       <option value="EUR">EUR</option>
@@ -500,15 +739,31 @@ export default function AdminDashboard() {
                   </div>
                   <div className="field">
                     <label htmlFor="brandColor">Brand color</label>
-                    <input id="brandColor" type="color" value={settings.brandColor} onChange={(e) => setSettings({ ...settings, brandColor: e.target.value })} />
+                    <input
+                      id="brandColor"
+                      type="color"
+                      value={settings.brandColor}
+                      onChange={(e) => setSettings({ ...settings, brandColor: e.target.value })}
+                    />
                   </div>
                   <div className="field col-span">
                     <label htmlFor="bankTransferNote">Bank transfer note</label>
-                    <textarea id="bankTransferNote" rows={4} value={settings.bankTransferNote} onChange={(e) => setSettings({ ...settings, bankTransferNote: e.target.value })} />
+                    <textarea
+                      id="bankTransferNote"
+                      rows={4}
+                      value={settings.bankTransferNote}
+                      onChange={(e) => setSettings({ ...settings, bankTransferNote: e.target.value })}
+                    />
                   </div>
                 </div>
                 <div className="actions">
-                  <button className="btn btn-primary" onClick={() => alert('Settings saved (TODO: wire API)')}>Save settings</button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => window.alert('Settings saved (TODO: wire API)')}
+                    type="button"
+                  >
+                    Save settings
+                  </button>
                 </div>
               </div>
             </>
@@ -523,8 +778,12 @@ export default function AdminDashboard() {
         onClose={() => setShowProdModal(false)}
         actions={
           <>
-            <button className="btn btn-ghost" onClick={() => setShowProdModal(false)}>Cancel</button>
-            <button className="btn btn-primary" onClick={saveProduct}>Save</button>
+            <button className="btn btn-ghost" onClick={() => setShowProdModal(false)} type="button">
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={saveProduct} type="button">
+              Save
+            </button>
           </>
         }
       >
@@ -532,34 +791,74 @@ export default function AdminDashboard() {
           <div className="form-grid">
             <div className="field">
               <label htmlFor="pname">Name</label>
-              <input id="pname" value={editingProduct.name} onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })} />
+              <input
+                id="pname"
+                value={editingProduct.name}
+                onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+              />
             </div>
             <div className="field">
               <label htmlFor="pslug">Slug</label>
-              <input id="pslug" value={editingProduct.slug} onChange={(e) => setEditingProduct({ ...editingProduct, slug: e.target.value })} />
+              <input
+                id="pslug"
+                value={editingProduct.slug}
+                onChange={(e) => setEditingProduct({ ...editingProduct, slug: e.target.value })}
+              />
             </div>
             <div className="field">
               <label htmlFor="pcat">Category</label>
-              <input id="pcat" value={editingProduct.category || ''} onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })} />
+              <input
+                id="pcat"
+                value={editingProduct.category || ''}
+                onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+              />
             </div>
             <div className="field">
               <label htmlFor="pprice">Price</label>
-              <input id="pprice" type="number" step="0.01" value={editingProduct.price} onChange={(e) => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })} />
+              <input
+                id="pprice"
+                type="number"
+                step="0.01"
+                value={editingProduct.price}
+                onChange={(e) => setEditingProduct({ ...editingProduct, price: Number(e.target.value) || 0 })}
+              />
             </div>
             <div className="field">
               <label htmlFor="pstock">Stock</label>
-              <input id="pstock" type="number" value={editingProduct.stock} onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })} />
+              <input
+                id="pstock"
+                type="number"
+                value={editingProduct.stock}
+                onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number(e.target.value) || 0 })}
+              />
             </div>
             <div className="field">
               <label htmlFor="pactive">Active</label>
-              <select id="pactive" value={editingProduct.active ? 'yes' : 'no'} onChange={(e) => setEditingProduct({ ...editingProduct, active: e.target.value === 'yes' })}>
+              <select
+                id="pactive"
+                value={editingProduct.active ? 'yes' : 'no'}
+                onChange={(e) => setEditingProduct({ ...editingProduct, active: e.target.value === 'yes' })}
+              >
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
               </select>
             </div>
             <div className="field col-span">
               <label htmlFor="pimages">Image URLs (comma separated)</label>
-              <textarea id="pimages" rows={3} value={(editingProduct.images || []).join(', ')} onChange={(e) => setEditingProduct({ ...editingProduct, images: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })} />
+              <textarea
+                id="pimages"
+                rows={3}
+                value={(editingProduct.images || []).join(', ')}
+                onChange={(e) =>
+                  setEditingProduct({
+                    ...editingProduct,
+                    images: e.target.value
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter(Boolean),
+                  })
+                }
+              />
             </div>
           </div>
         )}
@@ -572,8 +871,12 @@ export default function AdminDashboard() {
         onClose={() => setShowOrderModal(false)}
         actions={
           <>
-            <button className="btn btn-ghost" onClick={() => setShowOrderModal(false)}>Cancel</button>
-            <button className="btn btn-primary" onClick={saveOrder}>Save</button>
+            <button className="btn btn-ghost" onClick={() => setShowOrderModal(false)} type="button">
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={saveOrder} type="button">
+              Save
+            </button>
           </>
         }
       >
@@ -591,7 +894,7 @@ export default function AdminDashboard() {
               <label>Status</label>
               <select
                 value={editingOrder.status}
-                onChange={(e) => setEditingOrder({ ...editingOrder, status: e.target.value as Order['status'] })}
+                onChange={(e) => setEditingOrder({ ...editingOrder, status: e.target.value as OrderStatus })}
               >
                 <option value="pending">pending</option>
                 <option value="paid">paid</option>
@@ -602,11 +905,20 @@ export default function AdminDashboard() {
             </div>
             <div className="field">
               <label>Total</label>
-              <input type="number" step="0.01" value={editingOrder.total} onChange={(e) => setEditingOrder({ ...editingOrder, total: Number(e.target.value) })} />
+              <input
+                type="number"
+                step="0.01"
+                value={editingOrder.total}
+                onChange={(e) => setEditingOrder({ ...editingOrder, total: Number(e.target.value) || 0 })}
+              />
             </div>
             <div className="field">
               <label>Date</label>
-              <input type="date" value={editingOrder.createdAt} onChange={(e) => setEditingOrder({ ...editingOrder, createdAt: e.target.value })} />
+              <input
+                type="date"
+                value={editingOrder.createdAt}
+                onChange={(e) => setEditingOrder({ ...editingOrder, createdAt: e.target.value })}
+              />
             </div>
           </div>
         )}
@@ -619,7 +931,7 @@ export default function AdminDashboard() {
           --surface-alt:#171821;
           --text:#e9e9ef;
           --muted:#b8bbd9;
-          --brand:#6D74FF;
+          --brand:${seedSettings.brandColor};
           --brand-600:#5860ff;
           --line:#2a2b36;
           --card:#14151d;
@@ -632,7 +944,7 @@ export default function AdminDashboard() {
         .sidebar{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column}
         .brand{padding:16px;font-weight:800;letter-spacing:.2px;color:white;border-bottom:1px solid var(--line)}
         .menu{display:flex;flex-direction:column;padding:8px}
-        .menu-item{appearance:none;border:none;background:transparent;text-align:left;color:var(--text);padding:10px 12px;border-radius:8px}
+        .menu-item{appearance:none;border:none;background:transparent;text-align:left;color:var(--text);padding:10px 12px;border-radius:8px;cursor:pointer}
         .menu-item:hover{background:var(--ghost)}
         .menu-item.active{background:var(--brand);color:white}
         .sidebar-foot{margin-top:auto;padding:8px;border-top:1px solid var(--line)}
@@ -656,11 +968,11 @@ export default function AdminDashboard() {
         .panel-title{margin:0 0 8px;font-size:16px}
         .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-top:8px}
         table{width:100%;border-collapse:separate;border-spacing:0}
-        thead th{position:sticky;top:0;background:var(--surface-alt);text-align:left;padding:10px;border-bottom:1px solid var(--line)}
+        thead th{position:sticky;top:0;background:var(--surface-alt);text-align:left;padding:10px;border-bottom:1px solid var(--line);z-index:1}
         tbody td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
         .empty{color:var(--muted);text-align:center;padding:14px}
         .th-inner{display:flex;align-items:center;gap:6px}
-        .sort-btn{border:1px solid var(--line);background:var(--ghost);border-radius:6px;color:var(--text);padding:0 6px;height:22px}
+        .sort-btn{border:1px solid var(--line);background:var(--ghost);border-radius:6px;color:var(--text);padding:0 6px;height:22px;cursor:pointer}
         .cell-main{display:flex;flex-direction:column}
         .cell-strong{font-weight:600}
         .cell-muted{color:var(--muted);font-size:12px}

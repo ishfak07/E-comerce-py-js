@@ -46,10 +46,11 @@ export default function Shop() {
 
   useEffect(() => {
     let ignore = false
-    setLoading(true)
-    setError(null)
-    axios.get<ApiResponse>('/api/v1/products')
-      .then(r => {
+    async function fetchProducts() {
+      setLoading(true)
+      setError(null)
+      try {
+        const r = await axios.get<ApiResponse>('/api/v1/products')
         if (ignore) return
         const items = r.data?.items
         if (items && items.length) {
@@ -57,14 +58,24 @@ export default function Shop() {
         } else {
           setProducts(demoProducts)
         }
-      })
-      .catch(() => {
-        setProducts(demoProducts)
-      })
-      .finally(() => {
+      } catch (ex) {
+        if (!ignore) setProducts(demoProducts)
+      } finally {
         if (!ignore) setLoading(false)
-      })
-    return () => { ignore = true }
+      }
+    }
+
+    fetchProducts()
+
+    // listen for product updates from other tabs (admin creating product)
+    function onStorage(e: StorageEvent) {
+      if (e.key === 'products:update') {
+        // refetch products
+        fetchProducts()
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => { ignore = true; window.removeEventListener('storage', onStorage) }
   }, [])
 
   useEffect(() => {

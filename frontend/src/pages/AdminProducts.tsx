@@ -33,6 +33,7 @@ export default function AdminProducts() {
   const [items, setItems] = useState<Prod[]>([])
   const [form, setForm] = useState<Prod>({ name: '', slug: '', price: 0, stock: 0, images: [] })
   const [file, setFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [submitting, setSubmitting] = useState<boolean>(false)
@@ -261,8 +262,20 @@ export default function AdminProducts() {
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          onChange={(e) => {
+            const f = e.target.files?.[0] || null
+            setFile(f)
+            if (f) {
+              const url = URL.createObjectURL(f)
+              setPreviewUrl(url)
+            } else {
+              setPreviewUrl(null)
+            }
+          }}
         />
+        {previewUrl && (
+          <img src={previewUrl} alt="preview" style={{ height: 48, marginLeft: 8, verticalAlign: 'middle' }} />
+        )}
         <button onClick={create} disabled={!isValid || submitting} type="button">
           {submitting ? 'Adding…' : 'Add'}
         </button>

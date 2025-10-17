@@ -14,6 +14,7 @@ except Exception:  # pragma: no cover
     pymongo = None
 
 from ..core.config import settings as app_settings
+from fastapi import HTTPException, status
 
 _async_client: Optional[Any] = None
 _sync_client = None
@@ -86,21 +87,28 @@ def close_mongo_client():
 def get_mongo_db() -> Iterator:
     try:
         sync_client = get_sync_mongo_client()
-        db_name = getattr(app_settings, "mongo_db_name", None) or sync_client and sync_client.get_default_database().name
+        db_name = getattr(app_settings, "mongo_db_name", None) or (sync_client and sync_client.get_default_database().name)
         logger.debug(f"Database name: {db_name}")
         if sync_client is not None:
-            db = sync_client.get_database(db_name)
-            logger.debug(f"Sync database instance: {db}")
-            yield db
-            return
+            try:
+                db = sync_client.get_database(db_name)
+                logger.debug(f"Sync database instance: {db}")
+                yield db
+                return
+            except Exception as e:
+                logger.error(f"Sync MongoDB get_database error: {e}")
+                raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="MongoDB unavailable")
         async_client = get_mongo_client()
         if async_client is None:
-            logger.error("Async MongoDB client is not initialized")
-            yield None
-            return
-        db = async_client.get_database(db_name)
-        logger.debug(f"Async database instance: {db}")
-        yield db
+            logger.error("MongoDB client is not initialized")
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="MongoDB unavailable")
+        try:
+            db = async_client.get_database(db_name)
+            logger.debug(f"Async database instance: {db}")
+            yield db
+        except Exception as e:
+            logger.error(f"Async MongoDB get_database error: {e}")
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="MongoDB unavailable")
     except Exception as e:
         logger.error(f"Error in get_mongo_db: {e}")
-        yield None
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="MongoDB unavailable")

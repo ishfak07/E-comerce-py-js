@@ -22,18 +22,28 @@ def get_mongo_db() -> Iterator:
             pass
     if not db_name:
         db_name = "ecommerce"
-
+    # Try to obtain a reachable MongoDB database; do not wrap the yield
+    # in a broad try/except because FastAPI may throw exceptions into the
+    # generator (for example HTTPException from auth deps). Swallowing
+    # those would cause "generator didn't stop after throw()" runtime
+    # errors and return 500 responses.
     if sync_client is not None:
+        db = None
         try:
             db = sync_client.get_database(db_name)
             # Touch server to ensure it's reachable
             db.command("ping")
+        except ServerSelectionTimeoutError:
+            db = None
+        except Exception:
+            db = None
+
+        if db is not None:
+            # Yield the real MongoDB database. Any exception thrown into
+            # this generator by FastAPI (e.g. HTTPException) will propagate
+            # normally to the caller.
             yield db
             return
-        except ServerSelectionTimeoutError:
-            pass
-        except Exception:
-            pass
 
     # Final fallback: simple file-based store to keep app usable without MongoDB
     fallback_path = Path(__file__).parents[2] / "data" / f"{db_name}.json"

@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 from .core.config import settings
 from .api.v1.router import api_router_v1
@@ -30,6 +32,11 @@ def create_app() -> FastAPI:
 
     # Routers
     app.include_router(api_router_v1, prefix="/api/v1")
+
+    # Serve uploaded static files (images)
+    uploads_dir = Path(__file__).parents[1] / 'static'
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/static", StaticFiles(directory=str(uploads_dir)), name="static")
 
     # Mongo init (optional)
     @app.on_event("startup")

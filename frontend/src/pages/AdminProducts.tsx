@@ -10,6 +10,7 @@ type Prod = {
   price: number
   stock: number
   images?: string[]
+  is_published?: boolean
 }
 
 type ProductsResponse = {
@@ -94,7 +95,7 @@ export default function AdminProducts() {
     try {
       // Let Axios/browser set multipart boundaries automatically
       const up = await api.post<UploadResponse>('/admin/products/upload', fd)
-      return [up.data.url]
+  return [up.data.url]
     } catch (e) {
       const err = e as ApiError
       const status = err?.response?.status
@@ -121,6 +122,8 @@ export default function AdminProducts() {
         price: form.price,
         stock: form.stock,
         images,
+        // publish immediately so users see new products
+        is_published: true,
       }
 
       // Optimistic update for snappy UX

@@ -55,5 +55,33 @@
       "_id": "f7028bde-0cc0-423b-8153-aae475d8c21d"
     }
   ],
-  "products": []
+  "products": [
+    {
+      "name": "cat",
+      "slug": "awd",
+      "price": 79,
+      "stock": 3,
+      "_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9"
+    },
+    {
+      "name": "aaaa",
+      "slug": "assdcc",
+      "price": 34,
+      "stock": 345,
+      "images": [
+        "/static/uploads/e5779a56ac0645cc9f605ccf8e9f2ba9.jpeg"
+      ],
+      "_id": "7797d88b-d324-49b3-8996-ace368a872c9"
+    },
+    {
+      "name": "aaaa",
+      "slug": "sdee",
+      "price": 23,
+      "stock": 434,
+      "images": [
+        "/static/uploads/39e9f753c5ae45b7bd201dd391683c87.jpg"
+      ],
+      "_id": "0b2da532-1756-419a-bb2a-3961adab5bb4"
+    }
+  ]
 }

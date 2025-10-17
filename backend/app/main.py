@@ -34,7 +34,8 @@ def create_app() -> FastAPI:
     app.include_router(api_router_v1, prefix="/api/v1")
 
     # Serve uploaded static files (images)
-    uploads_dir = Path(__file__).parents[1] / 'static'
+    # Uploads are saved relative to the `app` package (app/static/uploads)
+    uploads_dir = Path(__file__).parent / 'static'
     uploads_dir.mkdir(parents=True, exist_ok=True)
     app.mount("/static", StaticFiles(directory=str(uploads_dir)), name="static")
 

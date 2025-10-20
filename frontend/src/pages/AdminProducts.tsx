@@ -89,22 +89,32 @@ export default function AdminProducts() {
   }, [])
 
   async function uploadImageIfNeeded(): Promise<string[] | undefined> {
-    if (!file) return form.images && form.images.length ? form.images : undefined
+    if (!file) {
+      console.log('No file to upload, returning existing images:', form.images)
+      return form.images && form.images.length ? form.images : undefined
+    }
+    
+    console.log('Uploading file:', file.name, file.type, file.size, 'bytes')
     const fd = new FormData()
-    // Include filename and type for stricter servers
     fd.append('file', file, file.name)
+    
     try {
-      // Let Axios/browser set multipart boundaries automatically
+      // Don't set Content-Type - let axios/browser handle it with proper boundary
       const up = await api.post<UploadResponse>('/admin/products/upload', fd)
-  return [up.data.url]
+      console.log('Upload successful, URL:', up.data.url)
+      return [up.data.url]
     } catch (e) {
       const err = e as ApiError
+      console.error('Upload error:', err)
       const status = err?.response?.status
       if (status === 401) {
+        console.error('Upload failed: 401 Unauthorized')
         try { window.location.href = '/login' } catch {}
         return undefined
       }
-      throw new Error(err?.response?.data?.detail || err?.response?.data?.message || 'Upload failed')
+      const errorMsg = err?.response?.data?.detail || err?.response?.data?.message || 'Upload failed'
+      console.error('Upload failed with message:', errorMsg)
+      throw new Error(errorMsg)
     }
   }
 
@@ -116,7 +126,10 @@ export default function AdminProducts() {
     }
     setSubmitting(true)
     try {
+      console.log('Creating product, uploading image first...')
       const images = await uploadImageIfNeeded()
+      console.log('Image upload complete, images:', images)
+      
       const payload: Partial<Prod> = {
         name: form.name.trim(),
         slug: form.slug.trim(),
@@ -126,6 +139,8 @@ export default function AdminProducts() {
         // publish immediately so users see new products
         is_published: true,
       }
+      
+      console.log('Creating product with payload:', payload)
 
       // Optimistic update for snappy UX
       const optimistic: Prod = {
@@ -139,11 +154,13 @@ export default function AdminProducts() {
       }
       setItems((prev) => [optimistic, ...prev])
 
-      await api.post('/admin/products', payload)
+      const response = await api.post('/admin/products', payload)
+      console.log('Product created successfully:', response.data)
 
       // Reset form
       setForm({ name: '', slug: '', price: 0, stock: 0, images: [] })
       setFile(null)
+      setPreviewUrl(null)
 
       // Re-sync with server (ensures IDs/images are canonical)
       await load()

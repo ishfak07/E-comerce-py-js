@@ -27,6 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <CartProvider>
           <Routes>
+            {/* Public site uses AppShell (Header/Footer) */}
             <Route element={<AppShell />}>
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
@@ -38,12 +39,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/register" element={<Register />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route element={<AdminRoute><AdminShell /></AdminRoute>}>
-                <Route path="/admin" element={<AdminDashboardHome />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/orders" element={<AdminOrders />} />
-              </Route>
+            </Route>
+            {/* Admin site uses its own shell (no public header/footer) */}
+            <Route element={<AdminRoute><AdminShell /></AdminRoute>}>
+              <Route path="/admin" element={<AdminDashboardHome />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
             </Route>
           </Routes>
         </CartProvider>

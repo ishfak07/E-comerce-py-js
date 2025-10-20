@@ -33,11 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     accessToken,
     login: async (email: string, password: string) => {
       const res = await api.post('/auth/login', { email, password })
-      const { access_token, user } = res.data
+      const { access_token, refresh_token, user } = res.data
       setUser(user)
       setAccessToken(access_token)
+      // persist tokens
       localStorage.setItem('access_token', access_token)
+      if (refresh_token) localStorage.setItem('refresh_token', refresh_token)
       localStorage.setItem('user', JSON.stringify(user))
+      // set header immediately so subsequent calls in same tick are authorized
+      setAuthToken(access_token)
     },
     register: async (email: string, password: string, fullName?: string) => {
       await api.post('/auth/register', { email, password, full_name: fullName })

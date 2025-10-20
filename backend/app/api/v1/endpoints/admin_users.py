@@ -18,10 +18,18 @@ def _maybe_oid(v):
 @router.get("")
 def list_users(db=Depends(get_mongo_db), _admin=Depends(require_admin)):
     users = db.get_collection("users")
-    items = list(users.find({}).sort("created_at", -1))
+    # Try to sort by created_at if available, otherwise just list all
+    try:
+        items = list(users.find({}).sort("created_at", -1))
+    except Exception:
+        # If sorting fails (field doesn't exist), just get all users
+        items = list(users.find({}))
+    
     for it in items:
         it["id"] = str(it.pop("_id", ""))
         it.pop("password_hash", None)
+        it.pop("hashed_password", None)  # Also remove this variant
+        it.pop("password", None)  # And plain passwords from old seeds
     return {"items": items}
 
 

@@ -87,7 +87,17 @@ def login(payload: LoginRequest, db=Depends(get_mongo_db)):
         raise RuntimeError("MongoDB is not configured")
     users = db.get_collection("users")
     user = users.find_one({"email": payload.email})
-    if not user or not verify_password(payload.password, user.get("password_hash")):
+    
+    # Support multiple password field formats for compatibility with different seed scripts
+    stored_password = None
+    if user:
+        stored_password = (
+            user.get("password_hash") 
+            or user.get("hashed_password")  # legacy from older seeds
+            or user.get("password")  # plain text in some demo seeds
+        )
+    
+    if not user or not verify_password(payload.password, stored_password or ""):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     user_id = str(user.get("_id"))
     access = create_access_token(user_id)

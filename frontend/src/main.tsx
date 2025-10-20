@@ -41,11 +41,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/checkout" element={<Checkout />} />
             </Route>
             {/* Admin site uses its own shell (no public header/footer) */}
-            <Route element={<AdminRoute><AdminShell /></AdminRoute>}>
-              <Route path="/admin" element={<AdminDashboardHome />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
+              <Route index element={<AdminDashboardHome />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="orders" element={<AdminOrders />} />
             </Route>
           </Routes>
         </CartProvider>

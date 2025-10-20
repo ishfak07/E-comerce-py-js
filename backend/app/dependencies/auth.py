@@ -32,9 +32,26 @@ def get_current_user(
     if db is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User DB not available")
     users = db.get_collection("users")
-    # Mongo stores _id as ObjectId; convert if needed
+    
+    # Try multiple ID formats for compatibility with different storage backends
+    user = None
+    
+    # Try as ObjectId first (MongoDB with proper ObjectId)
     lookup_id = _maybe_objectid(user_id)
-    user = users.find_one({"_id": lookup_id}) if lookup_id else None
+    if lookup_id != user_id:  # conversion succeeded
+        user = users.find_one({"_id": lookup_id})
+    
+    # Try as string (UUID or string IDs)
+    if not user:
+        user = users.find_one({"_id": user_id})
+    
+    # Try as integer (simple numeric IDs from seed_mongo.py)
+    if not user:
+        try:
+            user = users.find_one({"_id": int(user_id)})
+        except (ValueError, TypeError):
+            pass
+    
     if not user or not user.get("is_active", True):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive or missing user")
     return user

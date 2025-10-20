@@ -19,10 +19,16 @@ export function setAuthToken(token: string | null) {
 // Attach the latest token from localStorage before each request (handles page reloads)
 api.interceptors.request.use((cfg) => {
   try {
-    const t = localStorage.getItem('access_token')
-    if (t) {
-      cfg.headers = cfg.headers || {}
-      ;(cfg.headers as any)['Authorization'] = `Bearer ${t}`
+    // Skip auth header for login/register to avoid sending stale tokens
+    const url = (cfg.url || '').toLowerCase()
+    const skipAuth = url.includes('/auth/login') || url.includes('/auth/register')
+    
+    if (!skipAuth) {
+      const t = localStorage.getItem('access_token')
+      if (t) {
+        cfg.headers = cfg.headers || {}
+        ;(cfg.headers as any)['Authorization'] = `Bearer ${t}`
+      }
     }
   } catch (e) {
     // ignore

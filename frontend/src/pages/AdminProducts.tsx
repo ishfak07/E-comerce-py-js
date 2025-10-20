@@ -2054,4 +2054,4 @@ export default function AdminProducts() {
       `}</style>
     </div>
   )
-}   
+}    

@@ -32,7 +32,7 @@ export default function ProductDetail() {
         </div>
         <div>
           <h1 style={{ marginTop: 0 }}>{product.name}</h1>
-          <div className="price" style={{ fontSize: 22 }}>${product.price}</div>
+          <div className="price" style={{ fontSize: 22 }}>LKR {product.price}</div>
           <p style={{ color: 'var(--muted)' }}>{product.description || 'A beautiful product made for you.'}</p>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn" onClick={() => add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.images?.[0] })}>Add to Cart</button>

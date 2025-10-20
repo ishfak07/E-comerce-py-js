@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 
 export default function Checkout() {
   const { items, clear } = useCart()
-  const [address, setAddress] = useState({ line1: '', city: '', postal_code: '', country: 'US' })
+  const [address, setAddress] = useState({ line1: '', city: '', postal_code: '', country: 'LK' })
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [orderId, setOrderId] = useState<number | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bank_transfer'>('stripe')

@@ -90,7 +90,7 @@ export default function AdminDashboardHome() {
         <div className="card">
           <div className="k">Sales</div>
           <div className="v" aria-live="polite">
-            ${Number.isFinite(safe.sales) ? safe.sales.toFixed(2) : '0.00'}
+            LKR {Number.isFinite(safe.sales) ? safe.sales.toFixed(2) : '0.00'}
           </div>
         </div>
       </div>

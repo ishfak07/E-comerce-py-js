@@ -79,7 +79,7 @@ const seedSettings: SiteSettings = {
   siteName: 'Ecommerce',
   supportEmail: 'support@yourstore.com',
   supportPhone: '+94 11 234 5678',
-  currency: 'USD',
+  currency: 'LKR',
   brandColor: '#6D74FF',
   bankTransferNote:
     'Bank transfer accepted: Name: Ishfaque Mif · Bank: BOC · Branch: Puttalam · Account: 89001476 · WhatsApp: +94 76 897 6222. Include order number as reference.',
@@ -90,7 +90,7 @@ const seedSettings: SiteSettings = {
    ========================= */
 
 function formatMoney(x: number, currency: Currency) {
-  const sym = currency === 'USD' ? '$' : currency === 'LKR' ? 'Rs ' : '€'
+  const sym = currency === 'USD' ? '$' : currency === 'LKR' ? 'LKR ' : '€'
   return `${sym}${x.toFixed(2)}`
 }
 

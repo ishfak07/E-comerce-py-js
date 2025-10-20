@@ -272,7 +272,7 @@ export default function Shop() {
                 <div className="card-body">
                   <div className="meta">
                     <span className="tag">{p.category || 'General'}</span>
-                    <span className="price">${Number(p.price).toFixed(2)}</span>
+                    <span className="price">LKR {Number(p.price).toFixed(2)}</span>
                   </div>
                   <Link to={`/product/${p.slug}`} className="card-title">{p.name}</Link>
                   <div className="card-actions">

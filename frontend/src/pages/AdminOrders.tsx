@@ -127,7 +127,7 @@ export default function AdminOrders() {
 
   function formatMoney(n: number) {
     const v = Number.isFinite(n) ? n : 0
-    return `$${v.toFixed(2)}`
+    return `LKR ${v.toFixed(2)}`
   }
 
   async function setStatus(orderId: number, status: OrderStatus | string) {

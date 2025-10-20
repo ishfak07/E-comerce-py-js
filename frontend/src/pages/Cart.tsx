@@ -20,7 +20,7 @@ export default function Cart() {
   const openTransfer = () => setShowTransfer(true)
 
   const whatsappMessage = encodeURIComponent(
-    `Hello, I have transferred ${subtotal.toFixed(2)} for my order. Here is my payment confirmation.`
+    `Hello, I have transferred LKR ${subtotal.toFixed(2)} for my order. Here is my payment confirmation.`
   )
 
   return (
@@ -99,8 +99,8 @@ export default function Cart() {
                               </button>
                             </div>
                           </td>
-                          <td>${Number(i.price).toFixed(2)}</td>
-                          <td>${(i.price * i.qty).toFixed(2)}</td>
+                          <td>LKR {Number(i.price).toFixed(2)}</td>
+                          <td>LKR {(i.price * i.qty).toFixed(2)}</td>
                           <td>
                             <button className="btn btn-ghost" onClick={() => remove(i.id)}>
                               Remove
@@ -112,7 +112,7 @@ export default function Cart() {
                     <tfoot>
                       <tr>
                         <td colSpan={3} className="right">Subtotal</td>
-                        <td colSpan={2} className="subtotal">${subtotal.toFixed(2)}</td>
+                        <td colSpan={2} className="subtotal">LKR {subtotal.toFixed(2)}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -122,7 +122,7 @@ export default function Cart() {
                   <h2 className="summary-title">Order Summary</h2>
                   <div className="summary-row">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>LKR {subtotal.toFixed(2)}</span>
                   </div>
                   <div className="summary-row">
                     <span>Shipping</span>
@@ -130,7 +130,7 @@ export default function Cart() {
                   </div>
                   <div className="summary-total">
                     <span>Estimated Total</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>LKR {subtotal.toFixed(2)}</span>
                   </div>
 
                   <div className="summary-actions">

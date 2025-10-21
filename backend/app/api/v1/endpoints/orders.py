@@ -63,6 +63,46 @@ def get_order_history(
         
         print(f"[OrderHistory] Found {len(orders)} orders")
         
+        # Auto-fix orders without tracking_status (migration helper)
+        for order in orders:
+            if "_id" in order and not order.get("tracking_status"):
+                print(f"[OrderHistory] Auto-fixing order {order['_id']} - adding tracking_status")
+                # Determine tracking_status from status field
+                status = order.get("status", "pending_verification")
+                update_data = {}
+                
+                if status == "pending_verification":
+                    update_data["tracking_status"] = "placed"
+                    update_data["payment_status"] = order.get("payment_status") or "pending"
+                elif status == "payment_verified":
+                    update_data["tracking_status"] = "verified"
+                    update_data["payment_status"] = order.get("payment_status") or "verified"
+                elif status == "processing":
+                    update_data["tracking_status"] = "processing"
+                elif status == "shipped":
+                    update_data["tracking_status"] = "shipped"
+                elif status == "delivered":
+                    update_data["tracking_status"] = "delivered"
+                elif status == "cancelled":
+                    update_data["tracking_status"] = "cancelled"
+                    update_data["payment_status"] = order.get("payment_status") or "cancelled"
+                else:
+                    update_data["tracking_status"] = "placed"
+                    update_data["payment_status"] = order.get("payment_status") or "pending"
+                
+                # Ensure payment_status exists
+                if not update_data.get("payment_status") and not order.get("payment_status"):
+                    update_data["payment_status"] = "pending"
+                
+                # Update in database
+                orders_collection.update_one(
+                    {"_id": order["_id"]},
+                    {"$set": update_data}
+                )
+                
+                # Update in-memory order object
+                order.update(update_data)
+        
         # Convert ObjectId to string
         for order in orders:
             if "_id" in order:

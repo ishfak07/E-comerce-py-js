@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 
@@ -34,12 +34,9 @@ export default function OrderHistory() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState('all')
+  const [unauth, setUnauth] = useState(false)
 
-  useEffect(() => {
-    fetchOrders()
-  }, [filter])
-
-  async function fetchOrders() {
+  const fetchOrders = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -51,11 +48,43 @@ export default function OrderHistory() {
       setOrders(res.data.orders || [])
     } catch (err: any) {
       console.error('Error fetching orders:', err)
-      setError(err.response?.data?.detail || 'Failed to load orders')
+      const status = err?.response?.status
+      if (status === 401) {
+        setUnauth(true)
+        setError('Not authenticated')
+      } else {
+        setError(err.response?.data?.detail || 'Failed to load orders')
+      }
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter])
+
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
+
+  // Lightweight auto-refresh to reflect status changes near real-time
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      // Only poll when tab is visible to avoid unnecessary calls
+      if (document.visibilityState === 'visible') {
+        fetchOrders()
+      }
+    }, 5000)
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchOrders()
+      }
+    }
+    window.addEventListener('visibilitychange', onVisibility)
+
+    return () => {
+      clearInterval(intervalId)
+      window.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [fetchOrders])
 
   function getStatusColor(status: TrackingStatus | undefined): string {
     if (!status) return '#d97706'
@@ -185,6 +214,25 @@ export default function OrderHistory() {
             marginBottom: '16px'
           }}>
             {error}
+          </div>
+        )}
+
+        {unauth && (
+          <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+            <button
+              onClick={() => navigate('/login?next=/orders')}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#6D74FF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              Go to Login
+            </button>
           </div>
         )}
 

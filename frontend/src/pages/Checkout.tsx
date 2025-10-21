@@ -105,6 +105,13 @@ export default function Checkout() {
         transfer_receipt_url: receiptUrl,
         transaction_reference: transactionRef,
         additional_notes: additionalNotes,
+        items: items.map(item => ({
+          product_id: item.id,
+          title: item.name,
+          quantity: item.qty,
+          price: item.price
+        })),
+        total_amount: items.reduce((sum, item) => sum + (item.price * item.qty), 0)
       }
 
       const res = await api.post('/checkout', payload)

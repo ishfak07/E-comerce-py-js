@@ -24,6 +24,13 @@ class Address(BaseModel):
     country: str
 
 
+class CheckoutItem(BaseModel):
+    product_id: str | int
+    title: str
+    quantity: int
+    price: float
+
+
 class CheckoutRequest(BaseModel):
     cart_id: str | None = None  # placeholder for future cart service
     shipping_address: Address
@@ -37,6 +44,9 @@ class CheckoutRequest(BaseModel):
     transfer_receipt_url: str | None = None
     transaction_reference: str | None = None
     additional_notes: str | None = None
+    # Items and totals (allow frontend to pass cart snapshot)
+    items: list[CheckoutItem] | None = None
+    total_amount: float | None = None
 
 
 @router.post("")
@@ -56,8 +66,20 @@ def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
         if not payload.transfer_receipt_url:
             raise HTTPException(status_code=400, detail="Transfer receipt upload is required")
 
-    # Minimal placeholder: total derived from cart would be calculated here
-    total_amount = 100.00
+    # Derive total from payload if provided; otherwise fallback to items or placeholder
+    if payload.total_amount is not None:
+        try:
+            total_amount = float(payload.total_amount)
+        except Exception:
+            total_amount = 100.00
+    elif payload.items:
+        try:
+            total_amount = float(sum((it.price * it.quantity) for it in payload.items))
+        except Exception:
+            total_amount = 100.00
+    else:
+        # Minimal placeholder: total derived from cart would be calculated here
+        total_amount = 100.00
     discount = 0.0
     if payload.coupon and db is not None:
         coupons = db.get_collection("coupons")
@@ -94,6 +116,12 @@ def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
         "resubmit_required": False,
         "estimated_delivery_date": None,
     }
+    # Persist items snapshot if provided
+    if payload.items:
+        try:
+            order_doc["items"] = [it.model_dump() for it in payload.items]
+        except Exception:
+            order_doc["items"] = []
     if db is None:
         raise RuntimeError("MongoDB is not configured")
     orders = db.get_collection("orders")

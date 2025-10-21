@@ -21,7 +21,7 @@ api.interceptors.request.use((cfg) => {
   try {
     // Skip auth header for login/register to avoid sending stale tokens
     const url = (cfg.url || '').toLowerCase()
-    const skipAuth = url.includes('/auth/login') || url.includes('/auth/register')
+    const skipAuth = url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')
     
     if (!skipAuth) {
       const t = localStorage.getItem('access_token')
@@ -73,6 +73,8 @@ api.interceptors.response.use(
         if (!refreshToken) {
           processQueue(null)
           isRefreshing = false
+          try { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token') } catch (_) {}
+          try { window.location.href = '/login' } catch (_) {}
           return Promise.reject(err)
         }
         const resp = await axios.post('/api/v1/auth/refresh', { refresh_token: refreshToken })

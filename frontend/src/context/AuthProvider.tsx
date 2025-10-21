@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null)
       setAccessToken(null)
       localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
     }
   }), [user, accessToken])

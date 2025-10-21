@@ -57,7 +57,8 @@ export default function OrderHistory() {
     }
   }
 
-  function getStatusColor(status: TrackingStatus): string {
+  function getStatusColor(status: TrackingStatus | undefined): string {
+    if (!status) return '#d97706'
     switch (status) {
       case 'placed': return '#d97706'
       case 'verified': return '#0284c7'
@@ -70,7 +71,8 @@ export default function OrderHistory() {
     }
   }
 
-  function getPaymentBadgeColor(status: PaymentStatus): string {
+  function getPaymentBadgeColor(status: PaymentStatus | undefined): string {
+    if (!status) return '#fef3c7'
     switch (status) {
       case 'pending': return '#fef3c7'
       case 'verified': return '#d1fae5'
@@ -79,7 +81,8 @@ export default function OrderHistory() {
     }
   }
 
-  function getPaymentTextColor(status: PaymentStatus): string {
+  function getPaymentTextColor(status: PaymentStatus | undefined): string {
+    if (!status) return '#92400e'
     switch (status) {
       case 'pending': return '#92400e'
       case 'verified': return '#065f46'
@@ -88,7 +91,8 @@ export default function OrderHistory() {
     }
   }
 
-  function getProgressPercentage(status: TrackingStatus): number {
+  function getProgressPercentage(status: TrackingStatus | undefined): number {
+    if (!status) return 20
     switch (status) {
       case 'placed': return 20
       case 'verified': return 40
@@ -111,14 +115,19 @@ export default function OrderHistory() {
 
   function formatDate(dateString?: string): string {
     if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch {
+      return 'N/A'
+    }
   }
 
-  function formatMoney(amount: number): string {
+  function formatMoney(amount: number | undefined): string {
+    if (!amount) return 'LKR 0.00'
     return `LKR ${amount.toFixed(2)}`
   }
 
@@ -322,7 +331,7 @@ export default function OrderHistory() {
                       fontWeight: 'bold',
                       color: getStatusColor(order.tracking_status)
                     }}>
-                      {order.tracking_status.toUpperCase()}
+                      {order.tracking_status?.toUpperCase() || 'PENDING'}
                     </div>
                   </div>
                 )}

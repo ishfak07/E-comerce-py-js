@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCart } from '../lib/cart'
 import { api } from '../lib/api'
+import { useAuth } from '../context/AuthProvider'
 
 const SRI_LANKAN_BANKS = [
   'Commercial Bank of Ceylon',
@@ -28,6 +29,7 @@ const COMPANY_BANK_DETAILS = {
 
 export default function Checkout() {
   const { items, clear } = useCart()
+  const { user } = useAuth()
   const [address, setAddress] = useState({ line1: '', city: '', postal_code: '', country: 'LK' })
   const [orderId, setOrderId] = useState<string | null>(null)
   const [bankInfo, setBankInfo] = useState<any | null>(null)
@@ -38,6 +40,13 @@ export default function Checkout() {
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
+  
+  // Auto-fill email if user is logged in
+  useEffect(() => {
+    if (user?.email && !customerEmail) {
+      setCustomerEmail(user.email)
+    }
+  }, [user])
   const [selectedBank, setSelectedBank] = useState('')
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null)
@@ -89,8 +98,16 @@ export default function Checkout() {
 
     try {
       // Validate required fields
-      if (!customerName || !customerPhone || !selectedBank || !receiptUrl) {
+      if (!customerName || !customerPhone || !customerEmail || !selectedBank || !receiptUrl) {
         setError('Please fill all required fields and upload receipt')
+        setLoading(false)
+        return
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(customerEmail)) {
+        setError('Please enter a valid email address')
         setLoading(false)
         return
       }
@@ -170,12 +187,24 @@ export default function Checkout() {
             style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
           <input
-            placeholder="Email Address (optional)"
+            placeholder="Email Address"
             type="email"
             value={customerEmail}
             onChange={e => setCustomerEmail(e.target.value)}
-            style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+            disabled={!!user?.email}
+            required
+            style={{ 
+              padding: '10px', 
+              borderRadius: '4px', 
+              border: '1px solid #ccc',
+              backgroundColor: user?.email ? '#f5f5f5' : 'white'
+            }}
           />
+          {user?.email && (
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '-8px' }}>
+              ✓ Using logged-in account email
+            </p>
+          )}
 
           {/* Delivery Address */}
           <h3 style={{ marginTop: '8px' }}>Delivery Address</h3>
@@ -275,10 +304,26 @@ export default function Checkout() {
           <h2 style={{ color: '#0a0', marginBottom: '16px' }}>✓ Order Placed Successfully!</h2>
           <div style={{ fontSize: '18px', marginBottom: '16px' }}>Order ID: <strong>#{orderId}</strong></div>
           <p style={{ marginBottom: '12px' }}>Your order has been received and is pending verification.</p>
-          <p style={{ fontSize: '14px', color: '#666' }}>
+          <p style={{ fontSize: '14px', color: '#666', marginBottom: '16px' }}>
             We will review your payment receipt and update your order status shortly.
             You will be notified once your payment is verified.
           </p>
+          <button
+            onClick={() => window.location.href = '/orders'}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: '#6D74FF',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginTop: '8px'
+            }}
+          >
+            View Order History
+          </button>
         </div>
       )}
     </div>

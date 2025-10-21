@@ -49,13 +49,43 @@ def get_order(order_id: str, db=Depends(get_mongo_db), _admin=Depends(require_ad
 
 
 @router.put("/{order_id}/status")
-def update_status(order_id: str, new_status: str, db=Depends(get_mongo_db), _admin=Depends(require_admin)):
+def update_status(
+    order_id: str,
+    new_status: str = Query(...),
+    db=Depends(get_mongo_db),
+    _admin=Depends(require_admin)
+):
+    """Update order status. 
+    
+    Valid statuses: pending_verification, payment_verified, processing, shipped, delivered, cancelled
+    """
+    valid_statuses = [
+        "pending_verification",
+        "payment_verified",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled"
+    ]
+    
+    if new_status not in valid_statuses:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+    
     if db is None:
         raise RuntimeError("MongoDB is not configured")
     orders = db.get_collection("orders")
-    res = orders.update_one({"_id": order_id}, {"$set": {"status": new_status}})
+    
+    # Also update payment_status when status changes
+    update_data = {"status": new_status}
+    if new_status == "payment_verified":
+        update_data["payment_status"] = "verified"
+    elif new_status == "cancelled":
+        update_data["payment_status"] = "cancelled"
+    
+    res = orders.update_one({"_id": order_id}, {"$set": update_data})
     if res.matched_count == 0:
         return {"detail": "not found"}
-    return {"ok": True}
+    return {"ok": True, "status": new_status}
 
 

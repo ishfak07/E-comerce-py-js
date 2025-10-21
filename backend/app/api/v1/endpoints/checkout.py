@@ -1,7 +1,12 @@
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from pydantic import BaseModel
 from typing import Any
+from datetime import datetime
+from pathlib import Path
+import shutil
+import uuid
+import os
 
 from ....dependencies.mongo import get_mongo_db
 from ....services.payments import create_payment_intent
@@ -24,13 +29,32 @@ class CheckoutRequest(BaseModel):
     shipping_address: Address
     payment_method: str
     coupon: str | None = None
+    # New bank transfer fields
+    customer_name: str | None = None
+    customer_phone: str | None = None
+    customer_email: str | None = None
+    selected_bank: str | None = None
+    transfer_receipt_url: str | None = None
+    transaction_reference: str | None = None
+    additional_notes: str | None = None
 
 
 @router.post("")
 def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
-    # support stripe and bank_transfer
-    if payload.payment_method not in ("stripe", "bank_transfer"):
-        raise HTTPException(status_code=400, detail="Unsupported payment method")
+    # Only support bank_transfer now (removed stripe)
+    if payload.payment_method != "bank_transfer":
+        raise HTTPException(status_code=400, detail="Only bank transfer payment is supported")
+
+    # Validate required fields for bank transfer
+    if payload.payment_method == "bank_transfer":
+        if not payload.customer_name:
+            raise HTTPException(status_code=400, detail="Customer name is required")
+        if not payload.customer_phone:
+            raise HTTPException(status_code=400, detail="Customer phone is required")
+        if not payload.selected_bank:
+            raise HTTPException(status_code=400, detail="Bank selection is required")
+        if not payload.transfer_receipt_url:
+            raise HTTPException(status_code=400, detail="Transfer receipt upload is required")
 
     # Minimal placeholder: total derived from cart would be calculated here
     total_amount = 100.00
@@ -45,23 +69,25 @@ def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
                 discount = float(coupon.get("value", 0))
             total_amount = max(0.0, total_amount - discount)
 
-    amount_cents = int(round(total_amount * 100))
-    # For stripe: create payment intent
-    payment_intent = None
-    if payload.payment_method == "stripe":
-        payment_intent = create_payment_intent(amount_cents, metadata={"cart_id": payload.cart_id or "na"})
-
     # Create a Mongo order document
     order_doc: dict[str, Any] = {
-        "status": "pending",
+        "status": "pending_verification",  # New default status
         "total_amount": total_amount,
         "shipping_amount": 0,
         "taxes": 0,
         "shipping_address": payload.shipping_address.model_dump(),
         "billing_address": payload.shipping_address.model_dump(),
-        "payment_status": "unpaid",
+        "payment_status": "pending",
         "payment_method": payload.payment_method,
-        "payment_intent_id": (payment_intent["id"] if payment_intent else None),
+        "created_at": datetime.utcnow().isoformat(),
+        # New bank transfer fields
+        "customer_name": payload.customer_name,
+        "customer_phone": payload.customer_phone,
+        "customer_email": payload.customer_email,
+        "selected_bank": payload.selected_bank,
+        "transfer_receipt_url": payload.transfer_receipt_url,
+        "transaction_reference": payload.transaction_reference,
+        "additional_notes": payload.additional_notes,
     }
     if db is None:
         raise RuntimeError("MongoDB is not configured")
@@ -69,18 +95,45 @@ def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
     res = orders.insert_one(order_doc)
     order_id = str(res.inserted_id)
 
-    if payload.payment_method == "stripe":
-        return {"order_id": order_id, "payment_intent_client_secret": payment_intent["client_secret"]}
-
-    # bank_transfer: return instructions to the client
+    # Return bank transfer instructions to the client
     bank_info = {
         "name": "Ishfaque Mif",
         "bank": "BOC",
         "branch": "Puttalam",
         "account_number": "89001476",
         "whatsapp": "0768976222",
-        "instructions": "Please transfer the total amount to the above account and send a payment confirmation (screenshot) to the WhatsApp number. You may upload the payment screenshot on your orders page.",
+        "instructions": "Please transfer the total amount to the above account and upload your payment receipt.",
     }
-    return {"order_id": order_id, "bank_transfer": bank_info}
+    return {"order_id": order_id, "bank_transfer": bank_info, "success": True}
+
+
+@router.post("/upload-receipt")
+def upload_receipt(request: Request, file: UploadFile = File(...)):
+    """Upload transfer receipt (PDF, JPG, PNG)"""
+    # Validate file type
+    allowed_extensions = {'.pdf', '.jpg', '.jpeg', '.png'}
+    original = os.path.basename(file.filename or '')
+    _, ext = os.path.splitext(original)
+    ext = ext.lower()
+    
+    if ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail="Only PDF, JPG, and PNG files are allowed")
+    
+    # Create receipts directory
+    receipts_dir = Path(__file__).parents[3] / 'static' / 'receipts'
+    receipts_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create unique filename
+    unique = f"{uuid.uuid4().hex}{ext}"
+    dest = receipts_dir / unique
+    
+    # Save file
+    with dest.open('wb') as f:
+        shutil.copyfileobj(file.file, f)
+    
+    # Return URL
+    base = str(request.base_url).rstrip('/')
+    return {"url": f"{base}/static/receipts/{unique}"}
+
 
 

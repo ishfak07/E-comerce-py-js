@@ -1,12 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../lib/api'
 
-type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'canceled'
+type OrderStatus = 
+  | 'pending_verification' 
+  | 'payment_verified' 
+  | 'processing' 
+  | 'shipped' 
+  | 'delivered' 
+  | 'cancelled'
 
 type Order = {
-  id: number
+  id: string
   status: OrderStatus | string
   total_amount: number
+  customer_name?: string
+  customer_phone?: string
+  customer_email?: string
+  shipping_address?: {
+    line1: string
+    city: string
+    postal_code: string
+    country: string
+  }
+  selected_bank?: string
+  transfer_receipt_url?: string
+  transaction_reference?: string
+  additional_notes?: string
+  created_at?: string
+  payment_status?: string
 }
 
 type OrdersResponse = {
@@ -130,7 +151,7 @@ export default function AdminOrders() {
     return `LKR ${v.toFixed(2)}`
   }
 
-  async function setStatus(orderId: number, status: OrderStatus | string) {
+  async function setStatus(orderId: string, status: OrderStatus | string) {
     try {
       await api.put(`/admin/orders/${orderId}/status`, null, { params: { new_status: status } })
       // Refresh current page to reflect the change
@@ -172,8 +193,12 @@ export default function AdminOrders() {
             <div className="stat-label">Total Orders</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{orders.filter(o => o.status === 'pending').length}</div>
-            <div className="stat-label">Pending</div>
+            <div className="stat-value">{orders.filter(o => o.status === 'pending_verification').length}</div>
+            <div className="stat-label">Pending Verification</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{orders.filter(o => o.status === 'payment_verified').length}</div>
+            <div className="stat-label">Payment Verified</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">{orders.filter(o => o.status === 'processing').length}</div>
@@ -241,113 +266,177 @@ export default function AdminOrders() {
           </div>
         )}
 
-        {/* Orders Grid */}
+        {/* Orders List with Full Details */}
         {orders.length > 0 && (
-          <div className="orders-table">
-            <div className="table-header-orders">
-              <div className="th-order">Order</div>
-              <div className="th-status">Status</div>
-              <div className="th-total">Total</div>
-              <div className="th-actions-orders">Actions</div>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
             {orders.map((o) => (
-              <div key={o.id} className="table-row-orders">
-                <div className="td-order">
-                  <div className="order-cell">
-                    <div className="order-icon">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="9" y1="3" x2="9" y2="21"></line>
-                      </svg>
-                    </div>
-                    <div className="order-info">
-                      <div className="order-number">Order #{o.id}</div>
-                      <div className="order-id">ID: {o.id}</div>
-                    </div>
+              <div key={o.id} style={{ 
+                border: '1px solid #e0e0e0', 
+                borderRadius: '8px', 
+                padding: '20px', 
+                backgroundColor: '#fff' 
+              }}>
+                {/* Order Header */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  marginBottom: '16px',
+                  paddingBottom: '12px',
+                  borderBottom: '2px solid #f0f0f0'
+                }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>
+                      Order #{o.id}
+                    </h3>
+                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#666' }}>
+                      {o.created_at ? new Date(o.created_at).toLocaleString() : 'N/A'}
+                    </p>
+                  </div>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#6D74FF' }}>
+                    {formatMoney(o.total_amount)}
                   </div>
                 </div>
-                <div className="td-status">
-                  <span className={`status-badge status-${o.status}`}>
-                    {o.status === 'pending' && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
+
+                {/* Order Content - 2 Columns */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
+                  {/* Left Column - Customer Info */}
+                  <div>
+                    <h4 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
+                      👤 Customer Information
+                    </h4>
+                    <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
+                      <div><strong>Name:</strong> {o.customer_name || 'N/A'}</div>
+                      <div><strong>Phone:</strong> {o.customer_phone || 'N/A'}</div>
+                      {o.customer_email && <div><strong>Email:</strong> {o.customer_email}</div>}
+                    </div>
+
+                    <h4 style={{ margin: '16px 0 12px', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
+                      📍 Delivery Address
+                    </h4>
+                    <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
+                      {o.shipping_address ? (
+                        <>
+                          <div>{o.shipping_address.line1}</div>
+                          <div>{o.shipping_address.city}, {o.shipping_address.postal_code}</div>
+                          <div>{o.shipping_address.country}</div>
+                        </>
+                      ) : (
+                        <div>No address provided</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column - Payment Info */}
+                  <div>
+                    <h4 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
+                      💳 Payment Information
+                    </h4>
+                    <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
+                      <div><strong>Bank:</strong> {o.selected_bank || 'N/A'}</div>
+                      <div><strong>Payment Status:</strong> {o.payment_status || 'N/A'}</div>
+                      {o.transaction_reference && (
+                        <div><strong>Reference ID:</strong> {o.transaction_reference}</div>
+                      )}
+                    </div>
+
+                    {o.transfer_receipt_url && (
+                      <>
+                        <h4 style={{ margin: '16px 0 12px', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
+                          📄 Transfer Receipt
+                        </h4>
+                        <div>
+                          <a 
+                            href={o.transfer_receipt_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ 
+                              display: 'inline-block',
+                              padding: '8px 16px', 
+                              backgroundColor: '#6D74FF', 
+                              color: 'white', 
+                              textDecoration: 'none',
+                              borderRadius: '4px',
+                              fontSize: '14px'
+                            }}
+                          >
+                            📥 View/Download Receipt
+                          </a>
+                        </div>
+                      </>
                     )}
-                    {o.status === 'processing' && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                      </svg>
+
+                    {o.additional_notes && (
+                      <>
+                        <h4 style={{ margin: '16px 0 12px', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
+                          📝 Notes
+                        </h4>
+                        <div style={{ fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
+                          {o.additional_notes}
+                        </div>
+                      </>
                     )}
-                    {o.status === 'shipped' && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="1" y="3" width="15" height="13"></rect>
-                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                      </svg>
-                    )}
-                    {o.status === 'delivered' && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                      </svg>
-                    )}
-                    {o.status === 'canceled' && (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                      </svg>
-                    )}
-                    {o.status}
-                  </span>
+                  </div>
                 </div>
-                <div className="td-total">
-                  <div className="amount-display">{formatMoney(o.total_amount)}</div>
-                </div>
-                <div className="td-actions-orders">
-                  <div className="action-buttons">
-                    {o.status !== 'processing' && (
-                      <button
-                        className="btn-action btn-processing"
-                        onClick={() => setStatus(o.id, 'processing')}
-                        type="button"
-                        title="Mark as Processing"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                        </svg>
-                      </button>
-                    )}
-                    {o.status !== 'shipped' && (
-                      <button
-                        className="btn-action btn-shipped"
-                        onClick={() => setStatus(o.id, 'shipped')}
-                        type="button"
-                        title="Mark as Shipped"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="1" y="3" width="15" height="13"></rect>
-                          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                          <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                          <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                        </svg>
-                      </button>
-                    )}
-                    {o.status !== 'delivered' && (
-                      <button
-                        className="btn-action btn-delivered"
-                        onClick={() => setStatus(o.id, 'delivered')}
-                        type="button"
-                        title="Mark as Delivered"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                      </button>
-                    )}
+
+                {/* Order Actions */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  paddingTop: '16px',
+                  borderTop: '1px solid #f0f0f0'
+                }}>
+                  <div>
+                    <span style={{ 
+                      fontSize: '14px', 
+                      fontWeight: 'bold',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      backgroundColor: 
+                        o.status === 'pending_verification' ? '#fff4e5' :
+                        o.status === 'payment_verified' ? '#e5f5ff' :
+                        o.status === 'processing' ? '#fff0e5' :
+                        o.status === 'shipped' ? '#e5f0ff' :
+                        o.status === 'delivered' ? '#e5ffe5' :
+                        o.status === 'cancelled' ? '#ffe5e5' : '#f0f0f0',
+                      color:
+                        o.status === 'pending_verification' ? '#d97706' :
+                        o.status === 'payment_verified' ? '#0284c7' :
+                        o.status === 'processing' ? '#ea580c' :
+                        o.status === 'shipped' ? '#2563eb' :
+                        o.status === 'delivered' ? '#16a34a' :
+                        o.status === 'cancelled' ? '#dc2626' : '#666'
+                    }}>
+                      {o.status === 'pending_verification' && '⏳ '}
+                      {o.status === 'payment_verified' && '✅ '}
+                      {o.status === 'processing' && '⚙️ '}
+                      {o.status === 'shipped' && '🚚 '}
+                      {o.status === 'delivered' && '📦 '}
+                      {o.status === 'cancelled' && '❌ '}
+                      {o.status.replace(/_/g, ' ').toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <select
+                      onChange={(e) => setStatus(o.id, e.target.value)}
+                      value={o.status}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '4px',
+                        border: '1px solid #ccc',
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="pending_verification">⏳ Pending Verification</option>
+                      <option value="payment_verified">✅ Payment Verified</option>
+                      <option value="processing">⚙️ Order Processing</option>
+                      <option value="shipped">🚚 Shipped</option>
+                      <option value="delivered">📦 Delivered</option>
+                      <option value="cancelled">❌ Cancelled</option>
+                    </select>
                   </div>
                 </div>
               </div>

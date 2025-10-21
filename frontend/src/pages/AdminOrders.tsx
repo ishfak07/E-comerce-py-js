@@ -153,7 +153,12 @@ export default function AdminOrders() {
 
   async function setStatus(orderId: string, status: OrderStatus | string) {
     try {
-      await api.put(`/admin/orders/${orderId}/status`, null, { params: { new_status: status } })
+      await api.put(`/admin/orders/${orderId}/status`, {
+        new_status: status,
+        admin_feedback: null,
+        resubmit_required: false,
+        estimated_delivery_date: null
+      })
       // Refresh current page to reflect the change
       await fetchPage(pageRef.current)
     } catch (err) {
@@ -163,8 +168,8 @@ export default function AdminOrders() {
         try { window.location.href = '/login' } catch {}
         return
       }
-      // console.error('Failed to update status', err)
-      setError('Failed to update status')
+      console.error('Failed to update status', err)
+      alert('Failed to update status. Please try again.')
     }
   }
 

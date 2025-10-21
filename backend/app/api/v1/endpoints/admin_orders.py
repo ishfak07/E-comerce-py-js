@@ -3,6 +3,7 @@ from ....dependencies.auth import require_admin
 from ....dependencies.mongo import get_mongo_db
 from pydantic import BaseModel
 from typing import Optional
+from bson import ObjectId
 
 
 router = APIRouter(prefix="/admin/orders")
@@ -51,7 +52,15 @@ def get_order(order_id: str, db=Depends(get_mongo_db), _admin=Depends(require_ad
     if db is None:
         raise RuntimeError("MongoDB is not configured")
     orders = db.get_collection("orders")
-    order = orders.find_one({"_id": order_id})
+    
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
+    order = orders.find_one({"_id": obj_id})
     if order and "_id" in order:
         order["id"] = str(order.pop("_id"))
     return order
@@ -86,6 +95,13 @@ def update_status(
         raise RuntimeError("MongoDB is not configured")
     orders = db.get_collection("orders")
     
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
     # Build update data
     update_data = {"status": payload.new_status}
     
@@ -114,7 +130,7 @@ def update_status(
     if payload.estimated_delivery_date:
         update_data["estimated_delivery_date"] = payload.estimated_delivery_date
     
-    res = orders.update_one({"_id": order_id}, {"$set": update_data})
+    res = orders.update_one({"_id": obj_id}, {"$set": update_data})
     if res.matched_count == 0:
         return {"detail": "not found"}
     return {"ok": True, "status": payload.new_status}
@@ -133,6 +149,13 @@ def reject_payment(
         raise RuntimeError("MongoDB is not configured")
     orders = db.get_collection("orders")
     
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
     update_data = {
         "payment_status": "rejected",
         "tracking_status": "rejected",
@@ -140,7 +163,7 @@ def reject_payment(
         "resubmit_required": resubmit_required
     }
     
-    res = orders.update_one({"_id": order_id}, {"$set": update_data})
+    res = orders.update_one({"_id": obj_id}, {"$set": update_data})
     if res.matched_count == 0:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Order not found")

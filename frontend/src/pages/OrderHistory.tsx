@@ -43,11 +43,14 @@ export default function OrderHistory() {
     setLoading(true)
     setError(null)
     try {
+      console.log('Fetching orders with filter:', filter)
       const res = await api.get('/orders/history', {
         params: { status_filter: filter }
       })
+      console.log('Orders response:', res.data)
       setOrders(res.data.orders || [])
     } catch (err: any) {
+      console.error('Error fetching orders:', err)
       setError(err.response?.data?.detail || 'Failed to load orders')
     } finally {
       setLoading(false)
@@ -119,12 +122,14 @@ export default function OrderHistory() {
     return `LKR ${amount.toFixed(2)}`
   }
 
+  console.log('OrderHistory render - loading:', loading, 'orders:', orders.length, 'error:', error)
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '24px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
             📦 Order History
           </h1>
           <p style={{ color: '#6b7280' }}>

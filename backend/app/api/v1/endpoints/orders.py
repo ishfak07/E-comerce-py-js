@@ -9,6 +9,7 @@ import shutil
 import uuid
 import os
 from datetime import datetime
+from bson import ObjectId
 
 router = APIRouter(prefix="/orders")
 
@@ -26,38 +27,56 @@ def get_order_history(
     current_user=Depends(get_current_user)
 ):
     """Get user's order history with optional status filter."""
-    if db is None:
-        raise HTTPException(status_code=500, detail="Database not configured")
+    try:
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database not configured")
+        
+        orders_collection = db.get_collection("orders")
+        
+        # Build query - filter by user email or phone
+        user_email = current_user.get("email")
+        user_phone = current_user.get("phone")
+        
+        print(f"[OrderHistory] Fetching orders for user: email={user_email}, phone={user_phone}")
+        
+        query = {
+            "$or": [
+                {"customer_email": user_email},
+                {"customer_phone": user_phone}
+            ]
+        }
+        
+        if status_filter and status_filter != "all":
+            if status_filter == "pending":
+                query["tracking_status"] = {"$in": ["placed", "verified", "processing", "shipped"]}
+            elif status_filter == "completed":
+                query["tracking_status"] = "delivered"
+            elif status_filter == "failed":
+                query["tracking_status"] = "rejected"
+            elif status_filter == "cancelled":
+                query["tracking_status"] = "cancelled"
+        
+        print(f"[OrderHistory] Query: {query}")
+        
+        # Get orders sorted by most recent
+        orders = list(orders_collection.find(query).sort("created_at", -1))
+        
+        print(f"[OrderHistory] Found {len(orders)} orders")
+        
+        # Convert ObjectId to string
+        for order in orders:
+            if "_id" in order:
+                order["id"] = str(order.pop("_id"))
+        
+        return {"orders": orders}
     
-    orders_collection = db.get_collection("orders")
-    
-    # Build query - filter by user email or phone
-    query = {
-        "$or": [
-            {"customer_email": current_user.get("email")},
-            {"customer_phone": current_user.get("phone")}
-        ]
-    }
-    
-    if status_filter and status_filter != "all":
-        if status_filter == "pending":
-            query["tracking_status"] = {"$in": ["placed", "verified"]}
-        elif status_filter == "completed":
-            query["tracking_status"] = "delivered"
-        elif status_filter == "failed":
-            query["tracking_status"] = "rejected"
-        elif status_filter == "cancelled":
-            query["tracking_status"] = "cancelled"
-    
-    # Get orders sorted by most recent
-    orders = list(orders_collection.find(query).sort("created_at", -1))
-    
-    # Convert ObjectId to string
-    for order in orders:
-        if "_id" in order:
-            order["id"] = str(order.pop("_id"))
-    
-    return {"orders": orders}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[OrderHistory] Error: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to fetch orders: {str(e)}")
 
 
 @router.get("/{order_id}")
@@ -71,7 +90,14 @@ def get_order_details(
         raise HTTPException(status_code=500, detail="Database not configured")
     
     orders_collection = db.get_collection("orders")
-    order = orders_collection.find_one({"_id": order_id})
+    
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
+    order = orders_collection.find_one({"_id": obj_id})
     
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -101,7 +127,14 @@ def reorder(
         raise HTTPException(status_code=500, detail="Database not configured")
     
     orders_collection = db.get_collection("orders")
-    order = orders_collection.find_one({"_id": order_id})
+    
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
+    order = orders_collection.find_one({"_id": obj_id})
     
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -133,7 +166,14 @@ def download_invoice(
         raise HTTPException(status_code=500, detail="Database not configured")
     
     orders_collection = db.get_collection("orders")
-    order = orders_collection.find_one({"_id": order_id})
+    
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
+    order = orders_collection.find_one({"_id": obj_id})
     
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -172,7 +212,14 @@ def reupload_receipt(
         raise HTTPException(status_code=500, detail="Database not configured")
     
     orders_collection = db.get_collection("orders")
-    order = orders_collection.find_one({"_id": order_id})
+    
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
+    order = orders_collection.find_one({"_id": obj_id})
     
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -215,7 +262,7 @@ def reupload_receipt(
     new_receipt_url = f"{base}/static/receipts/{unique}"
     
     orders_collection.update_one(
-        {"_id": order_id},
+        {"_id": obj_id},
         {
             "$set": {
                 "transfer_receipt_url": new_receipt_url,
@@ -246,7 +293,14 @@ def submit_review(
         raise HTTPException(status_code=500, detail="Database not configured")
     
     orders_collection = db.get_collection("orders")
-    order = orders_collection.find_one({"_id": order_id})
+    
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
+    order = orders_collection.find_one({"_id": obj_id})
     
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")

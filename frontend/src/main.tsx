@@ -7,6 +7,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import OrderHistory from './pages/OrderHistory'
+import OrderDetails from './pages/OrderDetails'
 import AppShell from './AppShell'
 import { AuthProvider } from './context/AuthProvider'
 import { CartProvider } from './lib/cart'
@@ -39,6 +41,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/register" element={<Register />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/orders" element={<OrderHistory />} />
+              <Route path="/orders/:orderId" element={<OrderDetails />} />
             </Route>
             {/* Admin site uses its own shell (no public header/footer) */}
             <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>

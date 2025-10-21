@@ -72,6 +72,7 @@ def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
     # Create a Mongo order document
     order_doc: dict[str, Any] = {
         "status": "pending_verification",  # New default status
+        "tracking_status": "placed",  # Tracking status for user view
         "total_amount": total_amount,
         "shipping_amount": 0,
         "taxes": 0,
@@ -88,6 +89,10 @@ def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
         "transfer_receipt_url": payload.transfer_receipt_url,
         "transaction_reference": payload.transaction_reference,
         "additional_notes": payload.additional_notes,
+        # New tracking fields
+        "admin_feedback": None,
+        "resubmit_required": False,
+        "estimated_delivery_date": None,
     }
     if db is None:
         raise RuntimeError("MongoDB is not configured")

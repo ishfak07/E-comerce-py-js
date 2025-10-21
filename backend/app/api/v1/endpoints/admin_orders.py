@@ -30,6 +30,10 @@ def list_orders(
     total = orders.count_documents(query)
     cursor = orders.find(query).sort("created_at", -1).skip((page - 1) * size).limit(size)
     items = list(cursor)
+    # Convert ObjectId to string for JSON serialization
+    for item in items:
+        if "_id" in item:
+            item["id"] = str(item.pop("_id"))
     return {"items": items, "total": total, "page": page, "size": size}
 
 
@@ -38,7 +42,10 @@ def get_order(order_id: str, db=Depends(get_mongo_db), _admin=Depends(require_ad
     if db is None:
         raise RuntimeError("MongoDB is not configured")
     orders = db.get_collection("orders")
-    return orders.find_one({"_id": order_id})
+    order = orders.find_one({"_id": order_id})
+    if order and "_id" in order:
+        order["id"] = str(order.pop("_id"))
+    return order
 
 
 @router.put("/{order_id}/status")

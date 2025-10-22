@@ -159,11 +159,47 @@ export default function Header() {
         .hamburger{display:none;flex-direction:column;gap:4px;width:36px;height:36px;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:var(--ghost);color:var(--text)}
         .hamburger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px}
         .nav{display:flex;align-items:center;gap:14px}
-        .nav-link{color:var(--text);text-decoration:none;padding:8px 10px;border-radius:8px;transition:background 0.2s ease}
-        .nav-link:hover{background:var(--ghost)}
-        .nav-link.active{color:white;background:var(--brand)}
-        .nav-link:focus{outline:none}
-        .nav-link:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+        
+        /* Base nav-link styles */
+        .nav-link{
+          color:var(--text);
+          text-decoration:none;
+          padding:8px 10px;
+          border-radius:8px;
+          transition:background 0.2s ease, color 0.2s ease;
+          position:relative;
+        }
+        
+        /* Hover state - only on NON-active links */
+        .nav-link:not(.active):hover{
+          background:var(--ghost);
+          color:var(--text);
+        }
+        
+        /* Active state */
+        .nav-link.active{
+          color:white;
+          background:var(--brand);
+        }
+        
+        /* Keep active state even when hovered */
+        .nav-link.active:hover{
+          color:white;
+          background:var(--brand);
+          cursor:default;
+        }
+        
+        /* Prevent focus styles from interfering */
+        .nav-link:focus{
+          outline:none;
+        }
+        
+        /* Only show focus-visible ring on keyboard navigation, not on active state */
+        .nav-link:not(.active):focus-visible{
+          outline:2px solid var(--brand);
+          outline-offset:2px;
+        }
+        
         .cart-link{display:inline-flex;align-items:center;gap:8px}
         .badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--brand);color:white;font-size:12px}
         .divider{width:1px;height:24px;background:var(--line);margin:0 6px}
@@ -184,16 +220,13 @@ export default function Header() {
           font-weight:500;
         }
         
-        /* Remove ALL focus styles from auth buttons */
-        .auth-btn:focus,
-        .auth-btn:focus-within,
-        .auth-btn:active:focus {
-          outline:none !important;
-          box-shadow:none !important;
+        /* Remove focus outline */
+        .auth-btn:focus {
+          outline:none;
         }
         
-        /* Hover state */
-        .auth-btn:hover{
+        /* Hover state - only on NON-active buttons */
+        .auth-btn:not(.active):hover{
           background:var(--brand-600);
           border-color:var(--brand-600);
           color:white;
@@ -207,11 +240,16 @@ export default function Header() {
           box-shadow:0 4px 12px rgba(109,116,255,0.3);
         }
         
-        /* Ensure no focus styles override active state */
-        .auth-btn.active:focus {
-          background:var(--brand) !important;
-          border-color:var(--brand) !important;
-          outline:none !important;
+        /* Ensure active state persists even on hover */
+        .auth-btn.active:hover {
+          background:var(--brand);
+          border-color:var(--brand);
+        }
+        
+        /* Focus-visible only on non-active buttons */
+        .auth-btn:not(.active):focus-visible {
+          outline:2px solid var(--brand);
+          outline-offset:2px;
         }
         
         .user-wrap{position:relative;display:flex;align-items:center;gap:8px}

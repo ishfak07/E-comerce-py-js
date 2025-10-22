@@ -54,7 +54,7 @@ type SiteSettings = {
    ========================= */
 
 const defaultSettings: SiteSettings = {
-  siteName: 'Ecommerce',
+  siteName: 'Own Setup 💼',
   supportEmail: '',
   supportPhone: '',
   currency: 'LKR',

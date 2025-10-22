@@ -14,7 +14,7 @@ logger.setLevel(logging.DEBUG)
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Ecommerce API",
+        title="Own Setup 💼 API",
         version="1.0.0",
         docs_url="/api/docs",
         redoc_url="/api/redoc",

@@ -71,7 +71,7 @@ export default function Header() {
             <span />
             <span />
           </button>
-          <Link to="/" className="brand">Ecommerce</Link>
+          <Link to="/" className="brand">Own Setup 💼</Link>
         </div>
 
         <nav id="main-menu" className={`nav ${open ? 'open' : ''}`} aria-label="Main navigation">

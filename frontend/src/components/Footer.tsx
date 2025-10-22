@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Brand + Tagline */}
           <div className="col brand-col">
-            <Link to="/" className="brand">Ecommerce</Link>
+            <Link to="/" className="brand">Own Setup 💼</Link>
             <p className="tagline">Everyday essentials with thoughtful design and lasting quality.</p>
           </div>
 
@@ -80,7 +80,7 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <div className="left">
-            <span>© {year} Ecommerce</span>
+            <span>© {year} Own Setup 💼</span>
             <span className="dot">•</span>
             <Link to="/privacy">Privacy</Link>
             <span className="dot">•</span>

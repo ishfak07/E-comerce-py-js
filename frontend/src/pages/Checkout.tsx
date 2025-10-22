@@ -300,30 +300,327 @@ export default function Checkout() {
           </button>
         </form>
       ) : (
-        <div style={{ padding: '24px', backgroundColor: '#f0fff0', borderRadius: '8px', textAlign: 'center' }}>
-          <h2 style={{ color: '#0a0', marginBottom: '16px' }}>✓ Order Placed Successfully!</h2>
-          <div style={{ fontSize: '18px', marginBottom: '16px' }}>Order ID: <strong>#{orderId}</strong></div>
-          <p style={{ marginBottom: '12px' }}>Your order has been received and is pending verification.</p>
-          <p style={{ fontSize: '14px', color: '#666', marginBottom: '16px' }}>
-            We will review your payment receipt and update your order status shortly.
-            You will be notified once your payment is verified.
-          </p>
-          <button
-            onClick={() => window.location.href = '/orders'}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#6D74FF',
+        <div style={{ 
+          maxWidth: '600px', 
+          margin: '40px auto', 
+          padding: '0',
+          position: 'relative'
+        }}>
+          {/* Success Animation Container */}
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '20px',
+            padding: '48px 32px',
+            boxShadow: '0 20px 60px rgba(102, 126, 234, 0.4)',
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Decorative circles */}
+            <div style={{
+              position: 'absolute',
+              width: '200px',
+              height: '200px',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.1)',
+              top: '-100px',
+              right: '-100px'
+            }} />
+            <div style={{
+              position: 'absolute',
+              width: '150px',
+              height: '150px',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.1)',
+              bottom: '-75px',
+              left: '-75px'
+            }} />
+
+            {/* Success Icon */}
+            <div style={{
+              width: '100px',
+              height: '100px',
+              margin: '0 auto 24px',
+              background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 10px 30px rgba(56, 239, 125, 0.4)',
+              position: 'relative',
+              animation: 'bounce 1s ease infinite'
+            }}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+
+            {/* Main Heading */}
+            <h1 style={{ 
               color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '16px',
+              fontSize: '32px',
               fontWeight: 'bold',
-              marginTop: '8px'
-            }}
-          >
-            View Order History
-          </button>
+              marginBottom: '16px',
+              textShadow: '0 2px 10px rgba(0,0,0,0.2)',
+              position: 'relative'
+            }}>
+              Order Placed Successfully!
+            </h1>
+
+            {/* Order ID Box */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '24px',
+              position: 'relative'
+            }}>
+              <div style={{ 
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '14px',
+                marginBottom: '8px',
+                fontWeight: '500'
+              }}>
+                Order ID
+              </div>
+              <div style={{ 
+                color: 'white',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                letterSpacing: '1px',
+                fontFamily: 'monospace'
+              }}>
+                #{orderId}
+              </div>
+            </div>
+
+            {/* Status Message */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '24px',
+              textAlign: 'left',
+              position: 'relative'
+            }}>
+              <div style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '12px'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 183, 77, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '12px'
+                }}>
+                  <span style={{ fontSize: '24px' }}>⏳</span>
+                </div>
+                <div>
+                  <div style={{ 
+                    color: 'white', 
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}>
+                    Pending Verification
+                  </div>
+                  <div style={{ 
+                    color: 'rgba(255, 255, 255, 0.7)', 
+                    fontSize: '13px'
+                  }}>
+                    Your order is being reviewed
+                  </div>
+                </div>
+              </div>
+              <div style={{ 
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '14px',
+                lineHeight: '1.6'
+              }}>
+                We will review your payment receipt and update your order status shortly. 
+                You will be notified once your payment is verified.
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              position: 'relative'
+            }}>
+              <button
+                onClick={() => window.location.href = '/orders'}
+                style={{
+                  padding: '14px 32px',
+                  background: 'white',
+                  color: '#667eea',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                View Order History
+              </button>
+              
+              <button
+                onClick={() => window.location.href = '/shop'}
+                style={{
+                  padding: '14px 32px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                Continue Shopping
+              </button>
+            </div>
+          </div>
+
+          {/* Additional Info Card */}
+          <div style={{
+            marginTop: '24px',
+            background: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ 
+              fontSize: '18px',
+              fontWeight: 'bold',
+              marginBottom: '16px',
+              color: '#333'
+            }}>
+              What's Next?
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: '#e3f2fd',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <span style={{ fontSize: '18px' }}>📧</span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: '600', color: '#333', marginBottom: '4px' }}>
+                    Email Confirmation
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    Check your email for order confirmation and receipt
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: '#fff3e0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <span style={{ fontSize: '18px' }}>🔍</span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: '600', color: '#333', marginBottom: '4px' }}>
+                    Payment Review
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    Our team will verify your payment receipt within 24 hours
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: '#e8f5e9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <span style={{ fontSize: '18px' }}>📦</span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: '600', color: '#333', marginBottom: '4px' }}>
+                    Track Your Order
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#666' }}>
+                    Monitor your order status in real-time from Order History
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Add CSS animation */}
+          <style>{`
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+          `}</style>
         </div>
       )}
     </div>

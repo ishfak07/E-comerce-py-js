@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { getFormspreeEndpoint } from '../lib/config'
 
 type FormState = {
   name: string
@@ -39,13 +40,49 @@ export default function Contact() {
     setSuccess(null)
     setError(null)
     try {
-      // TODO: Replace with real API call, e.g.:
-      // await fetch('/api/v1/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-      await new Promise(res => setTimeout(res, 800))
-      setSuccess('Thanks for reaching out. The team will reply within 1–2 business days.')
+      const endpoint = getFormspreeEndpoint()
+      if (!endpoint) {
+        throw new Error('Contact form is not configured. Missing VITE_FORMSPREE_FORM_ID.')
+      }
+
+      const payload = {
+        name: form.name,
+        email: form.email,
+        _replyto: form.email, // helps Formspree set Reply-To
+        subject: form.subject,
+        message: form.message,
+        order_id: form.orderId,
+        preferred_channel: form.channel,
+        // Optional: tag messages from this site/app
+        _subject: `[Store Contact] ${form.subject}`,
+      }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok) {
+        // Try to extract Formspree error details
+        let msg = 'Could not send message. Please try again.'
+        try {
+          const data = await res.json()
+          if (data?.errors?.length) {
+            msg = data.errors.map((e: any) => e.message).join('\n')
+          }
+        } catch (_) { /* ignore JSON parse errors */ }
+        throw new Error(msg)
+      }
+
+      setSuccess('Message sent! We\'ll reply to your email within 1–2 business days.')
       setForm({ name: '', email: '', subject: '', message: '', orderId: '', channel: 'email' })
     } catch (err) {
-      setError('Could not send message. Please try again or use another contact method.')
+      const msg = err instanceof Error ? err.message : 'Could not send message. Please try again or use another contact method.'
+      setError(msg)
     } finally {
       setSubmitting(false)
     }

@@ -5,3 +5,10 @@ __pycache__/
 node_modules/
 .DS_Store
 *.pyc
+
+# Environment files (do not commit form ids, keys, tokens)
+.env.local
+**/.env.local
+frontend/.env
+frontend/.env.local
+frontend/.env.*

@@ -31,19 +31,7 @@ export default function OrderHistory() {
 
   useEffect(() => { fetchOrders() }, [fetchOrders])
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (document.visibilityState === 'visible') fetchOrders()
-    }, 5000)
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') fetchOrders()
-    }
-    window.addEventListener('visibilitychange', onVisibility)
-    return () => {
-      clearInterval(intervalId)
-      window.removeEventListener('visibilitychange', onVisibility)
-    }
-  }, [fetchOrders])
+  // Removed auto-refresh - now manual only via refresh button
 
   function formatDate(dateString) {
     if (!dateString) return 'N/A'
@@ -99,8 +87,63 @@ export default function OrderHistory() {
     <>
       <section className="section">
         <div className="container">
-          <h1 className="section-title">📦 Order History</h1>
-          <p className="lead">Track your orders and manage your purchase history.</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h1 className="section-title">📦 Order History</h1>
+              <p className="lead">Track your orders and manage your purchase history.</p>
+            </div>
+            
+            {/* Manual Refresh Button */}
+            <button
+              onClick={() => fetchOrders()}
+              disabled={loading}
+              style={{
+                padding: '12px 24px',
+                background: loading ? '#ccc' : '#6D74FF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(109, 116, 255, 0.3)'
+              }}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.background = '#5a61d6'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 116, 255, 0.4)'
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.background = '#6D74FF'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(109, 116, 255, 0.3)'
+                }
+              }}
+            >
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                style={{
+                  animation: loading ? 'spin 1s linear infinite' : 'none'
+                }}
+              >
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
 
           {/* Filters */}
           <div className="order-filters">
@@ -114,6 +157,14 @@ export default function OrderHistory() {
               </button>
             ))}
           </div>
+          
+          {/* Add CSS for spin animation */}
+          <style>{`
+            @keyframes spin {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
 
           {/* Messages */}
           {error && <div className="alert error">{error}</div>}

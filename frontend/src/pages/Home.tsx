@@ -19,11 +19,11 @@ export default function Home() {
           </div>
           <div className="hero-images">
             <img
-              src="https://images.unsplash.com/photo-1503342394128-c104d54dba01?q=80&w=1200&auto=format&fit=crop"
+              src="/images/hero-1.jpg"
               alt="Lifestyle banner"
             />
             <img
-              src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop"
+              src="/images/hero-2.jpg"
               alt="Crafted details"
             />
           </div>

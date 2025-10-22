@@ -13,23 +13,8 @@ type Product = {
   createdAt?: string // ISO date for newest sorting
 }
 
-const demoProducts: Product[] = [
-  { id: 201, name: 'Classic Tee', slug: 'classic-tee', price: 19.99, images: ['https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1200&auto=format&fit=crop'], category: 'Apparel', createdAt: '2025-01-04' },
-  { id: 202, name: 'Minimal Watch', slug: 'minimal-watch', price: 75.00, images: ['https://images.unsplash.com/photo-1518441902117-f26a60b6c0a4?q=80&w=1200&auto=format&fit=crop'], category: 'Accessories', createdAt: '2025-02-10' },
-  { id: 203, name: 'Sunglasses', slug: 'sunglasses', price: 35.00, images: ['https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=1200&auto=format&fit=crop'], category: 'Accessories', createdAt: '2025-01-28' },
-  { id: 204, name: 'Leather Backpack', slug: 'leather-backpack', price: 89.99, images: ['https://images.unsplash.com/photo-1511988617509-a57c8a288659?q=80&w=1200&auto=format&fit=crop'], category: 'Bags', createdAt: '2025-02-20' },
-  { id: 205, name: 'Wireless Headphones', slug: 'wireless-headphones', price: 129.00, images: ['https://images.unsplash.com/photo-1518449032315-66c8f2dc39cf?q=80&w=1200&auto=format&fit=crop'], category: 'Electronics', createdAt: '2025-03-03' },
-  { id: 206, name: 'Sneakers', slug: 'sneakers', price: 59.99, images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop'], category: 'Footwear', createdAt: '2025-02-01' },
-  { id: 207, name: 'Canvas Tote', slug: 'canvas-tote', price: 22.00, images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1200&auto=format&fit=crop'], category: 'Bags', createdAt: '2025-01-14' },
-  { id: 208, name: 'Baseball Cap', slug: 'baseball-cap', price: 18.50, images: ['https://images.unsplash.com/photo-1542843131-ec13c3d3d9d0?q=80&w=1200&auto=format&fit=crop'], category: 'Accessories', createdAt: '2025-03-12' },
-]
-
-type ApiResponse = {
-  items?: Product[]
-}
-
 export default function Shop() {
-  const [products, setProducts] = useState<Product[]>(demoProducts)
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -50,16 +35,16 @@ export default function Shop() {
       setLoading(true)
       setError(null)
       try {
-        const r = await axios.get<ApiResponse>('/api/v1/products')
+        const r = await axios.get<{items?: Product[]}>('/api/v1/products')
         if (ignore) return
         const items = r.data?.items
         if (items && items.length) {
           setProducts(items)
         } else {
-          setProducts(demoProducts)
+          setProducts([])
         }
       } catch (ex) {
-        if (!ignore) setProducts(demoProducts)
+        if (!ignore) setProducts([])
       } finally {
         if (!ignore) setLoading(false)
       }

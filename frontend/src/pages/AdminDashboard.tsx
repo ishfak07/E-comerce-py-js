@@ -53,36 +53,13 @@ type SiteSettings = {
    Demo seed
    ========================= */
 
-const seedProducts: Product[] = [
-  { id: 1001, name: 'Classic Tee', slug: 'classic-tee', price: 19.99, stock: 48, category: 'Apparel', active: true, createdAt: '2025-02-01' },
-  { id: 1002, name: 'Leather Backpack', slug: 'leather-backpack', price: 89.99, stock: 12, category: 'Bags', active: true, createdAt: '2025-02-10' },
-  { id: 1003, name: 'Minimal Watch', slug: 'minimal-watch', price: 75.0, stock: 20, category: 'Accessories', active: true, createdAt: '2025-03-01' },
-  { id: 1004, name: 'Wireless Headphones', slug: 'wireless-headphones', price: 129.0, stock: 7, category: 'Electronics', active: true, createdAt: '2025-03-12' },
-  { id: 1005, name: 'Sunglasses', slug: 'sunglasses', price: 35.0, stock: 60, category: 'Accessories', active: false, createdAt: '2025-01-22' },
-]
-
-const seedOrders: Order[] = [
-  { id: 7001, number: 'ORD-000701', customerId: 3001, customerName: 'A. Perera', total: 129.0, status: 'pending', createdAt: '2025-03-23' },
-  { id: 7002, number: 'ORD-000702', customerId: 3002, customerName: 'S. Fernando', total: 75.0, status: 'paid', createdAt: '2025-03-22' },
-  { id: 7003, number: 'ORD-000703', customerId: 3003, customerName: 'N. Jayasuriya', total: 54.99, status: 'shipped', createdAt: '2025-03-22' },
-  { id: 7004, number: 'ORD-000704', customerId: 3004, customerName: 'I. Silva', total: 209.98, status: 'delivered', createdAt: '2025-03-20' },
-]
-
-const seedCustomers: Customer[] = [
-  { id: 3001, name: 'A. Perera', email: 'aperera@example.com', orders: 4, totalSpent: 412.4, createdAt: '2024-12-12' },
-  { id: 3002, name: 'S. Fernando', email: 'sfernando@example.com', orders: 2, totalSpent: 129.99, createdAt: '2025-01-05' },
-  { id: 3003, name: 'N. Jayasuriya', email: 'njaya@example.com', orders: 3, totalSpent: 265.0, createdAt: '2025-02-16' },
-  { id: 3004, name: 'I. Silva', email: 'isilva@example.com', orders: 1, totalSpent: 209.98, createdAt: '2025-03-10' },
-]
-
-const seedSettings: SiteSettings = {
+const defaultSettings: SiteSettings = {
   siteName: 'Ecommerce',
-  supportEmail: 'support@yourstore.com',
-  supportPhone: '+94 11 234 5678',
+  supportEmail: '',
+  supportPhone: '',
   currency: 'LKR',
   brandColor: '#6D74FF',
-  bankTransferNote:
-    'Bank transfer accepted: Name: Ishfaque Mif · Bank: BOC · Branch: Puttalam · Account: 89001476 · WhatsApp: +94 76 897 6222. Include order number as reference.',
+  bankTransferNote: '',
 }
 
 /* =========================
@@ -308,10 +285,10 @@ export default function AdminDashboard() {
 
   const [tab, setTab] = useState<Tab>('dashboard')
 
-  const [products, setProducts] = useState<Product[]>(seedProducts)
-  const [orders, setOrders] = useState<Order[]>(seedOrders)
-  const [customers, setCustomers] = useState<Customer[]>(seedCustomers)
-  const [settings, setSettings] = useState<SiteSettings>(seedSettings)
+  const [products, setProducts] = useState<Product[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
 
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<string>('')
@@ -931,7 +908,7 @@ export default function AdminDashboard() {
           --surface-alt:#171821;
           --text:#e9e9ef;
           --muted:#b8bbd9;
-          --brand:${seedSettings.brandColor};
+          --brand:${settings.brandColor};
           --brand-600:#5860ff;
           --line:#2a2b36;
           --card:#14151d;

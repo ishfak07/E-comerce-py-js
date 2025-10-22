@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 
@@ -27,6 +27,33 @@ type Order = {
   items?: any[]
 }
 
+// Extract helper functions outside component
+function formatDate(dateString?: string): string {
+  if (!dateString) return 'N/A'
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+function formatMoney(amount: number): string {
+  return `LKR ${amount.toFixed(2)}`
+}
+
+// Status icon and color mappings
+const STATUS_CONFIG = {
+  placed: { icon: '📦', color: '#FFD700' },
+  verified: { icon: '✅', color: '#0284c7' },
+  processing: { icon: '⚙️', color: '#ea580c' },
+  shipped: { icon: '🚚', color: '#2563eb' },
+  delivered: { icon: '🎉', color: '#11998e' }
+}
+
+const TIMELINE_STEPS = ['placed', 'verified', 'processing', 'shipped', 'delivered'] as const
+
 export default function OrderDetails() {
   const { orderId } = useParams<{ orderId: string }>()
   const navigate = useNavigate()
@@ -35,11 +62,7 @@ export default function OrderDetails() {
   const [error, setError] = useState<string | null>(null)
   const [uploadingReceipt, setUploadingReceipt] = useState(false)
 
-  useEffect(() => {
-    fetchOrderDetails()
-  }, [orderId])
-
-  async function fetchOrderDetails() {
+  const fetchOrderDetails = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -50,31 +73,35 @@ export default function OrderDetails() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId])
 
-  async function handleReceiptReupload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  useEffect(() => {
+    fetchOrderDetails()
+  }, [fetchOrderDetails])
 
-    setUploadingReceipt(true)
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      await api.put(`/orders/${orderId}/receipt`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      
-      alert('Receipt uploaded successfully! Awaiting admin verification.')
-      fetchOrderDetails()
-    } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to upload receipt')
-    } finally {
-      setUploadingReceipt(false)
-    }
-  }
+  const handleReceiptReupload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+      setUploadingReceipt(true)
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        await api.put(`/orders/${orderId}/receipt`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        alert('Receipt uploaded successfully! Awaiting admin verification.')
+        fetchOrderDetails()
+      } catch (err: any) {
+        alert(err.response?.data?.detail || 'Failed to upload receipt')
+      } finally {
+        setUploadingReceipt(false)
+      }
+    },
+    [orderId, fetchOrderDetails]
+  )
 
-  // Poll for order status updates while order is not yet delivered
+  // Optimized polling with shallow comparison
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null
     let stopped = false
@@ -84,22 +111,32 @@ export default function OrderDetails() {
         const res = await api.get(`/orders/${orderId}`)
         if (stopped) return
         const fresh = res.data as Order
-        // Only update if something changed to avoid unnecessary re-renders
-        if (JSON.stringify(fresh) !== JSON.stringify(order)) {
+        // Only update if relevant fields changed
+        if (
+          !order ||
+          fresh.tracking_status !== order.tracking_status ||
+          fresh.payment_status !== order.payment_status
+        ) {
           setOrder(fresh)
         }
-        // If order is delivered or cancelled, stop polling
-        if ((fresh.tracking_status === 'delivered' || fresh.tracking_status === 'cancelled') && intervalId) {
+        if (
+          (fresh.tracking_status === 'delivered' ||
+            fresh.tracking_status === 'cancelled') &&
+          intervalId
+        ) {
           clearInterval(intervalId)
           intervalId = null
         }
       } catch (e) {
-        // ignore errors silently; keep polling
+        // Silently continue polling
       }
     }
 
-    if (order && order.tracking_status !== 'delivered' && order.tracking_status !== 'cancelled') {
-      // initial quick poll, then regular interval
+    if (
+      order &&
+      order.tracking_status !== 'delivered' &&
+      order.tracking_status !== 'cancelled'
+    ) {
       pollOnce()
       intervalId = setInterval(pollOnce, 5000)
     }
@@ -108,22 +145,34 @@ export default function OrderDetails() {
       stopped = true
       if (intervalId) clearInterval(intervalId)
     }
-  }, [order?.tracking_status, orderId])
+  }, [order?.tracking_status, order?.payment_status, orderId])
 
-  function formatDate(dateString?: string): string {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+  // Memoized computed values
+  const currentStepIndex = useMemo(() => {
+    if (!order) return -1
+    return TIMELINE_STEPS.indexOf(order.tracking_status as any)
+  }, [order?.tracking_status])
 
-  function formatMoney(amount: number): string {
-    return `LKR ${amount.toFixed(2)}`
-  }
+  const statusConfig = useMemo(() => {
+    if (!order) return null
+    return STATUS_CONFIG[order.tracking_status as keyof typeof STATUS_CONFIG] || {
+      icon: '📝',
+      color: '#6D74FF'
+    }
+  }, [order?.tracking_status])
+
+  // Memoized handlers for hover effects
+  const createHoverHandler = useCallback(
+    (normalStyle: any, hoverStyle: any) => ({
+      onMouseOver: (e: React.MouseEvent<HTMLElement>) => {
+        Object.assign(e.currentTarget.style, hoverStyle)
+      },
+      onMouseOut: (e: React.MouseEvent<HTMLElement>) => {
+        Object.assign(e.currentTarget.style, normalStyle)
+      }
+    }),
+    []
+  )
 
   if (loading) {
     return (
@@ -181,18 +230,10 @@ export default function OrderDetails() {
             boxShadow: '0 2px 8px rgba(109, 116, 255, 0.1)',
             transition: 'all 0.3s ease'
           }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = '#6D74FF'
-            e.currentTarget.style.color = 'white'
-            e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 116, 255, 0.3)'
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = 'white'
-            e.currentTarget.style.color = '#6D74FF'
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 2px 8px rgba(109, 116, 255, 0.1)'
-          }}
+          {...createHoverHandler(
+            { background: 'white', color: '#6D74FF', transform: 'translateY(0)', boxShadow: '0 2px 8px rgba(109, 116, 255, 0.1)' },
+            { background: '#6D74FF', color: 'white', transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(109, 116, 255, 0.3)' }
+          )}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -296,66 +337,14 @@ export default function OrderDetails() {
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: 'bold',
-                background: order.tracking_status === 'delivered' 
-                  ? 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
-                  : order.tracking_status === 'shipped' 
-                  ? 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)'
-                  : order.tracking_status === 'processing' 
-                  ? 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)'
-                  : order.tracking_status === 'verified' 
-                  ? 'linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)'
-                  : 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                background: statusConfig?.color ? `linear-gradient(135deg, ${statusConfig.color}, ${statusConfig.color}dd)` : '#6D74FF',
                 color: 'white',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                {order.tracking_status === 'delivered' && (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Delivered
-                  </>
-                )}
-                {order.tracking_status === 'shipped' && (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="1" y="3" width="15" height="13"></rect>
-                      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                      <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                      <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                    </svg>
-                    Shipped
-                  </>
-                )}
-                {order.tracking_status === 'processing' && (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="3"></circle>
-                      <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"></path>
-                    </svg>
-                    Processing
-                  </>
-                )}
-                {order.tracking_status === 'verified' && (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Verified
-                  </>
-                )}
-                {order.tracking_status === 'placed' && (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    Placed
-                  </>
-                )}
+                {statusConfig?.icon} {order.tracking_status.charAt(0).toUpperCase() + order.tracking_status.slice(1)}
               </div>
             </div>
           </div>
@@ -437,7 +426,6 @@ export default function OrderDetails() {
               {order.admin_feedback}
             </div>
             
-            {/* Receipt Reupload */}
             {order.resubmit_required && (
               <div style={{ marginTop: '20px', position: 'relative', zIndex: 1 }}>
                 <label style={{ 
@@ -455,16 +443,10 @@ export default function OrderDetails() {
                   transition: 'all 0.3s ease',
                   opacity: uploadingReceipt ? 0.7 : 1
                 }}
-                onMouseOver={(e) => {
-                  if (!uploadingReceipt) {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)'
-                  }
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)'
-                }}>
+                {...createHoverHandler(
+                  { transform: 'translateY(0)', boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)' },
+                  uploadingReceipt ? {} : { transform: 'translateY(-2px)', boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)' }
+                )}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
@@ -540,14 +522,10 @@ export default function OrderDetails() {
                   border: '1px solid rgba(109, 116, 255, 0.1)',
                   transition: 'all 0.3s ease'
                 }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 116, 255, 0.15)'
-                  e.currentTarget.style.transform = 'translateX(4px)'
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.boxShadow = 'none'
-                  e.currentTarget.style.transform = 'translateX(0)'
-                }}>
+                {...createHoverHandler(
+                  { boxShadow: 'none', transform: 'translateX(0)' },
+                  { boxShadow: '0 4px 12px rgba(109, 116, 255, 0.15)', transform: 'translateX(4px)' }
+                )}>
                   <div style={{ flex: 1 }}>
                     <div style={{ 
                       fontWeight: '600', 
@@ -575,7 +553,6 @@ export default function OrderDetails() {
               ))}
             </div>
 
-            {/* Order Summary */}
             <div style={{
               marginTop: '24px',
               paddingTop: '24px',
@@ -642,17 +619,10 @@ export default function OrderDetails() {
           </div>
           
           <div style={{ position: 'relative', paddingLeft: '48px' }}>
-            {['placed', 'verified', 'processing', 'shipped', 'delivered'].map((status, index) => {
-              const isActive = ['placed', 'verified', 'processing', 'shipped', 'delivered'].indexOf(order.tracking_status) >= index
+            {TIMELINE_STEPS.map((status, index) => {
+              const isActive = currentStepIndex >= index
               const isCurrent = order.tracking_status === status
-              
-              const statusIcons = {
-                placed: '📦',
-                verified: '✅',
-                processing: '⚙️',
-                shipped: '🚚',
-                delivered: '🎉'
-              }
+              const config = STATUS_CONFIG[status]
               
               return (
                 <div key={status} style={{ position: 'relative', paddingBottom: index < 4 ? '32px' : '0' }}>
@@ -711,7 +681,7 @@ export default function OrderDetails() {
                         alignItems: 'center',
                         gap: '8px'
                       }}>
-                        <span>{statusIcons[status as keyof typeof statusIcons]}</span>
+                        <span>{config.icon}</span>
                         {status}
                         {isCurrent && (
                           <span style={{
@@ -1034,14 +1004,10 @@ export default function OrderDetails() {
                   transition: 'all 0.3s ease',
                   border: 'none'
                 }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)'
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)'
-                }}
+                {...createHoverHandler(
+                  { transform: 'translateY(0)', boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)' },
+                  { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(102, 126, 234, 0.5)' }
+                )}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>

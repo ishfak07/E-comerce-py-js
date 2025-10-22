@@ -40,15 +40,15 @@ export default function Footer() {
           <div className="col">
             <h3 className="col-title">Contact</h3>
             <ul className="list">
-              <li>Email: support@yourstore.com</li>
-              <li>Phone: +94 11 234 5678</li>
+              <li>Email: memberofpfc20@gmail.com</li>
+              <li>Phone: +94 76 89 76 222</li>
               <li>Hours: Mon–Fri, 9:00–17:00</li>
-              <li>Address: 123 Market Street, Colombo</li>
+              <li>Address: 252/1A Mannar Road, Puttalam</li>
             </ul>
             <div className="social">
-              <a href="https://instagram.com/yourstore" aria-label="Instagram" target="_blank" rel="noopener noreferrer">IG</a>
-              <a href="https://facebook.com/yourstore" aria-label="Facebook" target="_blank" rel="noopener noreferrer">FB</a>
-              <a href="https://x.com/yourstore" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer">X</a>
+              <a href="https://www.instagram.com/" aria-label="Instagram" target="_blank" rel="noopener noreferrer">IG</a>
+              <a href="https://facebook.com/" aria-label="Facebook" target="_blank" rel="noopener noreferrer">FB</a>
+              <a href="https://x.com/" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer">X</a>
             </div>
           </div>
 

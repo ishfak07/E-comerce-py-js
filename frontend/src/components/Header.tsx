@@ -83,10 +83,10 @@ export default function Header() {
                 <>
                   <NavLink to="/shop" className={linkClass}>Shop</NavLink>
                   <NavLink to="/contact" className={linkClass}>Contact</NavLink>
-                  <Link to="/cart" className="nav-link cart-link">
+                  <NavLink to="/cart" className={({ isActive }) => isActive ? 'nav-link cart-link active' : 'nav-link cart-link'}>
                     Cart
                     <span className="badge" aria-label={`${count} items in cart`}>{count}</span>
-                  </Link>
+                  </NavLink>
                 </>
               )}
             </>
@@ -253,14 +253,20 @@ export default function Header() {
         }
         
         .user-wrap{position:relative;display:flex;align-items:center;gap:8px}
-        .user-btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:4px 8px;border:1px solid var(--line);background:transparent;color:var(--text)}
+        .user-btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:4px 8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+        .user-btn:hover{background:var(--ghost)}
         .user-btn:focus{outline:none}
+        .user-btn:active{background:var(--ghost)}
         .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#2a2b36,#171821);border:1px solid var(--line)}
-        .email{color:var(--muted);font-size:12px}
-        .user-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:180px;border:1px solid var(--line);background:var(--surface);border-radius:10px;box-shadow:0 6px 22px rgba(0,0,0,.3);padding:6px}
-        .menu-item{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;border:none;background:transparent}
-        .menu-item:hover{background:var(--ghost)}
-        .menu-item:focus{outline:none}
+        .email{color:var(--muted);font-size:12px;user-select:none}
+        .user-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:180px;border:1px solid var(--line);background:var(--surface);border-radius:10px;box-shadow:0 6px 22px rgba(0,0,0,.3);padding:6px;z-index:100}
+        .menu-item{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:8px;color:var(--text) !important;text-decoration:none;border:none;background:transparent !important;cursor:pointer;font-size:14px;font-family:inherit;user-select:none;-webkit-tap-highlight-color:transparent}
+        .menu-item:hover{background:var(--ghost) !important;color:var(--text) !important}
+        .menu-item:active{background:var(--ghost) !important;color:var(--text) !important}
+        .menu-item:focus{outline:none;box-shadow:none;background:transparent !important;color:var(--text) !important}
+        .menu-item:focus-visible{outline:2px solid var(--brand);outline-offset:-2px;background:var(--ghost) !important}
+        .menu-item::-moz-focus-inner{border:0}
+        .menu-item:visited{color:var(--text) !important}
         .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4)}
         @media (max-width:900px){
           .hamburger{display:flex}

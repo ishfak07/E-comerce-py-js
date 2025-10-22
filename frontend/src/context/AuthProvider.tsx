@@ -6,6 +6,7 @@ type User = { id: string; email: string; full_name?: string | null; is_staff?: b
 type AuthContextType = {
   user: User | null
   accessToken: string | null
+  loading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, fullName?: string) => Promise<void>
   logout: () => void
@@ -16,12 +17,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Restore authentication state from localStorage
     const token = localStorage.getItem('access_token')
     const userJson = localStorage.getItem('user')
     if (token) setAccessToken(token)
     if (userJson) setUser(JSON.parse(userJson))
+    setLoading(false)
   }, [])
 
   useEffect(() => {
@@ -31,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({
     user,
     accessToken,
+    loading,
     login: async (email: string, password: string) => {
       const res = await api.post('/auth/login', { email, password })
       const { access_token, refresh_token, user } = res.data
@@ -53,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
     }
-  }), [user, accessToken])
+  }), [user, accessToken, loading])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

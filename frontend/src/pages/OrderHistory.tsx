@@ -2,37 +2,11 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 
-type TrackingStatus = 'placed' | 'verified' | 'processing' | 'shipped' | 'delivered' | 'rejected' | 'cancelled'
-type PaymentStatus = 'pending' | 'verified' | 'rejected'
-
-type Order = {
-  id: string
-  created_at: string
-  total_amount: number
-  tracking_status: TrackingStatus
-  payment_status: PaymentStatus
-  customer_name: string
-  selected_bank?: string
-  transfer_receipt_url?: string
-  admin_feedback?: string
-  resubmit_required?: boolean
-  estimated_delivery_date?: string
-  items?: any[]
-}
-
-const STATUS_FILTERS = [
-  { key: 'all', label: 'All Orders' },
-  { key: 'pending', label: 'Pending' },
-  { key: 'completed', label: 'Completed' },
-  { key: 'failed', label: 'Failed' },
-  { key: 'cancelled', label: 'Cancelled' },
-]
-
 export default function OrderHistory() {
   const navigate = useNavigate()
-  const [orders, setOrders] = useState<Order[]>([])
+  const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(null)
   const [filter, setFilter] = useState('all')
   const [unauth, setUnauth] = useState(false)
 
@@ -40,14 +14,9 @@ export default function OrderHistory() {
     setLoading(true)
     setError(null)
     try {
-      console.log('Fetching orders with filter:', filter)
-      const res = await api.get('/orders/history', {
-        params: { status_filter: filter }
-      })
-      console.log('Orders response:', res.data)
+      const res = await api.get('/orders/history', { params: { status_filter: filter } })
       setOrders(res.data.orders || [])
-    } catch (err: any) {
-      console.error('Error fetching orders:', err)
+    } catch (err) {
       const status = err?.response?.status
       if (status === 401) {
         setUnauth(true)
@@ -60,34 +29,39 @@ export default function OrderHistory() {
     }
   }, [filter])
 
-  useEffect(() => {
-    fetchOrders()
-  }, [fetchOrders])
+  useEffect(() => { fetchOrders() }, [fetchOrders])
 
-  // Lightweight auto-refresh to reflect status changes near real-time
   useEffect(() => {
     const intervalId = setInterval(() => {
-      // Only poll when tab is visible to avoid unnecessary calls
-      if (document.visibilityState === 'visible') {
-        fetchOrders()
-      }
+      if (document.visibilityState === 'visible') fetchOrders()
     }, 5000)
-
     const onVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        fetchOrders()
-      }
+      if (document.visibilityState === 'visible') fetchOrders()
     }
     window.addEventListener('visibilitychange', onVisibility)
-
     return () => {
       clearInterval(intervalId)
       window.removeEventListener('visibilitychange', onVisibility)
     }
   }, [fetchOrders])
 
-  function getStatusColor(status: TrackingStatus | undefined): string {
-    if (!status) return '#d97706'
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A'
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      })
+    } catch {
+      return 'N/A'
+    }
+  }
+
+  function formatMoney(amount) {
+    if (!amount) return 'LKR 0.00'
+    return `LKR ${amount.toFixed(2)}`
+  }
+
+  function getStatusColor(status) {
     switch (status) {
       case 'placed': return '#d97706'
       case 'verified': return '#0284c7'
@@ -96,32 +70,11 @@ export default function OrderHistory() {
       case 'delivered': return '#16a34a'
       case 'rejected': return '#dc2626'
       case 'cancelled': return '#9ca3af'
-      default: return '#666'
+      default: return '#6D74FF'
     }
   }
 
-  function getPaymentBadgeColor(status: PaymentStatus | undefined): string {
-    if (!status) return '#fef3c7'
-    switch (status) {
-      case 'pending': return '#fef3c7'
-      case 'verified': return '#d1fae5'
-      case 'rejected': return '#fee2e2'
-      default: return '#f3f4f6'
-    }
-  }
-
-  function getPaymentTextColor(status: PaymentStatus | undefined): string {
-    if (!status) return '#92400e'
-    switch (status) {
-      case 'pending': return '#92400e'
-      case 'verified': return '#065f46'
-      case 'rejected': return '#991b1b'
-      default: return '#374151'
-    }
-  }
-
-  function getProgressPercentage(status: TrackingStatus | undefined): number {
-    if (!status) return 20
+  function getProgressPercentage(status) {
     switch (status) {
       case 'placed': return 20
       case 'verified': return 40
@@ -132,336 +85,136 @@ export default function OrderHistory() {
     }
   }
 
-  async function handleReorder(orderId: string) {
+  async function handleReorder(orderId) {
     try {
       await api.post(`/orders/${orderId}/reorder`)
       alert('Items added to cart!')
       navigate('/cart')
-    } catch (err: any) {
+    } catch (err) {
       alert(err.response?.data?.detail || 'Failed to reorder')
     }
   }
 
-  function formatDate(dateString?: string): string {
-    if (!dateString) return 'N/A'
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
-    } catch {
-      return 'N/A'
-    }
-  }
-
-  function formatMoney(amount: number | undefined): string {
-    if (!amount) return 'LKR 0.00'
-    return `LKR ${amount.toFixed(2)}`
-  }
-
-  console.log('OrderHistory render - loading:', loading, 'orders:', orders.length, 'error:', error)
-
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '24px' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
-            📦 Order History
-          </h1>
-          <p style={{ color: '#6b7280' }}>
-            Track your orders and manage your purchase history
-          </p>
-        </div>
+    <>
+      <section className="section">
+        <div className="container">
+          <h1 className="section-title">📦 Order History</h1>
+          <p className="lead">Track your orders and manage your purchase history.</p>
 
-        {/* Filter Tabs */}
-        <div style={{ 
-          display: 'flex', 
-          gap: '8px', 
-          marginBottom: '24px', 
-          overflowX: 'auto',
-          paddingBottom: '8px'
-        }}>
-          {STATUS_FILTERS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              style={{
-                padding: '10px 20px',
-                borderRadius: '8px',
-                border: 'none',
-                backgroundColor: filter === key ? '#6D74FF' : 'white',
-                color: filter === key ? 'white' : '#374151',
-                fontWeight: filter === key ? 'bold' : 'normal',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div style={{ 
-            padding: '16px', 
-            backgroundColor: '#fee2e2', 
-            color: '#991b1b', 
-            borderRadius: '8px',
-            marginBottom: '16px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {unauth && (
-          <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-            <button
-              onClick={() => navigate('/login?next=/orders')}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#6D74FF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              Go to Login
-            </button>
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading && (
-          <div style={{ textAlign: 'center', padding: '48px' }}>
-            <div style={{ fontSize: '18px', color: '#6b7280' }}>Loading orders...</div>
-          </div>
-        )}
-
-        {/* No Orders */}
-        {!loading && orders.length === 0 && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '48px', 
-            backgroundColor: 'white', 
-            borderRadius: '12px' 
-          }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
-            <h3 style={{ fontSize: '20px', marginBottom: '8px' }}>No Orders Found</h3>
-            <p style={{ color: '#6b7280', marginBottom: '24px' }}>
-              {filter === 'all' 
-                ? 'You haven\'t placed any orders yet' 
-                : `No ${filter} orders found`}
-            </p>
-            <button
-              onClick={() => navigate('/shop')}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: '#6D74FF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              Start Shopping
-            </button>
-          </div>
-        )}
-
-        {/* Orders List */}
-        {!loading && orders.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                }}
+          {/* Filters */}
+          <div className="order-filters">
+            {['all','pending','completed','failed','cancelled'].map((key) => (
+              <button
+                key={key}
+                className={`btn ${filter === key ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={() => setFilter(key)}
               >
-                {/* Order Header */}
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  marginBottom: '16px',
-                  paddingBottom: '16px',
-                  borderBottom: '1px solid #e5e7eb'
-                }}>
-                  <div>
-                    <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
-                      Order #{order.id.slice(-8)}
-                    </h3>
-                    <p style={{ fontSize: '14px', color: '#6b7280' }}>
-                      {formatDate(order.created_at)}
-                    </p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#6D74FF' }}>
-                      {formatMoney(order.total_amount)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Status */}
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 'bold' }}>Payment:</span>
-                    <span style={{
-                      padding: '4px 12px',
-                      borderRadius: '12px',
-                      fontSize: '13px',
-                      fontWeight: 'bold',
-                      backgroundColor: getPaymentBadgeColor(order.payment_status),
-                      color: getPaymentTextColor(order.payment_status)
-                    }}>
-                      {order.payment_status === 'pending' && '⏳ Pending Verification'}
-                      {order.payment_status === 'verified' && '✅ Verified'}
-                      {order.payment_status === 'rejected' && '❌ Rejected'}
-                    </span>
-                  </div>
-
-                  {/* Admin Feedback */}
-                  {order.admin_feedback && (
-                    <div style={{ 
-                      padding: '12px', 
-                      backgroundColor: '#fef3c7', 
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      color: '#92400e',
-                      marginTop: '8px'
-                    }}>
-                      <strong>Admin Feedback:</strong> {order.admin_feedback}
-                    </div>
-                  )}
-                </div>
-
-                {/* Progress Bar */}
-                {order.tracking_status !== 'rejected' && order.tracking_status !== 'cancelled' && (
-                  <div style={{ marginBottom: '16px' }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      marginBottom: '8px',
-                      fontSize: '12px',
-                      color: '#6b7280'
-                    }}>
-                      <span>Placed</span>
-                      <span>Verified</span>
-                      <span>Processing</span>
-                      <span>Shipped</span>
-                      <span>Delivered</span>
-                    </div>
-                    <div style={{ 
-                      height: '8px', 
-                      backgroundColor: '#e5e7eb', 
-                      borderRadius: '4px',
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{
-                        height: '100%',
-                        width: `${getProgressPercentage(order.tracking_status)}%`,
-                        backgroundColor: getStatusColor(order.tracking_status),
-                        transition: 'width 0.3s'
-                      }} />
-                    </div>
-                    <div style={{ 
-                      marginTop: '8px', 
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      color: getStatusColor(order.tracking_status)
-                    }}>
-                      {order.tracking_status?.toUpperCase() || 'PENDING'}
-                    </div>
-                  </div>
-                )}
-
-                {/* Estimated Delivery */}
-                {order.estimated_delivery_date && order.tracking_status !== 'delivered' && (
-                  <div style={{ marginBottom: '16px', fontSize: '14px', color: '#6b7280' }}>
-                    📅 Estimated Delivery: <strong>{formatDate(order.estimated_delivery_date)}</strong>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => navigate(`/orders/${order.id}`)}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#6D74FF',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    View Details
-                  </button>
-
-                  <button
-                    onClick={() => handleReorder(order.id)}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: 'white',
-                      color: '#6D74FF',
-                      border: '2px solid #6D74FF',
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    🔁 Reorder
-                  </button>
-
-                  {order.payment_status === 'verified' && (
-                    <button
-                      onClick={() => window.open(`/api/v1/orders/${order.id}/invoice`, '_blank')}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: 'white',
-                        color: '#059669',
-                        border: '2px solid #059669',
-                        borderRadius: '8px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      📄 Invoice
-                    </button>
-                  )}
-
-                  {order.tracking_status === 'delivered' && (
-                    <button
-                      onClick={() => navigate(`/orders/${order.id}/review`)}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: 'white',
-                        color: '#ea580c',
-                        border: '2px solid #ea580c',
-                        borderRadius: '8px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      ⭐ Review
-                    </button>
-                  )}
-                </div>
-              </div>
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </button>
             ))}
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* Messages */}
+          {error && <div className="alert error">{error}</div>}
+          {unauth && (
+            <div className="alert warning">
+              <button onClick={() => navigate('/login?next=/orders')} className="btn btn-primary">
+                Go to Login
+              </button>
+            </div>
+          )}
+
+          {/* Loading */}
+          {loading && <div className="loading">Loading orders...</div>}
+
+          {/* No Orders */}
+          {!loading && orders.length === 0 && (
+            <div className="empty-state">
+              <div>📭</div>
+              <h3>No Orders Found</h3>
+              <p>{filter === 'all' ? 'You haven’t placed any orders yet.' : `No ${filter} orders found.`}</p>
+              <button onClick={() => navigate('/shop')} className="btn btn-primary">Start Shopping</button>
+            </div>
+          )}
+
+          {/* Orders List */}
+          {!loading && orders.length > 0 && (
+            <div className="order-list">
+              {orders.map(order => (
+                <div key={order.id} className="order-card">
+                  <div className="order-header">
+                    <div>
+                      <h3>Order #{order.id.slice(-8)}</h3>
+                      <p>{formatDate(order.created_at)}</p>
+                    </div>
+                    <div className="order-total">{formatMoney(order.total_amount)}</div>
+                  </div>
+
+                  <div className="order-progress">
+                    <div className="progress-bar">
+                      <div
+                        style={{
+                          width: `${getProgressPercentage(order.tracking_status)}%`,
+                          backgroundColor: getStatusColor(order.tracking_status)
+                        }}
+                      />
+                    </div>
+                    <p className="status" style={{ color: getStatusColor(order.tracking_status) }}>
+                      {order.tracking_status?.toUpperCase()}
+                    </p>
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={() => navigate(`/orders/${order.id}`)} className="btn btn-primary">View</button>
+                    <button onClick={() => handleReorder(order.id)} className="btn btn-ghost">🔁 Reorder</button>
+                    {order.payment_status === 'verified' && (
+                      <button
+                        onClick={() => window.open(`/api/v1/orders/${order.id}/invoice`, '_blank')}
+                        className="btn btn-ghost"
+                      >
+                        📄 Invoice
+                      </button>
+                    )}
+                    {order.tracking_status === 'delivered' && (
+                      <button
+                        onClick={() => navigate(`/orders/${order.id}/review`)}
+                        className="btn btn-ghost"
+                      >
+                        ⭐ Review
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Inline Dark Theme */}
+      <style>{`
+        .order-filters{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+        .order-list{display:flex;flex-direction:column;gap:16px}
+        .order-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;transition:.2s}
+        .order-card:hover{transform:translateY(-2px);border-color:var(--brand)}
+        .order-header{display:flex;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+        .order-header h3{margin:0;font-size:18px}
+        .order-header p{color:var(--muted);margin:4px 0 0}
+        .order-total{font-size:20px;font-weight:600;color:var(--brand)}
+        .progress-bar{height:6px;background:var(--surface-alt);border-radius:4px;overflow:hidden}
+        .progress-bar div{height:100%;transition:width .3s ease}
+        .status{text-align:right;font-size:13px;font-weight:600;margin-top:8px}
+        .loading{text-align:center;padding:32px;color:var(--muted)}
+        .empty-state{text-align:center;padding:48px;background:var(--surface-alt);border-radius:12px}
+        .empty-state div{font-size:48px;margin-bottom:8px}
+        .empty-state h3{font-size:20px;margin:0 0 8px}
+        .empty-state p{color:var(--muted);margin-bottom:16px}
+        .alert{padding:16px;border-radius:8px;margin-bottom:16px}
+        .alert.error{background:#3b0d0d;color:#ffbaba}
+        .alert.warning{background:#302b0b;color:#fff1b0;text-align:center}
+        .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+      `}</style>
+    </>
   )
 }

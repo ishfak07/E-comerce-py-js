@@ -265,7 +265,7 @@ export default function Header() {
         .menu-item:active{background:var(--ghost) !important;color:var(--text) !important}
         .menu-item:focus{outline:none;box-shadow:none;background:transparent !important;color:var(--text) !important}
         .menu-item:focus-visible{outline:2px solid var(--brand);outline-offset:-2px;background:var(--ghost) !important}
-        .menu-item::-moz-focus-inner{border:0}
+        .menu-item::-moz-focus-inner{border:0} 
         .menu-item:visited{color:var(--text) !important}
         .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4)}
         @media (max-width:900px){

@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthProvider'
 
 export default function Home() {
+  const { user } = useAuth()
+
   return (
     <>
       {/* Hero / Welcome Banner */}
@@ -12,10 +15,19 @@ export default function Home() {
             <p className="subhead">
               Curated apparel and accessories crafted for comfort, durability, and timeless style.
             </p>
-            <div className="hero-ctas">
-              <Link to="/about" className="btn btn-primary">Learn More</Link>
-              <Link to="/shop" className="btn btn-ghost">Visit Shop</Link>
-            </div>
+            {!user ? (
+              // Non-authenticated users - prompt to login/register
+              <div className="hero-ctas">
+                <Link to="/login" className="btn btn-primary">Login to Shop</Link>
+                <Link to="/register" className="btn btn-ghost">Register</Link>
+              </div>
+            ) : (
+              // Authenticated users - show normal CTAs
+              <div className="hero-ctas">
+                <Link to="/about" className="btn btn-primary">Learn More</Link>
+                <Link to="/shop" className="btn btn-ghost">Visit Shop</Link>
+              </div>
+            )}
           </div>
           <div className="hero-images">
             <img
@@ -30,8 +42,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Us */}
-      <section className="section alt">
+      {/* Login Prompt Banner for Non-Authenticated Users */}
+      {!user && (
+        <section className="section" style={{ background: 'linear-gradient(135deg, rgba(109, 116, 255, 0.1), rgba(109, 40, 217, 0.05))', borderTop: '1px solid rgba(109, 116, 255, 0.2)', borderBottom: '1px solid rgba(109, 116, 255, 0.2)' }}>
+          <div className="container" style={{ textAlign: 'center', padding: '32px 20px' }}>
+            <h2 style={{ fontSize: '28px', marginBottom: '12px', color: 'var(--text)' }}>🔐 Want to See More?</h2>
+            <p style={{ fontSize: '16px', color: 'var(--muted)', marginBottom: '20px', maxWidth: '600px', margin: '0 auto 20px' }}>
+              Login or create an account to explore our full collections, view features, and start shopping!
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/login" className="btn btn-primary" style={{ fontSize: '16px', padding: '12px 24px' }}>Login Now</Link>
+              <Link to="/register" className="btn" style={{ fontSize: '16px', padding: '12px 24px' }}>Create Account</Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* All sections below - Only show for authenticated users */}
+      {user && (
+        <>
+          {/* About Us */}
+          <section className="section alt">
         <div className="container">
           <h2 className="section-title">About Us</h2>
           <p className="lead">
@@ -201,6 +232,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+        </>
+      )}
 
       {/* Inline styles: keeps component self-contained. Move to CSS files as preferred. */}
       <style>{`

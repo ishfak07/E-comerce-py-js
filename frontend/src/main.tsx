@@ -17,6 +17,7 @@ import AdminDashboardHome from './pages/AdminDashboardHome'
 import AdminProducts from './pages/AdminProducts'
 import AdminUsers from './pages/AdminUsers'
 import AdminRoute from './components/AdminRoute'
+import ProtectedRoute from './components/ProtectedRoute'
 import AdminShell from './AdminShell'
 import Shop from './pages/Shop'
 import About from './pages/About'
@@ -31,18 +32,21 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Routes>
             {/* Public site uses AppShell (Header/Footer) */}
             <Route element={<AppShell />}>
+              {/* Public routes - accessible without login */}
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/product/:slug" element={<ProductDetail />} />
-              <Route path="/shop" element={<Shop />} />
               <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/orders" element={<OrderHistory />} />
-              <Route path="/orders/:orderId" element={<OrderDetails />} />
+              
+              {/* Protected routes - require authentication */}
+              <Route path="/product/:slug" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
+              <Route path="/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+              <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+              <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+              <Route path="/orders/:orderId" element={<ProtectedRoute><OrderDetails /></ProtectedRoute>} />
             </Route>
             {/* Admin site uses its own shell (no public header/footer) */}
             <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>

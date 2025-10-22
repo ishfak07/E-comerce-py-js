@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthProvider'
 
 export default function About() {
+  const { user } = useAuth()
+
   return (
     <>
       {/* Hero */}
@@ -12,16 +15,44 @@ export default function About() {
             <p className="subhead">
               Everyday apparel and accessories built with comfort, durability, and timeless aesthetics at the core.
             </p>
-            <div className="hero-ctas">
-              <Link to="/contact" className="btn btn-primary">Contact Us</Link>
-              <Link to="/shop" className="btn btn-ghost">Browse Collections</Link>
-            </div>
+            {!user ? (
+              // Non-authenticated users - prompt to login/register
+              <div className="hero-ctas">
+                <Link to="/login" className="btn btn-primary">Login to Shop</Link>
+                <Link to="/register" className="btn btn-ghost">Register</Link>
+              </div>
+            ) : (
+              // Authenticated users - show normal CTAs
+              <div className="hero-ctas">
+                <Link to="/contact" className="btn btn-primary">Contact Us</Link>
+                <Link to="/shop" className="btn btn-ghost">Browse Collections</Link>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Our Story */}
-      <section className="section alt">
+      {/* Login Prompt Banner for Non-Authenticated Users */}
+      {!user && (
+        <section className="section" style={{ background: 'linear-gradient(135deg, rgba(109, 116, 255, 0.1), rgba(109, 40, 217, 0.05))', borderTop: '1px solid rgba(109, 116, 255, 0.2)', borderBottom: '1px solid rgba(109, 116, 255, 0.2)' }}>
+          <div className="container" style={{ textAlign: 'center', padding: '32px 20px' }}>
+            <h2 style={{ fontSize: '28px', marginBottom: '12px', color: 'var(--text)' }}>🔐 Want to Learn More?</h2>
+            <p style={{ fontSize: '16px', color: 'var(--muted)', marginBottom: '20px', maxWidth: '600px', margin: '0 auto 20px' }}>
+              Login or create an account to see our full story, team, values, and start exploring our collections!
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/login" className="btn btn-primary" style={{ fontSize: '16px', padding: '12px 24px' }}>Login Now</Link>
+              <Link to="/register" className="btn" style={{ fontSize: '16px', padding: '12px 24px' }}>Create Account</Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* All sections below - Only show for authenticated users */}
+      {user && (
+        <>
+          {/* Our Story */}
+          <section className="section alt">
         <div className="container">
           <h2 className="section-title">Our Story</h2>
           <p className="lead">
@@ -191,6 +222,8 @@ export default function About() {
           </div>
         </div>
       </section>
+        </>
+      )}
 
       {/* Inline Styles for consistency with the rest of the app */}
       <style>{`

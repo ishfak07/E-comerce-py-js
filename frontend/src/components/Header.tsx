@@ -65,13 +65,17 @@ export default function Header() {
           {!inAdmin && (
             <>
               <NavLink to="/" end className={linkClass}>Home</NavLink>
-              <NavLink to="/shop" className={linkClass}>Shop</NavLink>
               <NavLink to="/about" className={linkClass}>About</NavLink>
-              <NavLink to="/contact" className={linkClass}>Contact</NavLink>
-              <Link to="/cart" className="nav-link cart-link">
-                Cart
-                <span className="badge" aria-label={`${count} items in cart`}>{count}</span>
-              </Link>
+              {user && (
+                <>
+                  <NavLink to="/shop" className={linkClass}>Shop</NavLink>
+                  <NavLink to="/contact" className={linkClass}>Contact</NavLink>
+                  <Link to="/cart" className="nav-link cart-link">
+                    Cart
+                    <span className="badge" aria-label={`${count} items in cart`}>{count}</span>
+                  </Link>
+                </>
+              )}
             </>
           )}
 

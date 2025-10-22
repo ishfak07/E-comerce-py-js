@@ -214,7 +214,7 @@ export default function OrderHistory() {
         .alert.error{background:#3b0d0d;color:#ffbaba}
         .alert.warning{background:#302b0b;color:#fff1b0;text-align:center}
         .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
-      `}</style>
+      `}</style> 
     </>
   )
 }    

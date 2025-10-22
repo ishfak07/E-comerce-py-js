@@ -73,6 +73,16 @@ export default function OrderHistory() {
     }
   }
 
+  function getFilterLabel(key: string): string {
+    switch (key) {
+      case 'all': return 'All'
+      case 'pending': return 'In Progress'
+      case 'completed': return 'Completed'
+      case 'cancelled': return 'Cancelled'
+      default: return key.charAt(0).toUpperCase() + key.slice(1)
+    }
+  }
+
   async function handleReorder(orderId) {
     try {
       await api.post(`/orders/${orderId}/reorder`)
@@ -147,13 +157,13 @@ export default function OrderHistory() {
 
           {/* Filters */}
           <div className="order-filters">
-            {['all','pending','completed','failed','cancelled'].map((key) => (
+            {['all','pending','completed','cancelled'].map((key) => (
               <button
                 key={key}
                 className={`btn ${filter === key ? 'btn-primary' : 'btn-ghost'}`}
                 onClick={() => setFilter(key)}
               >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {getFilterLabel(key)}
               </button>
             ))}
           </div>
@@ -184,7 +194,7 @@ export default function OrderHistory() {
             <div className="empty-state">
               <div>📭</div>
               <h3>No Orders Found</h3>
-              <p>{filter === 'all' ? 'You haven’t placed any orders yet.' : `No ${filter} orders found.`}</p>
+              <p>{filter === 'all' ? 'You haven’t placed any orders yet.' : `No ${getFilterLabel(filter)} orders found.`}</p>
               <button onClick={() => navigate('/shop')} className="btn btn-primary">Start Shopping</button>
             </div>
           )}

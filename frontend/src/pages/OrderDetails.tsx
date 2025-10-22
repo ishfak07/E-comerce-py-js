@@ -74,6 +74,42 @@ export default function OrderDetails() {
     }
   }
 
+  // Poll for order status updates while order is not yet delivered
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | null = null
+    let stopped = false
+
+    async function pollOnce() {
+      try {
+        const res = await api.get(`/orders/${orderId}`)
+        if (stopped) return
+        const fresh = res.data as Order
+        // Only update if something changed to avoid unnecessary re-renders
+        if (JSON.stringify(fresh) !== JSON.stringify(order)) {
+          setOrder(fresh)
+        }
+        // If order is delivered or cancelled, stop polling
+        if ((fresh.tracking_status === 'delivered' || fresh.tracking_status === 'cancelled') && intervalId) {
+          clearInterval(intervalId)
+          intervalId = null
+        }
+      } catch (e) {
+        // ignore errors silently; keep polling
+      }
+    }
+
+    if (order && order.tracking_status !== 'delivered' && order.tracking_status !== 'cancelled') {
+      // initial quick poll, then regular interval
+      pollOnce()
+      intervalId = setInterval(pollOnce, 5000)
+    }
+
+    return () => {
+      stopped = true
+      if (intervalId) clearInterval(intervalId)
+    }
+  }, [order?.tracking_status, orderId])
+
   function formatDate(dateString?: string): string {
     if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -260,10 +296,14 @@ export default function OrderDetails() {
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: 'bold',
-                background: order.payment_status === 'verified' 
+                background: order.tracking_status === 'delivered' 
                   ? 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
-                  : order.payment_status === 'rejected' 
-                  ? 'linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)'
+                  : order.tracking_status === 'shipped' 
+                  ? 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)'
+                  : order.tracking_status === 'processing' 
+                  ? 'linear-gradient(135deg, #ea580c 0%, #f97316 100%)'
+                  : order.tracking_status === 'verified' 
+                  ? 'linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)'
                   : 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
                 color: 'white',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
@@ -271,30 +311,49 @@ export default function OrderDetails() {
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                {order.payment_status === 'verified' && (
+                {order.tracking_status === 'delivered' && (
                   <>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    Payment Verified
+                    Delivered
                   </>
                 )}
-                {order.payment_status === 'pending' && (
+                {order.tracking_status === 'shipped' && (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="1" y="3" width="15" height="13"></rect>
+                      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                      <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                      <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                    Shipped
+                  </>
+                )}
+                {order.tracking_status === 'processing' && (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"></path>
+                    </svg>
+                    Processing
+                  </>
+                )}
+                {order.tracking_status === 'verified' && (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Verified
+                  </>
+                )}
+                {order.tracking_status === 'placed' && (
                   <>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10"></circle>
                       <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    Pending Verification
-                  </>
-                )}
-                {order.payment_status === 'rejected' && (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    Payment Rejected
+                    Placed
                   </>
                 )}
               </div>

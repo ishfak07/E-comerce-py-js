@@ -210,28 +210,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Info */}
-      <section className="section alt">
-        <div className="container">
-          <h2 className="section-title">Contact Info</h2>
-          <div className="contact">
-            <div>
-              <p>Email: support@yourstore.com</p>
-              <p>Phone: +94 11 234 5678</p>
-              <p>Hours: Mon–Fri, 9:00–17:00</p>
-            </div>
-            <div>
-              <p>Address: 123 Market Street, Colombo</p>
-              <p>Instagram: @yourstore</p>
-              <p>Facebook: /yourstore</p>
-            </div>
-          </div>
-          <div className="contact-cta">
-            <Link to="/contact" className="btn btn-primary">Get in Touch</Link>
-            <Link to="/shop" className="btn btn-ghost">Browse Collections</Link>
-          </div>
-        </div>
-      </section>
+    
+        {/* Contact Info */}
         </>
       )}
 

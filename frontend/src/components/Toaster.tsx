@@ -26,7 +26,7 @@ export default function Toaster() {
   }, [])
 
   return (
-    <div style={{ position:'fixed', top: 20, right: 20, zIndex: 2000, display:'flex', flexDirection:'column', gap: 8 }} aria-live="polite" aria-atomic="true">
+    <div style={{ position:'fixed', bottom: 20, right: 20, zIndex: 2000, display:'flex', flexDirection:'column', gap: 8 }} aria-live="polite" aria-atomic="true">
       {toasts.map(t => (
         <div key={t.id}
           role="status"

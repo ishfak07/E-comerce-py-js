@@ -218,6 +218,32 @@ export default function Header() {
           60% { transform: scale(0.95); }
           100% { transform: scale(1); }
         }
+        /* Sparkle pulse when fly-to-cart lands */
+        .badge.sparkle{
+          box-shadow: 0 0 0 0 rgba(109,116,255,0.6);
+          animation: badge-glow .6s ease-out;
+        }
+        .badge.sparkle::after{
+          content:"";
+          position:absolute;left:50%;top:50%;
+          width:6px;height:6px;border-radius:50%;
+          background:white;
+          transform:translate(-50%,-50%) scale(.2);
+          box-shadow: 0 0 0 8px rgba(109,116,255,0.3), 0 0 18px 8px rgba(109,116,255,0.25);
+          opacity:.9;
+          animation: sparkle-pop .6s ease-out forwards;
+          pointer-events:none;
+        }
+        @keyframes badge-glow {
+          0% { box-shadow: 0 0 0 0 rgba(109,116,255,0.6); }
+          80% { box-shadow: 0 0 0 10px rgba(109,116,255,0); }
+          100% { box-shadow: none; }
+        }
+        @keyframes sparkle-pop {
+          0% { transform: translate(-50%,-50%) scale(.2); opacity:.9; }
+          70% { transform: translate(-50%,-50%) scale(2.4); opacity:.35; box-shadow: 0 0 0 14px rgba(109,116,255,0); }
+          100% { transform: translate(-50%,-50%) scale(2.8); opacity:0; box-shadow:none; }
+        }
         .divider{width:1px;height:24px;background:var(--line);margin:0 6px}
         .auth{display:flex;align-items:center;gap:10px}
         

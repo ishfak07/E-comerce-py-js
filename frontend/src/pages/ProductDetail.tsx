@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { useCart } from '../lib/cart'
+import { animateFlyToCart } from '../lib/flyToCart'
 
 type Product = {
   id: number
@@ -18,6 +19,7 @@ export default function ProductDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const { add } = useCart()
   const navigate = useNavigate()
+  const mainImgRef = useRef<HTMLImageElement | null>(null)
 
   useEffect(() => {
     if (!slug) return
@@ -50,6 +52,7 @@ export default function ProductDetail() {
           {/* Main Image Display */}
           <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow)' }}>
             <img 
+              ref={mainImgRef}
               src={images[currentImageIndex]} 
               alt={`${product.name} - Image ${currentImageIndex + 1}`} 
               style={{ width: '100%', display: 'block', aspectRatio: '4/3', objectFit: 'cover' }} 
@@ -184,15 +187,17 @@ export default function ProductDetail() {
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               className="btn"
-              onClick={() =>
+              onClick={() => {
+                if (mainImgRef.current) animateFlyToCart(mainImgRef.current)
                 add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
-              }
+              }}
             >
               Add to Cart
             </button>
             <button
               className="btn"
               onClick={() => {
+                if (mainImgRef.current) animateFlyToCart(mainImgRef.current)
                 add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
                 navigate('/cart')
               }}

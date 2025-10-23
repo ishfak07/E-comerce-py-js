@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useCart } from '../lib/cart'
+import { animateFlyToCart } from '../lib/flyToCart'
 
 type Product = {
   id: number
@@ -263,7 +264,10 @@ export default function Shop() {
                   <div className="card-actions">
                     <button
                       className="btn btn-primary"
-                      onClick={() =>
+                      onClick={(e) => {
+                        const card = (e.currentTarget as HTMLElement).closest('.card') as HTMLElement | null
+                        const img = card?.querySelector('img') as HTMLImageElement | null
+                        if (img) animateFlyToCart(img)
                         add({
                           productId: p.id,
                           slug: p.slug,
@@ -271,7 +275,7 @@ export default function Shop() {
                           price: p.price,
                           image: p.images?.[0],
                         })
-                      }
+                      }}
                     >
                       Add to Cart
                     </button>

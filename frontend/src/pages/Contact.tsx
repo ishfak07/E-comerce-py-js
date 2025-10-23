@@ -222,7 +222,7 @@ export default function Contact() {
               <li>Email: memberofpfc20@gmail.com</li>
               <li>Phone: +94 76 89 76 222</li>
               <li>WhatsApp: +94 76 897 6222</li>
-              <li>Address: 123 Market Street, Colombo</li>
+              <li>Address: 252/1A Mannar Road , Puttalam</li>
               <li>Hours: Mon–Fri, 9:00–17:00 (UTC+5:30)</li>
               <li>Response time: within 1–2 business days</li>
             </ul>

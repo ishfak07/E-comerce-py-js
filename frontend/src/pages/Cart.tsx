@@ -12,7 +12,7 @@ export default function Cart() {
     [items]
   )
 
-  const handleQty = (id: number, qty: number) => {
+  const handleQty = (id: string, qty: number) => {
     if (qty < 1 || Number.isNaN(qty)) return
     update(id, qty)
   }
@@ -36,7 +36,24 @@ export default function Cart() {
         <div className="container">
           {items.length === 0 ? (
             <div className="empty">
-              <p>Cart is empty.</p>
+              <div className="empty-anim" aria-hidden>
+                <svg className="cart-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g className="animate-cart">
+                    <rect x="26" y="36" width="60" height="34" rx="6" stroke="var(--brand)" strokeWidth="3" fill="rgba(109,116,255,0.08)" />
+                    <path d="M20 36h10M86 36h14" stroke="var(--brand)" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M32 70l-4 12" stroke="var(--brand)" strokeWidth="3" strokeLinecap="round"/>
+                    <path d="M80 70l4 12" stroke="var(--brand)" strokeWidth="3" strokeLinecap="round"/>
+                    <circle cx="40" cy="88" r="7" stroke="var(--brand)" strokeWidth="3" fill="rgba(109,116,255,0.1)"/>
+                    <circle cx="72" cy="88" r="7" stroke="var(--brand)" strokeWidth="3" fill="rgba(109,116,255,0.1)"/>
+                  </g>
+                  <g className="float-bubbles">
+                    <circle cx="54" cy="26" r="3" fill="var(--brand)"/>
+                    <circle cx="68" cy="18" r="2" fill="var(--brand)"/>
+                    <circle cx="44" cy="16" r="2.5" fill="var(--brand)"/>
+                  </g>
+                </svg>
+              </div>
+              <p>Your cart is empty</p>
               <div className="actions">
                 <Link to="/shop" className="btn btn-primary">Continue Shopping</Link>
               </div>
@@ -231,7 +248,22 @@ export default function Cart() {
         .subhead{color:var(--muted)}
         .section{padding:28px 0;border-top:1px solid var(--line)}
 
-        .empty{border:1px dashed var(--line);padding:16px;border-radius:12px;background:var(--surface)}
+        .empty{border:1px dashed var(--line);padding:16px;border-radius:12px;background:var(--surface);text-align:center}
+        .empty-anim{display:flex;justify-content:center;margin:6px 0 10px}
+        .cart-svg{width:120px;height:120px;filter:drop-shadow(0 6px 20px rgba(109,116,255,0.15))}
+        .animate-cart{animation: cartFloat 2.6s ease-in-out infinite}
+        .float-bubbles circle:nth-child(1){animation: bubbleUp 3s ease-in-out infinite}
+        .float-bubbles circle:nth-child(2){animation: bubbleUp 2.6s ease-in-out infinite 0.3s}
+        .float-bubbles circle:nth-child(3){animation: bubbleUp 2.2s ease-in-out infinite 0.6s}
+        @keyframes cartFloat{
+          0%,100%{ transform: translateY(0) }
+          50%{ transform: translateY(-6px) }
+        }
+        @keyframes bubbleUp{
+          0%{ transform: translateY(0); opacity:.8 }
+          70%{ transform: translateY(-10px); opacity:.3 }
+          100%{ transform: translateY(0); opacity:.8 }
+        }
         .actions{margin-top:10px}
         .btn{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:10px 14px;border:1px solid var(--line);background:var(--ghost);color:var(--text);text-decoration:none;transition:.2s}
         .btn:hover{transform:translateY(-1px)}

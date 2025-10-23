@@ -14,6 +14,11 @@ export default defineConfig({
         // Point to local backend started by run_server.py
         target: 'http://localhost:8001',
         changeOrigin: true,
+      },
+      '/static': {
+        // Proxy static uploads (avatars, product images) to backend FastAPI static mount
+        target: 'http://localhost:8001',
+        changeOrigin: true,
       }
     }
   }

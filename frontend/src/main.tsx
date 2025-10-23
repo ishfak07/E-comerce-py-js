@@ -24,6 +24,7 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import './styles.css'
 import Toaster from './components/Toaster'
+import Account from './pages/Account'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -45,6 +46,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/product/:slug" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
               <Route path="/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
               <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+              <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
               <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
               <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />

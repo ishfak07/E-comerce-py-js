@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from pydantic import BaseModel, EmailStr
-from typing import Any
+from typing import Any, Optional
+from pathlib import Path
 import logging
 
 from ....core.security import (
@@ -10,6 +11,7 @@ from ....core.security import (
     verify_password,
 )
 from ....dependencies.mongo import get_mongo_db
+from ....dependencies.auth import get_current_user
 from bson import ObjectId
 
 def _maybe_objectid(value):
@@ -111,6 +113,9 @@ def login(payload: LoginRequest, db=Depends(get_mongo_db)):
             "full_name": user.get("full_name"),
             "is_staff": bool(user.get("is_staff", False)),
             "is_superuser": bool(user.get("is_superuser", False)),
+            "avatar_url": user.get("avatar_url"),
+            "phone": user.get("phone"),
+            "address": user.get("address"),
         },
     }
 
@@ -145,7 +150,114 @@ def refresh(payload: RefreshRequest, db=Depends(get_mongo_db)):
             "id": str(user.get("_id")),
             "email": user.get("email"),
             "full_name": user.get("full_name"),
+            "is_staff": bool(user.get("is_staff", False)),
+            "is_superuser": bool(user.get("is_superuser", False)),
+            "avatar_url": user.get("avatar_url"),
+            "phone": user.get("phone"),
+            "address": user.get("address"),
         },
     }
+
+
+class ProfileUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+
+
+@router.get("/me")
+def me(db=Depends(get_mongo_db), user=Depends(get_current_user)):
+    # Normalize output
+    return {
+        "id": str(user.get("_id")),
+        "email": user.get("email"),
+        "full_name": user.get("full_name"),
+        "is_staff": bool(user.get("is_staff", False)),
+        "is_superuser": bool(user.get("is_superuser", False)),
+        "avatar_url": user.get("avatar_url"),
+        "phone": user.get("phone"),
+        "address": user.get("address"),
+    }
+
+
+@router.put("/me")
+def update_me(payload: ProfileUpdate, db=Depends(get_mongo_db), current=Depends(get_current_user)):
+    users = db.get_collection("users")
+    updates: dict[str, Any] = {}
+    # Unique email check
+    if payload.email and payload.email != current.get("email"):
+        exists = users.find_one({"email": payload.email})
+        if exists and str(exists.get("_id")) != str(current.get("_id")):
+            raise HTTPException(status_code=400, detail="Email already in use")
+        updates["email"] = payload.email
+    if payload.full_name is not None:
+        updates["full_name"] = payload.full_name
+    if payload.phone is not None:
+        updates["phone"] = payload.phone
+    if payload.address is not None:
+        updates["address"] = payload.address
+    if not updates:
+        return {"ok": True}
+    users.update_one({"_id": current.get("_id")}, {"$set": updates})
+    # Return updated snapshot
+    user = users.find_one({"_id": current.get("_id")})
+    return {
+        "id": str(user.get("_id")),
+        "email": user.get("email"),
+        "full_name": user.get("full_name"),
+        "is_staff": bool(user.get("is_staff", False)),
+        "is_superuser": bool(user.get("is_superuser", False)),
+        "avatar_url": user.get("avatar_url"),
+        "phone": user.get("phone"),
+        "address": user.get("address"),
+    }
+
+
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
+
+
+@router.post("/change-password")
+def change_password(payload: PasswordChange, db=Depends(get_mongo_db), current=Depends(get_current_user)):
+    users = db.get_collection("users")
+    stored_password = (
+        current.get("password_hash")
+        or current.get("hashed_password")
+        or current.get("password")
+    )
+    if not verify_password(payload.old_password, stored_password or ""):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect current password")
+    users.update_one({"_id": current.get("_id")}, {"$set": {"password_hash": get_password_hash(payload.new_password)}})
+    return {"ok": True}
+
+
+@router.post("/avatar")
+def upload_avatar(
+    file: UploadFile = File(...),
+    db=Depends(get_mongo_db),
+    current=Depends(get_current_user),
+):
+    # Validate content type
+    if file.content_type not in ("image/png", "image/jpeg", "image/jpg", "image/webp"):
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+    ext = {
+        "image/png": ".png",
+        "image/jpeg": ".jpg",
+        "image/jpg": ".jpg",
+        "image/webp": ".webp",
+    }[file.content_type]
+    # Save under backend/app/static/uploads/avatars (FastAPI mounts /static -> backend/app/static)
+    uploads_dir = Path(__file__).resolve().parents[3] / 'static' / 'uploads' / 'avatars'
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"{str(current.get('_id'))}{ext}"
+    path = uploads_dir / filename
+    with open(path, "wb") as f:
+        f.write(file.file.read())
+    public_url = f"/static/uploads/avatars/{filename}"
+    users = db.get_collection("users")
+    users.update_one({"_id": current.get("_id")}, {"$set": {"avatar_url": public_url}})
+    return {"avatar_url": public_url}
 
 

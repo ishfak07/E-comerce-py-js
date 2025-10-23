@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api, setAuthToken } from '../lib/api'
 
-type User = { id: string; email: string; full_name?: string | null; is_staff?: boolean; is_superuser?: boolean }
+type User = { id: string; email: string; full_name?: string | null; is_staff?: boolean; is_superuser?: boolean; avatar_url?: string | null; phone?: string | null; address?: string | null }
 
 type AuthContextType = {
   user: User | null
@@ -10,6 +10,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, fullName?: string) => Promise<void>
   logout: () => void
+  updateUser: (u: Partial<User>) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -57,6 +58,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
+    },
+    updateUser: (u: Partial<User>) => {
+      setUser(prev => {
+        const next = { ...(prev || {}), ...u } as User
+        try { localStorage.setItem('user', JSON.stringify(next)) } catch {}
+        return next
+      })
     }
   }), [user, accessToken, loading])
 

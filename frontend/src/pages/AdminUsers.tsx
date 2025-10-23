@@ -9,6 +9,7 @@ type U = {
   is_active?: boolean
   is_staff?: boolean
   is_superuser?: boolean
+  avatar_url?: string | null
 }
 
 type UsersResponse = {
@@ -185,7 +186,11 @@ export default function AdminUsers() {
                 <div className="td-email">
                   <div className="user-cell">
                     <div className="user-avatar">
-                      {u.email.charAt(0).toUpperCase()}
+                      {u.avatar_url ? (
+                        <img src={u.avatar_url} alt="" />
+                      ) : (
+                        u.email.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div className="user-info">
                       <div className="user-email">{u.email}</div>
@@ -458,7 +463,9 @@ export default function AdminUsers() {
           color: white;
           font-weight: 600;
           font-size: 16px;
+          overflow: hidden;
         }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
         
         .user-info {
           display: flex;

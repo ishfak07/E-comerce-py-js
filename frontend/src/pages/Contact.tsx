@@ -219,7 +219,7 @@ export default function Contact() {
           <aside className="panel">
             <h2 className="section-title">Contact details</h2>
             <ul className="list">
-              <li>Email: support@yourstore.com</li>
+              <li>Email: memberofpfc20@gmail.com</li>
               <li>Phone: +94 11 234 5678</li>
               <li>WhatsApp: +94 76 897 6222</li>
               <li>Address: 123 Market Street, Colombo</li>

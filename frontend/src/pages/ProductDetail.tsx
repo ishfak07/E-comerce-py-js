@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { useCart } from '../lib/cart'
 
@@ -17,6 +17,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const { add } = useCart()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!slug) return
@@ -181,8 +182,23 @@ export default function ProductDetail() {
           <div className="price" style={{ fontSize: 22 }}>LKR {product.price}</div>
           <p style={{ color: 'var(--muted)' }}>{product.description || 'A beautiful product made for you.'}</p>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn" onClick={() => add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })}>Add to Cart</button>
-            <button className="btn" onClick={() => add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })}>Buy Now</button>
+            <button
+              className="btn"
+              onClick={() =>
+                add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
+              }
+            >
+              Add to Cart
+            </button>
+            <button
+              className="btn"
+              onClick={() => {
+                add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
+                navigate('/cart')
+              }}
+            >
+              Buy Now
+            </button>
           </div>
         </div>
       </div>

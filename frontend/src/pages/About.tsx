@@ -16,13 +16,11 @@ export default function About() {
               Everyday apparel and accessories built with comfort, durability, and timeless aesthetics at the core.
             </p>
             {!user ? (
-              // Non-authenticated users - prompt to login/register
               <div className="hero-ctas">
                 <Link to="/login" className="btn btn-primary">Login to Shop</Link>
                 <Link to="/register" className="btn btn-ghost">Register</Link>
               </div>
             ) : (
-              // Authenticated users - show normal CTAs
               <div className="hero-ctas">
                 <Link to="/contact" className="btn btn-primary">Contact Us</Link>
                 <Link to="/shop" className="btn btn-ghost">Browse Collections</Link>
@@ -34,198 +32,220 @@ export default function About() {
 
       {/* Login Prompt Banner for Non-Authenticated Users */}
       {!user && (
-        <section className="section" style={{ background: 'linear-gradient(135deg, rgba(109, 116, 255, 0.1), rgba(109, 40, 217, 0.05))', borderTop: '1px solid rgba(109, 116, 255, 0.2)', borderBottom: '1px solid rgba(109, 116, 255, 0.2)' }}>
+        <section
+          className="section"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(109, 116, 255, 0.1), rgba(109, 40, 217, 0.05))',
+            borderTop: '1px solid rgba(109, 116, 255, 0.2)',
+            borderBottom: '1px solid rgba(109, 116, 255, 0.2)'
+          }}
+        >
           <div className="container" style={{ textAlign: 'center', padding: '32px 20px' }}>
             <h2 style={{ fontSize: '28px', marginBottom: '12px', color: 'var(--text)' }}>🔐 Want to Learn More?</h2>
-            <p style={{ fontSize: '16px', color: 'var(--muted)', marginBottom: '20px', maxWidth: '600px', margin: '0 auto 20px' }}>
+            <p
+              style={{
+                fontSize: '16px',
+                color: 'var(--muted)',
+                marginBottom: '20px',
+                maxWidth: '600px',
+                margin: '0 auto 20px'
+              }}
+            >
               Login or create an account to see our full story, team, values, and start exploring our collections!
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/login" className="btn btn-primary" style={{ fontSize: '16px', padding: '12px 24px' }}>Login Now</Link>
-              <Link to="/register" className="btn" style={{ fontSize: '16px', padding: '12px 24px' }}>Create Account</Link>
+              <Link to="/login" className="btn btn-primary" style={{ fontSize: '16px', padding: '12px 24px' }}>
+                Login Now
+              </Link>
+              <Link to="/register" className="btn" style={{ fontSize: '16px', padding: '12px 24px' }}>
+                Create Account
+              </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* All sections below - Only show for authenticated users */}
+      {/* Authenticated sections */}
       {user && (
         <>
           {/* Our Story */}
           <section className="section alt">
-        <div className="container">
-          <h2 className="section-title">Our Story</h2>
-          <p className="lead">
-            Started as a small studio with a big belief: daily wear should feel great, look refined, and hold up over time.
-            We partner with trusted makers and keep batches small, so attention to detail never slips.
-          </p>
-          <div className="timeline">
-            <div className="tl-item">
-              <div className="dot" />
-              <div>
-                <h3>Where it began</h3>
-                <p>Sketches, fabric swatches, and countless prototypes—our journey started with a focus on essentials.</p>
-              </div>
-            </div>
-            <div className="tl-item">
-              <div className="dot" />
-              <div>
-                <h3>Finding our partners</h3>
-                <p>We sourced mills and workshops that matched our standards for consistency and fair practices.</p>
-              </div>
-            </div>
-            <div className="tl-item">
-              <div className="dot" />
-              <div>
-                <h3>Refining the craft</h3>
-                <p>With customer feedback, we tuned fits, finishes, and care guides to make pieces last longer.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Mission & Values */}
-      <section className="section">
-        <div className="container">
-          <h2 className="section-title">Mission & Values</h2>
-          <div className="grid-3">
-            <div className="card">
-              <h3>Mission</h3>
-              <p>Make everyday dressing simpler through reliable, comfortable essentials that blend form and function.</p>
-            </div>
-            <div className="card">
-              <h3>Quality</h3>
-              <p>From reinforced seams to color-fast dyes, we design beyond the first wear and wash.</p>
-            </div>
-            <div className="card">
-              <h3>Trust</h3>
-              <p>Clear specs, honest descriptions, and responsive support keep decisions easy and informed.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sustainability & Craft */}
-      <section className="section alt">
-        <div className="container">
-          <h2 className="section-title">Sustainability & Craft</h2>
-          <div className="grid-2">
-            <div className="info">
-              <h3>Responsible choices</h3>
-              <p>
-                We prioritize durable textiles, mindful packaging, and small-batch production to reduce waste while keeping quality high.
+            <div className="container">
+              <h2 className="section-title">Our Story</h2>
+              <p className="lead">
+                Started as a small studio with a big belief: daily wear should feel great, look refined, and hold up over
+                time. We partner with trusted makers and keep batches small, so attention to detail never slips.
               </p>
-              <ul className="bullets">
-                <li>Material-first selection with long-life wear in mind.</li>
-                <li>Repair-friendly construction and care guides.</li>
-                <li>Continuous iteration based on real-world use.</li>
-              </ul>
-            </div>
-            <div className="info">
-              <h3>Attention to detail</h3>
-              <p>
-                Fit, finish, and feel are tested across sizes and seasons, ensuring each piece earns a place in daily rotation.
-              </p>
-              <ul className="bullets">
-                <li>Reinforced stress points and reliable hardware.</li>
-                <li>Neutral palettes for effortless pairing.</li>
-                <li>Consistent measurements for repeat buys.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Customer Promise */}
-      <section className="section">
-        <div className="container">
-          <h2 className="section-title">Customer Promise</h2>
-          <div className="grid-3">
-            <div className="mini-feature">
-              <h3>30-Day Returns</h3>
-              <p>Hassle-free returns on unused items in original condition within 30 days.</p>
-            </div>
-            <div className="mini-feature">
-              <h3>Fast Support</h3>
-              <p>Friendly assistance with sizing, care, and orders via chat or email.</p>
-            </div>
-            <div className="mini-feature">
-              <h3>Honest Pricing</h3>
-              <p>Fair prices without inflated markups—value built into each piece.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+              <div className="timeline">
+                <div className="tl-item">
+                  <div className="tl-content">
+                    <h3>Where it began</h3>
+                    <p>Sketches, fabric swatches, and countless prototypes—our journey started with a focus on essentials.</p>
+                  </div>
+                </div>
 
-      {/* Team Snapshot */}
-      <section className="section alt">
-        <div className="container">
-          <h2 className="section-title">Who We Are</h2>
-          <div className="grid-3">
-            <div className="person">
-              <div className="avatar" />
-              <div>
-                <h3>Design Lead</h3>
-                <p>Focuses on silhouettes, fit blocks, and fabric hand-feel for comfort and longevity.</p>
+                <div className="tl-item">
+                  <div className="tl-content">
+                    <h3>Finding our partners</h3>
+                    <p>We sourced mills and workshops that matched our standards for consistency and fair practices.</p>
+                  </div>
+                </div>
+
+                <div className="tl-item">
+                  <div className="tl-content">
+                    <h3>Refining the craft</h3>
+                    <p>With customer feedback, we tuned fits, finishes, and care guides to make pieces last longer.</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="person">
-              <div className="avatar" />
-              <div>
-                <h3>Production</h3>
-                <p>Oversees sourcing, QC, and small-batch timelines to maintain consistency.</p>
+          </section>
+
+          {/* Mission & Values */}
+          <section className="section">
+            <div className="container">
+              <h2 className="section-title">Mission & Values</h2>
+              <div className="grid-3">
+                <div className="card">
+                  <h3>Mission</h3>
+                  <p>Make everyday dressing simpler through reliable, comfortable essentials that blend form and function.</p>
+                </div>
+                <div className="card">
+                  <h3>Quality</h3>
+                  <p>From reinforced seams to color-fast dyes, we design beyond the first wear and wash.</p>
+                </div>
+                <div className="card">
+                  <h3>Trust</h3>
+                  <p>Clear specs, honest descriptions, and responsive support keep decisions easy and informed.</p>
+                </div>
               </div>
             </div>
-            <div className="person">
-              <div className="avatar" />
-              <div>
-                <h3>Care & Support</h3>
-                <p>Helps with sizing, exchanges, and care tips to keep favorites in rotation.</p>
+          </section>
+
+          {/* Sustainability & Craft */}
+          <section className="section alt">
+            <div className="container">
+              <h2 className="section-title">Sustainability & Craft</h2>
+              <div className="grid-2">
+                <div className="info">
+                  <h3>Responsible choices</h3>
+                  <p>
+                    We prioritize durable textiles, mindful packaging, and small-batch production to reduce waste while
+                    keeping quality high.
+                  </p>
+                  <ul className="bullets">
+                    <li>Material-first selection with long-life wear in mind.</li>
+                    <li>Repair-friendly construction and care guides.</li>
+                    <li>Continuous iteration based on real-world use.</li>
+                  </ul>
+                </div>
+                <div className="info">
+                  <h3>Attention to detail</h3>
+                  <p>
+                    Fit, finish, and feel are tested across sizes and seasons, ensuring each piece earns a place in daily
+                    rotation.
+                  </p>
+                  <ul className="bullets">
+                    <li>Reinforced stress points and reliable hardware.</li>
+                    <li>Neutral palettes for effortless pairing.</li>
+                    <li>Consistent measurements for repeat buys.</li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      {/* FAQs */}
-      <section className="section">
-        <div className="container">
-          <h2 className="section-title">FAQs</h2>
-          <div className="faq">
-            <details>
-              <summary>What sizes do you carry?</summary>
-              <p>Core styles generally run XS–XXL. Fit notes and measurements are listed on product pages.</p>
-            </details>
-            <details>
-              <summary>How do returns work?</summary>
-              <p>Submit a request within 30 days for unused items. We’ll guide through label creation and refund steps.</p>
-            </details>
-            <details>
-              <summary>Do you ship internationally?</summary>
-              <p>Yes, with tracked delivery options at checkout. Timelines vary by destination.</p>
-            </details>
-          </div>
-        </div>
-      </section>
+          {/* Customer Promise */}
+          <section className="section">
+            <div className="container">
+              <h2 className="section-title">Customer Promise</h2>
+              <div className="grid-3">
+                <div className="mini-feature">
+                  <h3>30-Day Returns</h3>
+                  <p>Hassle-free returns on unused items in original condition within 30 days.</p>
+                </div>
+                <div className="mini-feature">
+                  <h3>Fast Support</h3>
+                  <p>Friendly assistance with sizing, care, and orders via chat or email.</p>
+                </div>
+                <div className="mini-feature">
+                  <h3>Honest Pricing</h3>
+                  <p>Fair prices without inflated markups—value built into each piece.</p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      {/* Contact CTA */}
-      <section className="section alt">
-        <div className="container contact-cta">
-          <div>
-            <h2 className="section-title">Get in touch</h2>
-            <p className="lead">Questions about sizing, care, or orders? The team is ready to help.</p>
-          </div>
-          <div className="cta-buttons">
-            <Link to="/contact" className="btn btn-primary">Contact Support</Link>
-            <Link to="/shop" className="btn btn-ghost">Explore the Shop</Link>
-          </div>
-        </div>
-      </section>
+          {/* Team Snapshot */}
+          <section className="section alt">
+            <div className="container">
+              <h2 className="section-title">Who We Are</h2>
+              <div className="grid-3">
+                <div className="person">
+                  <div className="avatar" />
+                  <div>
+                    <h3>Design Lead</h3>
+                    <p>Focuses on silhouettes, fit blocks, and fabric hand-feel for comfort and longevity.</p>
+                  </div>
+                </div>
+                <div className="person">
+                  <div className="avatar" />
+                  <div>
+                    <h3>Production</h3>
+                    <p>Oversees sourcing, QC, and small-batch timelines to maintain consistency.</p>
+                  </div>
+                </div>
+                <div className="person">
+                  <div className="avatar" />
+                  <div>
+                    <h3>Care & Support</h3>
+                    <p>Helps with sizing, exchanges, and care tips to keep favorites in rotation.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* FAQs */}
+          <section className="section">
+            <div className="container">
+              <h2 className="section-title">FAQs</h2>
+              <div className="faq">
+                <details>
+                  <summary>What sizes do you carry?</summary>
+                  <p>Core styles generally run XS–XXL. Fit notes and measurements are listed on product pages.</p>
+                </details>
+                <details>
+                  <summary>How do returns work?</summary>
+                  <p>Submit a request within 30 days for unused items. We’ll guide through label creation and refund steps.</p>
+                </details>
+                <details>
+                  <summary>Do you ship internationally?</summary>
+                  <p>Yes, with tracked delivery options at checkout. Timelines vary by destination.</p>
+                </details>
+              </div>
+            </div>
+          </section>
+
+          {/* Contact CTA */}
+          <section className="section alt">
+            <div className="container contact-cta">
+              <div>
+                <h2 className="section-title">Get in touch</h2>
+                <p className="lead">Questions about sizing, care, or orders? The team is ready to help.</p>
+              </div>
+              <div className="cta-buttons">
+                <Link to="/contact" className="btn btn-primary">Contact Support</Link>
+                <Link to="/shop" className="btn btn-ghost">Explore the Shop</Link>
+              </div>
+            </div>
+          </section>
         </>
       )}
 
-      {/* Inline Styles for consistency with the rest of the app */}
+      {/* Inline Styles */}
       <style>{`
         :root{
           --bg:#0d0d0f;
@@ -254,25 +274,52 @@ export default function About() {
         .section{padding:48px 0;border-top:1px solid var(--line)}
         .section.alt{background:var(--surface)}
         .section-title{margin:0 0 14px;font-size:24px}
-        .lead{color:var(--muted);margin:0 0 18px;max-width:70ch}
+        .lead{color:var(--muted);margin:0 0 18px;max-width:70ch; line-height:1.6}
         .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
         .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
         .card{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:16px}
         .info{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:16px}
         .bullets{margin:8px 0 0; padding-left:18px}
         .mini-feature{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:16px}
-        .timeline{display:grid;gap:14px;margin-top:8px}
-        .tl-item{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
-        .tl-item .dot{width:10px;height:10px;border-radius:50%;background:var(--brand);margin-top:8px}
+
+        /* Timeline */
+        .timeline{display:grid;gap:18px;margin-top:8px}
+        .tl-item{
+          position:relative;
+          display:flex;
+          align-items:flex-start; /* allow natural top alignment */
+          gap:14px;
+          padding-left:20px; /* space for bullet */
+          line-height:1.35; /* consistent block line-height */
+        }
+        /* The bullet: aligns to first line cap-height using translateY */
+        .tl-item::before{
+          content:'';
+          position:absolute;
+          left:0;
+          top:0.55em; /* anchor around the first text line */
+          width:10px;
+          height:10px;
+          border-radius:50%;
+          background:var(--brand);
+          transform:translateY(-50%); /* center on the text baseline cluster */
+        }
+        .tl-content h3{margin:0 0 6px; line-height:1.2}
+        .tl-content p{margin:0; color:var(--muted)}
+
         .person{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px}
         .avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, var(--surface-alt), var(--card));border:1px solid var(--line)}
         .faq details{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:12px}
         .faq details + details{margin-top:10px}
         .contact-cta{display:flex;justify-content:space-between;align-items:center;gap:16px}
         .cta-buttons{display:flex;gap:12px}
+
+        /* Responsive */
         @media (max-width:900px){
           .grid-2,.grid-3{grid-template-columns:1fr}
           .contact-cta{flex-direction:column;align-items:flex-start}
+          .tl-item{padding-left:18px}
+          .tl-item::before{width:9px;height:9px}
         }
       `}</style>
     </>

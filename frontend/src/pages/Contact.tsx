@@ -220,7 +220,7 @@ export default function Contact() {
             <h2 className="section-title">Contact details</h2>
             <ul className="list">
               <li>Email: memberofpfc20@gmail.com</li>
-              <li>Phone: +94 11 234 5678</li>
+              <li>Phone: +94 76 89 76 222</li>
               <li>WhatsApp: +94 76 897 6222</li>
               <li>Address: 123 Market Street, Colombo</li>
               <li>Hours: Mon–Fri, 9:00–17:00 (UTC+5:30)</li>

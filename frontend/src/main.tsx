@@ -23,12 +23,14 @@ import Shop from './pages/Shop'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import './styles.css'
+import Toaster from './components/Toaster'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
+          <Toaster />
           <Routes>
             {/* Public site uses AppShell (Header/Footer) */}
             <Route element={<AppShell />}>

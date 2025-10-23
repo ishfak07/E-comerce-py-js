@@ -6,6 +6,7 @@ import { useCart } from '../lib/cart'
 export default function Header() {
   const { user, logout } = useAuth()
   const { count } = useCart()
+  const [bump, setBump] = useState(false)
   const [open, setOpen] = useState(false)
   const [userOpen, setUserOpen] = useState(false)
   const location = useLocation()
@@ -35,6 +36,14 @@ export default function Header() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  // Animate cart badge when count changes
+  useEffect(() => {
+    if (count <= 0) return
+    setBump(true)
+    const t = setTimeout(() => setBump(false), 300)
+    return () => clearTimeout(t)
+  }, [count])
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -85,7 +94,7 @@ export default function Header() {
                   <NavLink to="/contact" className={linkClass}>Contact</NavLink>
                   <NavLink to="/cart" className={({ isActive }) => isActive ? 'nav-link cart-link active' : 'nav-link cart-link'}>
                     Cart
-                    <span className="badge" aria-label={`${count} items in cart`}>{count}</span>
+                    <span className={`badge ${bump ? 'bump' : ''}`} aria-label={`${count} items in cart`}>{count}</span>
                   </NavLink>
                 </>
               )}
@@ -202,6 +211,13 @@ export default function Header() {
         
         .cart-link{display:inline-flex;align-items:center;gap:8px}
         .badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--brand);color:white;font-size:12px}
+        .badge.bump{animation: cart-bounce .3s ease}
+        @keyframes cart-bounce {
+          0% { transform: scale(1); }
+          30% { transform: scale(1.25); }
+          60% { transform: scale(0.95); }
+          100% { transform: scale(1); }
+        }
         .divider{width:1px;height:24px;background:var(--line);margin:0 6px}
         .auth{display:flex;align-items:center;gap:10px}
         

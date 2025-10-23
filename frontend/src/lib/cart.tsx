@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { toast } from './toast'
 import { useAuth } from '../context/AuthProvider'
 
 export type CartItem = { id: string; productId: number; slug: string; name: string; price: number; qty: number; image?: string }
@@ -46,10 +47,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setItems(prev => {
           const existing = prev.find(p => p.productId === item.productId)
           if (existing) {
-            return prev.map(p => p.productId === item.productId ? { ...p, qty: p.qty + qty } : p)
+            const next = prev.map(p => p.productId === item.productId ? { ...p, qty: p.qty + qty } : p)
+            return next
           }
-          return [...prev, { ...item, id: crypto.randomUUID(), qty }]
+          const next = [...prev, { ...item, id: crypto.randomUUID(), qty }]
+          return next
         })
+        // Fire friendly feedback
+        try { toast(`${item.name} added to cart`, 'success') } catch {}
       },
       remove: (id: string) => setItems(prev => prev.filter(p => p.id !== id)),
       update: (id: string, qty: number) => setItems(prev => prev.map(p => p.id === id ? { ...p, qty } : p)),

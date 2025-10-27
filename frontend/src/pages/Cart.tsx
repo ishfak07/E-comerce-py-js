@@ -207,7 +207,7 @@ export default function Cart() {
                           Send Confirmation via WhatsApp
                         </a>
 
-                        {/* MAX-ATTENTION CTA: neon border trail + magnetic tilt + burst */}
+                        {/* RED THEME MAX-ATTENTION CTA */}
                         <button
                           className="btn-cta mega-cta"
                           onClick={(e) => {
@@ -215,20 +215,17 @@ export default function Cart() {
                             const rect = btn.getBoundingClientRect()
                             const x = e.clientX - rect.left
                             const y = e.clientY - rect.top
-                            // click burst ring
                             const burst = document.createElement('span')
                             burst.className = 'burst'
                             burst.style.left = `${x}px`
                             burst.style.top = `${y}px`
                             btn.appendChild(burst)
                             setTimeout(() => burst.remove(), 800)
-                            // slight press feedback
                             btn.classList.add('pressed')
                             setTimeout(() => btn.classList.remove('pressed'), 150)
                             navigate('/checkout')
                           }}
                           onMouseMove={(e) => {
-                            // magnetic hover: cursor-based tilt/shift
                             const btn = e.currentTarget as HTMLButtonElement
                             const r = btn.getBoundingClientRect()
                             const cx = r.left + r.width / 2
@@ -353,14 +350,14 @@ export default function Cart() {
         .bank-box .row{display:flex;justify-content:space-between;padding:10px 12px;border-top:1px dashed var(--line)}
         .bank-box .row:first-child{border-top:none}
  .transfer-actions{display:flex;gap:8px;flex-wrap:wrap}
- /* Original CTA base */
+ /* Original CTA base (unchanged) */
         .btn-cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,var(--brand),#8a6bff);color:white;border:none;font-weight:700;box-shadow:0 10px 30px rgba(109,116,255,0.08);transition:transform .16s ease,box-shadow .16s ease,opacity .12s ease}
         .btn-cta:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(109,116,255,0.14);opacity:0.98}
         .btn-cta:active{transform:translateY(-1px)}
         .btn-cta:focus{outline:none;box-shadow:0 0 0 4px rgba(109,116,255,0.14),0 18px 40px rgba(109,116,255,0.14)}
         .btn-cta svg{opacity:.95}
 
-        /* MAX-ATTENTION version */
+        /* RED THEME MAX-ATTENTION CTA */
         .mega-cta{
           position:relative;
           overflow:hidden;
@@ -370,54 +367,54 @@ export default function Cart() {
           color:#0b0b11;
           background:#111;
           border:1px solid rgba(255,255,255,0.06);
-          /* intense neon stack */
           box-shadow:
-            0 0 0 2px rgba(109,116,255,0.25) inset,
-            0 12px 30px rgba(109,116,255,0.25),
-            0 0 60px rgba(138,107,255,0.25);
+            0 0 0 2px rgba(255, 68, 68, 0.28) inset,
+            0 12px 30px rgba(255, 68, 68, 0.35),
+            0 0 60px rgba(255, 80, 80, 0.30);
           transform:
             translate(var(--tx,0), var(--ty,0))
             rotateX(var(--rx,0)) rotateY(var(--ry,0));
           transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
           will-change: transform, box-shadow;
         }
-        /* vivid gradient background layer */
         .mega-cta .mega-cta__bg{
           position:absolute; inset:0; z-index:0;
-          background: radial-gradient(120% 180% at var(--mx,50%) 50%, #b07cff 0%, #6D74FF 40%, #4250ff 70%, #1d213a 90%);
-          filter: saturate(1.2) brightness(1.05);
+          background: radial-gradient(120% 180% at var(--mx,50%) 50%,
+            #ff7a7a 0%, #ff4444 35%, #d62828 70%, #1d1a1a 92%);
+          filter: saturate(1.15) brightness(1.05);
           transition: opacity .25s ease;
         }
-        /* animated border trail */
         .mega-cta .mega-cta__border{
           position:absolute; inset:0; z-index:2; pointer-events:none;
           background:
-            conic-gradient(from 0deg, rgba(255,255,255,0.0) 0 20%, rgba(255,255,255,0.45) 21% 23%, rgba(255,255,255,0.0) 24% 100%);
+            conic-gradient(from 0deg,
+              rgba(255,255,255,0.0) 0 20%,
+              rgba(255,255,255,0.55) 21% 23%,
+              rgba(255,255,255,0.0) 24% 100%);
           mix-blend-mode:screen;
           animation: border-spin 2.2s linear infinite;
-          opacity:.85;
+          opacity:.9;
         }
         @keyframes border-spin{
           0% { transform: rotate(0deg) scale(1.02); }
           100% { transform: rotate(360deg) scale(1.02); }
         }
-        /* outer neon aura */
         .mega-cta .mega-cta__glow{
           position:absolute; inset:-12%;
-          background: radial-gradient(60% 60% at 50% 50%, rgba(141,116,255,0.55), rgba(141,116,255,0) 60%),
-                      radial-gradient(80% 80% at 30% 120%, rgba(109,116,255,0.45), rgba(109,116,255,0) 70%);
+          background:
+            radial-gradient(60% 60% at 50% 50%, rgba(255, 90, 90, 0.60), rgba(255,90,90,0) 60%),
+            radial-gradient(80% 80% at 30% 120%, rgba(214,40,40,0.55), rgba(214,40,40,0) 70%);
           filter: blur(14px);
-          z-index:0; pointer-events:none; opacity:.9;
+          z-index:0; pointer-events:none; opacity:.95;
           animation: glow-pulse 2.6s ease-in-out infinite;
         }
         @keyframes glow-pulse{
-          0%,100%{ opacity:.7; }
+          0%,100%{ opacity:.75; }
           50%{ opacity:1; }
         }
-        /* moving sheen */
         .mega-cta .mega-cta__sheen{
           position:absolute; inset:-35%; z-index:3; pointer-events:none;
-          background: linear-gradient(110deg, rgba(255,255,255,0) 10%, rgba(255,255,255,0.28) 45%, rgba(255,255,255,0) 60%);
+          background: linear-gradient(110deg, rgba(255,255,255,0) 10%, rgba(255,255,255,0.32) 45%, rgba(255,255,255,0) 60%);
           transform: translateX(-60%);
           animation: sheen-scan 2.1s ease-in-out infinite;
           mix-blend-mode: screen;
@@ -428,36 +425,34 @@ export default function Cart() {
           100%{ transform: translateX(60%) }
         }
         .mega-cta .mega-cta__text{
-          position:relative; z-index:4; color:#fff; text-shadow:0 2px 10px rgba(0,0,0,0.35);
+          position:relative; z-index:4; color:#fff;
+          text-shadow:0 2px 10px rgba(0,0,0,0.4);
           letter-spacing:.2px;
         }
-        /* magnetic hover depth */
         .mega-cta:hover{
           box-shadow:
             0 0 0 2px rgba(255,255,255,0.08) inset,
-            0 22px 60px rgba(109,116,255,0.35),
-            0 0 90px rgba(138,107,255,0.35);
-          filter: drop-shadow(0 12px 28px rgba(109,116,255,.25));
+            0 22px 60px rgba(255, 68, 68, 0.45),
+            0 0 90px rgba(255, 80, 80, 0.40);
+          filter: drop-shadow(0 12px 28px rgba(255, 64, 64, .32));
         }
         .mega-cta svg{ position:relative; z-index:4; color:#fff; }
 
-        /* click burst ring */
         .mega-cta .burst{
           position:absolute; width:10px; height:10px; border-radius:999px;
           left:50%; top:50%; transform:translate(-50%,-50%);
           z-index:1; pointer-events:none;
           box-shadow:
-            0 0 0 2px rgba(255,255,255,0.65),
-            0 0 20px 4px rgba(141,116,255,0.6);
-          background: rgba(255,255,255,0.35);
+            0 0 0 2px rgba(255,255,255,0.75),
+            0 0 20px 4px rgba(255, 64, 64, 0.6);
+          background: rgba(255,255,255,0.45);
           animation: burst-out .8s ease-out forwards;
         }
         @keyframes burst-out{
-          0%{ opacity:0.9; transform:translate(-50%,-50%) scale(1); }
-          70%{ opacity:0.35; transform:translate(-50%,-50%) scale(16); }
+          0%{ opacity:0.95; transform:translate(-50%,-50%) scale(1); }
+          70%{ opacity:0.4; transform:translate(-50%,-50%) scale(16); }
           100%{ opacity:0; transform:translate(-50%,-50%) scale(24); }
         }
-        /* pressed micro feedback */
         .mega-cta.pressed{ transform: translate(0,2px) scale(0.99); }
 
         @media (prefers-reduced-motion: reduce){

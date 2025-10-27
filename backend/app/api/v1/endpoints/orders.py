@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, Body
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from ....dependencies.mongo import get_mongo_db
 from ....dependencies.auth import get_current_user
+from ....services.invoice import generate_order_invoice
 from pydantic import BaseModel
 from typing import Optional
 from pathlib import Path
@@ -230,13 +231,50 @@ def download_invoice(
             detail="Invoice only available for verified payments"
         )
     
-    # TODO: Generate actual PDF invoice
-    # For now, return a simple response
-    return {
-        "order_id": order_id,
-        "invoice_url": f"/invoices/{order_id}.pdf",
-        "message": "Invoice generation coming soon"
+    # Prepare order data for invoice generation
+    order_data = {
+        "id": str(order["_id"]),
+        "created_at": order.get("created_at"),
+        "customer_name": order.get("customer_name", "N/A"),
+        "customer_email": order.get("customer_email", "N/A"),
+        "customer_phone": order.get("customer_phone", "N/A"),
+        "shipping_address": order.get("shipping_address", {}),
+        "items": order.get("items", []),
+        "total_amount": order.get("total_amount", 0),
+        "shipping_cost": order.get("shipping_cost", 0),
+        "tax": order.get("tax", 0),
+        "payment_method": order.get("payment_method", "bank_transfer"),
+        "payment_status": order.get("payment_status", "pending"),
+        "selected_bank": order.get("selected_bank", "N/A"),
+        "transaction_reference": order.get("transaction_reference", "N/A"),
     }
+    
+    # Generate PDF invoice
+    try:
+        pdf_buffer = generate_order_invoice(order_data)
+        
+        # Return PDF as downloadable file
+        filename = f"Invoice_{order_id[-8:]}.pdf"
+        
+        # Read the buffer content before returning
+        pdf_content = pdf_buffer.getvalue()
+        
+        return StreamingResponse(
+            iter([pdf_content]),  # Wrap in iterator
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Content-Length": str(len(pdf_content))
+            }
+        )
+    except Exception as e:
+        print(f"[Invoice Error] Failed to generate invoice: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate invoice: {str(e)}"
+        )
 
 
 @router.put("/{order_id}/receipt")

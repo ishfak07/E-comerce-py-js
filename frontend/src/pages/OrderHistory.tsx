@@ -93,6 +93,29 @@ export default function OrderHistory() {
     }
   }
 
+  async function handleDownloadInvoice(orderId: string) {
+    try {
+      // Use api instance which includes auth headers
+      const response = await api.get(`/orders/${orderId}/invoice`, {
+        responseType: 'blob' // Important: tell axios to expect binary data
+      })
+      
+      // Create a blob URL and trigger download
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `Invoice_${orderId.slice(-8)}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Invoice download error:', err)
+      alert(err.response?.data?.detail || 'Failed to download invoice. Please try again.')
+    }
+  }
+
   return (
     <>
       <section className="section">
@@ -231,7 +254,7 @@ export default function OrderHistory() {
                     <button onClick={() => handleReorder(order.id)} className="btn btn-ghost">🔁 Reorder</button>
                     {order.payment_status === 'verified' && (
                       <button
-                        onClick={() => window.open(`/api/v1/orders/${order.id}/invoice`, '_blank')}
+                        onClick={() => handleDownloadInvoice(order.id)}
                         className="btn btn-ghost"
                       >
                         📄 Invoice

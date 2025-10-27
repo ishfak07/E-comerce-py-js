@@ -206,13 +206,29 @@ export default function Cart() {
                         >
                           Send Confirmation via WhatsApp
                         </a>
+                        {/* Enhanced CTA button with animations and ripple */}
                         <button
-                          className="btn btn-cta pulse"
-                          onClick={() => navigate('/checkout')}
+                          className="btn-cta pulse cta-ultimate"
+                          onClick={(e) => {
+                            // create a ripple at click position
+                            const btn = e.currentTarget
+                            const rect = btn.getBoundingClientRect()
+                            const x = e.clientX - rect.left
+                            const y = e.clientY - rect.top
+                            const ripple = document.createElement('span')
+                            ripple.className = 'ripple'
+                            ripple.style.left = `${x}px`
+                            ripple.style.top = `${y}px`
+                            btn.appendChild(ripple)
+                            setTimeout(() => ripple.remove(), 700)
+                            navigate('/checkout')
+                          }}
                           title="Optionally upload the payment screenshot on the order page"
                           aria-label="Go to order page"
                         >
-                          Go to Order Page
+                          <span className="cta-glow" aria-hidden="true"></span>
+                          <span className="cta-sheen" aria-hidden="true"></span>
+                          <span className="cta-text">Go to Order Page</span>
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" style={{ marginLeft: 10 }}>
                             <path d="M5 12h14"></path>
                             <path d="M12 5l7 7-7 7"></path>
@@ -307,8 +323,8 @@ export default function Cart() {
         .bank-box{margin:10px 0;border:1px solid var(--line);background:var(--card);border-radius:10px}
         .bank-box .row{display:flex;justify-content:space-between;padding:10px 12px;border-top:1px dashed var(--line)}
         .bank-box .row:first-child{border-top:none}
-  .transfer-actions{display:flex;gap:8px;flex-wrap:wrap}
-  /* CTA button for going to order page */
+ .transfer-actions{display:flex;gap:8px;flex-wrap:wrap}
+ /* CTA button for going to order page */
         .btn-cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,var(--brand),#8a6bff);color:white;border:none;font-weight:700;box-shadow:0 10px 30px rgba(109,116,255,0.08);transition:transform .16s ease,box-shadow .16s ease,opacity .12s ease}
         .btn-cta:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(109,116,255,0.14);opacity:0.98}
         .btn-cta:active{transform:translateY(-1px)}
@@ -326,6 +342,96 @@ export default function Cart() {
           .btn-cta.pulse { animation: none !important; }
         }
         .note{color:var(--muted);font-size:14px;margin-top:8px}
+
+        /* Ultimate CTA enhancements (glow + sheen + tilt + ripple) */
+        .cta-ultimate{
+          position:relative;
+          overflow:hidden;
+          isolation:isolate;
+          background:linear-gradient(100deg,#6D74FF 0%,#8a6bff 50%,#b07cff 100%);
+          box-shadow:
+            0 10px 30px rgba(109,116,255,0.20),
+            inset 0 0 0 1px rgba(255,255,255,0.06);
+          transform-style:preserve-3d;
+          will-change: transform;
+        }
+        .cta-ultimate:hover{
+          transform:translateY(-6px) rotateX(5deg) rotateY(-3deg);
+          box-shadow:
+            0 22px 50px rgba(109,116,255,0.28),
+            0 8px 18px rgba(0,0,0,0.22);
+        }
+        .cta-ultimate .cta-text{
+          position:relative;
+          z-index:2;
+          letter-spacing:0.2px;
+        }
+        /* Soft outer glow ring */
+        .cta-ultimate::before{
+          content:"";
+          position:absolute;
+          inset:-2px;
+          background:radial-gradient(120px 60px at var(--mx,50%) 0%, rgba(255,255,255,0.28), transparent 60%),
+                     radial-gradient(160px 80px at var(--mx,50%) 100%, rgba(138,107,255,0.18), transparent 60%);
+          filter:blur(10px);
+          opacity:.6;
+          z-index:0;
+          transition:opacity .3s ease;
+          pointer-events:none;
+        }
+        .cta-ultimate:hover::before{ opacity:.85; }
+
+        /* Moving sheen sweep */
+        .cta-ultimate .cta-sheen{
+          position:absolute;
+          inset:-40%;
+          background:conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0.0), rgba(255,255,255,0.18), rgba(255,255,255,0.0) 30%);
+          mix-blend-mode:soft-light;
+          animation:cta-sheen-move 2.4s ease-in-out infinite;
+          z-index:1;
+        }
+        @keyframes cta-sheen-move{
+          0%{ transform:translateX(-60%) rotate(15deg); }
+          50%{ transform:translateX(0%) rotate(15deg); }
+          100%{ transform:translateX(60%) rotate(15deg); }
+        }
+
+        /* Inner glow pulse */
+        .cta-ultimate .cta-glow{
+          position:absolute;
+          inset:0;
+          background:radial-gradient(120px 60px at 50% 50%, rgba(255,255,255,0.12), rgba(255,255,255,0) 60%);
+          opacity:.0;
+          animation:cta-glow 2.8s ease-in-out infinite;
+          z-index:1;
+          pointer-events:none;
+        }
+        @keyframes cta-glow{
+          0%,100%{ opacity:.08; }
+          50%{ opacity:.18; }
+        }
+
+        /* Ripple on click */
+        .cta-ultimate .ripple{
+          position:absolute;
+          width:8px;height:8px;
+          border-radius:999px;
+          background:rgba(255,255,255,0.35);
+          transform:translate(-50%,-50%) scale(1);
+          animation:ripple-grow .7s ease-out forwards;
+          z-index:0;
+          pointer-events:none;
+          filter:blur(0.5px);
+        }
+        @keyframes ripple-grow{
+          0%{ opacity:.35; transform:translate(-50%,-50%) scale(1); }
+          100%{ opacity:0; transform:translate(-50%,-50%) scale(28); }
+        }
+
+        /* Mouse reactive lighting (CSS-only fallback via :hover variable) */
+        .cta-ultimate:hover{
+          --mx:50%;
+        }
 
         @media (max-width:1024px){
           .cart-wrap{grid-template-columns:1fr}

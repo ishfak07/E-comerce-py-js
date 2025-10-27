@@ -17,15 +17,25 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([])
+  // Initialize cart synchronously from localStorage to avoid a mount-effect race
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      const stored = localStorage.getItem('cart')
+      return stored ? JSON.parse(stored) as CartItem[] : []
+    } catch {
+      return []
+    }
+  })
 
+  // Persist cart to localStorage. If cart is empty, remove the key so cleared state is explicit.
   useEffect(() => {
-    const stored = localStorage.getItem('cart')
-    if (stored) setItems(JSON.parse(stored))
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(items))
+    try {
+      if (!items || items.length === 0) {
+        localStorage.removeItem('cart')
+      } else {
+        localStorage.setItem('cart', JSON.stringify(items))
+      }
+    } catch {}
   }, [items])
 
   const value = useMemo(() => {

@@ -207,7 +207,7 @@ export default function Cart() {
                           Send Confirmation via WhatsApp
                         </a>
                         <button
-                          className="btn btn-cta"
+                          className="btn btn-cta pulse"
                           onClick={() => navigate('/checkout')}
                           title="Optionally upload the payment screenshot on the order page"
                           aria-label="Go to order page"
@@ -309,11 +309,22 @@ export default function Cart() {
         .bank-box .row:first-child{border-top:none}
   .transfer-actions{display:flex;gap:8px;flex-wrap:wrap}
   /* CTA button for going to order page */
-  .btn-cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,var(--brand),#8a6bff);color:white;border:none;font-weight:700;box-shadow:0 10px 30px rgba(109,116,255,0.08);transition:transform .16s ease,box-shadow .16s ease,opacity .12s ease}
-  .btn-cta:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(109,116,255,0.14);opacity:0.98}
-  .btn-cta:active{transform:translateY(-1px)}
-  .btn-cta:focus{outline:none;box-shadow:0 0 0 4px rgba(109,116,255,0.14),0 18px 40px rgba(109,116,255,0.14)}
-  .btn-cta svg{opacity:.95}
+        .btn-cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,var(--brand),#8a6bff);color:white;border:none;font-weight:700;box-shadow:0 10px 30px rgba(109,116,255,0.08);transition:transform .16s ease,box-shadow .16s ease,opacity .12s ease}
+        .btn-cta:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(109,116,255,0.14);opacity:0.98}
+        .btn-cta:active{transform:translateY(-1px)}
+        .btn-cta:focus{outline:none;box-shadow:0 0 0 4px rgba(109,116,255,0.14),0 18px 40px rgba(109,116,255,0.14)}
+        .btn-cta svg{opacity:.95}
+        /* Subtle attention-drawing pulse animation */
+        .btn-cta.pulse{animation:cta-pulse 2.6s ease-in-out infinite;}
+        .btn-cta.pulse:hover, .btn-cta.pulse:focus { animation-play-state: paused; }
+        @keyframes cta-pulse{
+          0% { transform: translateY(0) scale(1); box-shadow:0 10px 30px rgba(109,116,255,0.08); }
+          50% { transform: translateY(-2px) scale(1.02); box-shadow:0 20px 50px rgba(109,116,255,0.12); }
+          100% { transform: translateY(0) scale(1); box-shadow:0 10px 30px rgba(109,116,255,0.08); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .btn-cta.pulse { animation: none !important; }
+        }
         .note{color:var(--muted);font-size:14px;margin-top:8px}
 
         @media (max-width:1024px){

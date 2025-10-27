@@ -207,11 +207,16 @@ export default function Cart() {
                           Send Confirmation via WhatsApp
                         </a>
                         <button
-                          className="btn"
+                          className="btn btn-cta"
                           onClick={() => navigate('/checkout')}
                           title="Optionally upload the payment screenshot on the order page"
+                          aria-label="Go to order page"
                         >
                           Go to Order Page
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" style={{ marginLeft: 10 }}>
+                            <path d="M5 12h14"></path>
+                            <path d="M12 5l7 7-7 7"></path>
+                          </svg>
                         </button>
                       </div>
 
@@ -302,7 +307,13 @@ export default function Cart() {
         .bank-box{margin:10px 0;border:1px solid var(--line);background:var(--card);border-radius:10px}
         .bank-box .row{display:flex;justify-content:space-between;padding:10px 12px;border-top:1px dashed var(--line)}
         .bank-box .row:first-child{border-top:none}
-        .transfer-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .transfer-actions{display:flex;gap:8px;flex-wrap:wrap}
+  /* CTA button for going to order page */
+  .btn-cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,var(--brand),#8a6bff);color:white;border:none;font-weight:700;box-shadow:0 10px 30px rgba(109,116,255,0.08);transition:transform .16s ease,box-shadow .16s ease,opacity .12s ease}
+  .btn-cta:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(109,116,255,0.14);opacity:0.98}
+  .btn-cta:active{transform:translateY(-1px)}
+  .btn-cta:focus{outline:none;box-shadow:0 0 0 4px rgba(109,116,255,0.14),0 18px 40px rgba(109,116,255,0.14)}
+  .btn-cta svg{opacity:.95}
         .note{color:var(--muted);font-size:14px;margin-top:8px}
 
         @media (max-width:1024px){

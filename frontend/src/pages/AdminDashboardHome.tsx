@@ -160,21 +160,7 @@ export default function AdminDashboardHome() {
           </div>
         </div>
 
-        <div className="metric-card sales">
-          <div className="metric-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="1" x2="12" y2="23"></line>
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
-          </div>
-          <div className="metric-content">
-            <div className="metric-label">Total Sales</div>
-            <div className="metric-value" aria-live="polite">
-              LKR {Number.isFinite(safe.sales) ? safe.sales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
-            </div>
-            <div className="metric-subtitle">Revenue generated</div>
-          </div>
-        </div>
+        {/* Total Sales card removed per request */}
       </div>
 
       {/* Welcome Card */}

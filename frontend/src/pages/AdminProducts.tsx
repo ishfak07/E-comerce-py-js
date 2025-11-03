@@ -13,6 +13,7 @@ type Prod = {
   stock: number
   images?: string[]
   is_published?: boolean
+  description?: string
 }
 
 type ProductsResponse = {
@@ -33,7 +34,7 @@ type ApiError = {
 
 export default function AdminProducts() {
   const [items, setItems] = useState<Prod[]>([])
-  const [form, setForm] = useState<Prod>({ name: '', slug: '', price: 0, stock: 0, images: [] })
+  const [form, setForm] = useState<Prod>({ name: '', slug: '', price: 0, stock: 0, images: [], description: '' })
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -55,17 +56,19 @@ export default function AdminProducts() {
   const validation = useMemo(() => {
     const name = form.name.trim()
     const slug = form.slug.trim()
+    const description = form.description?.trim() || ''
     const priceOk = Number.isFinite(form.price) && form.price >= 0
     const stockOk = Number.isInteger(form.stock) && form.stock >= 0
     return {
       nameOk: name.length > 1,
       slugOk: slug.length > 1,
+      descriptionOk: description.length >= 10,
       priceOk,
       stockOk,
     }
   }, [form])
 
-  const isValid = validation.nameOk && validation.slugOk && validation.priceOk && validation.stockOk
+  const isValid = validation.nameOk && validation.slugOk && validation.descriptionOk && validation.priceOk && validation.stockOk
 
   // Helpers
   function parseMoneyInput(v: string): number {
@@ -320,6 +323,7 @@ export default function AdminProducts() {
       const payload: Partial<Prod> = {
         name: form.name.trim(),
         slug: form.slug.trim(),
+        description: form.description?.trim(),
         price: form.price,
         stock: form.stock,
         images: finalImages,
@@ -334,6 +338,7 @@ export default function AdminProducts() {
         ...payload,
         name: payload.name || '',
         slug: payload.slug || '',
+        description: payload.description || '',
         price: payload.price || 0,
         stock: payload.stock || 0,
         images: payload.images || [],
@@ -344,7 +349,7 @@ export default function AdminProducts() {
       console.log('✅ Product created successfully! Response:', response.data)
 
       // Reset form
-      setForm({ name: '', slug: '', price: 0, stock: 0, images: [] })
+      setForm({ name: '', slug: '', price: 0, stock: 0, images: [], description: '' })
       setSelectedFiles([])
       setPreviewUrls(prev => {
         prev.forEach(url => URL.revokeObjectURL(url))
@@ -473,6 +478,7 @@ export default function AdminProducts() {
       const updatePayload: Partial<Prod> = {
         name: editingProduct.name.trim(),
         slug: editingProduct.slug.trim(),
+        description: editingProduct.description?.trim(),
         price: editingProduct.price,
         stock: editingProduct.stock,
         images: allImages
@@ -627,6 +633,24 @@ export default function AdminProducts() {
               />
               {!validation.stockOk && <span className="form-error">Stock must be an integer ≥ 0</span>}
             </div>
+          </div>
+        
+          <div className="form-group-full">
+            <label className="form-label">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586a1 1 0 01.707.293l7.414 7.414a1 1 0 010 1.414l-4.586 4.586a1 1 0 01-1.414 0L4.293 7.707A1 1 0 014 7V4zm2 0v3.586l6.293 6.293 3.586-3.586L9.586 4H6z"/>
+              </svg>
+              Product Description *
+            </label>
+            <textarea
+              className="form-input"
+              placeholder="Describe your product in detail (minimum 10 characters)..."
+              value={form.description || ''}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              rows={4}
+              style={{ resize: 'vertical', minHeight: '80px' }}
+            />
+            {!validation.descriptionOk && <span className="form-error">Description must be at least 10 characters</span>}
           </div>
         
         <div className="form-group-full">
@@ -954,6 +978,25 @@ export default function AdminProducts() {
                     style={{ width: '100%', padding: 8, borderRadius: 4, background: '#14151d', border: '1px solid #2a2b36', color: '#e9e9ef' }}
                   />
                 </div>
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', marginBottom: 4, color: '#e9e9ef' }}>Description</label>
+                <textarea
+                  value={editingProduct.description || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                  rows={4}
+                  style={{
+                    width: '100%',
+                    padding: 8,
+                    borderRadius: 4,
+                    background: '#14151d',
+                    border: '1px solid #2a2b36',
+                    color: '#e9e9ef',
+                    resize: 'vertical',
+                    minHeight: '80px'
+                  }}
+                />
               </div>
               
               <div>
@@ -1491,19 +1534,23 @@ export default function AdminProducts() {
         /* Forms */
         .form-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          /* two-column layout for predictable alignment */
+          grid-template-columns: 1fr 1fr;
           gap: 20px;
           margin-bottom: 20px;
+          align-items: start;
         }
-        
+
         .form-group {
           display: flex;
           flex-direction: column;
           gap: 8px;
         }
-        
+
+        /* full-width rows (span both columns) */
         .form-group-full {
           width: 100%;
+          grid-column: 1 / -1;
         }
         
         .form-label {

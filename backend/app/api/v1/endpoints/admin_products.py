@@ -55,6 +55,8 @@ def create_product(payload: dict, db=Depends(get_mongo_db), _admin=Depends(requi
         raise HTTPException(status_code=400, detail="name is required")
     if not payload.get("slug"):
         raise HTTPException(status_code=400, detail="slug is required")
+    if not payload.get("description") or len(str(payload.get("description", "")).strip()) < 10:
+        raise HTTPException(status_code=400, detail="description is required and must be at least 10 characters")
     payload.setdefault("price", 0)
     payload.setdefault("stock", 0)
     res = products.insert_one(payload)

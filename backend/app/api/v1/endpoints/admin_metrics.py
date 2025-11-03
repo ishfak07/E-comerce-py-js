@@ -39,9 +39,24 @@ def get_metrics(db=Depends(get_mongo_db), _admin=Depends(require_admin)):
     except Exception:
         pass
 
+    # Total revenue for completed orders: sum 'total' where order is delivered/completed
+    total_revenue = 0.0
+    try:
+        # Consider an order completed if tracking_status == 'delivered' or status == 'delivered'
+        pipeline_rev = [
+            {"$match": {"$or": [{"tracking_status": "delivered"}, {"status": "delivered"}]}},
+            {"$group": {"_id": None, "sum": {"$sum": "$total"}}},
+        ]
+        agg_rev = list(orders.aggregate(pipeline_rev))
+        if agg_rev:
+            total_revenue = float(agg_rev[0].get("sum", 0.0))
+    except Exception:
+        pass
+
     return {
         "total_users": int(total_users),
         "total_products": int(total_products),
         "total_orders": int(total_orders),
         "total_sales": float(total_sales),
+        "total_revenue": float(total_revenue),
     }

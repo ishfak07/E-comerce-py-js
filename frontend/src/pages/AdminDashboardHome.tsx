@@ -6,6 +6,7 @@ type Metrics = {
   total_products: number
   total_orders: number
   total_sales: number
+  total_revenue?: number
 }
 
 type ApiError = {
@@ -64,6 +65,7 @@ export default function AdminDashboardHome() {
       products: data?.total_products ?? 0,
       orders: data?.total_orders ?? 0,
       sales: data?.total_sales ?? 0,
+      revenue: data?.total_revenue ?? 0,
     }
     return totals
   }, [data])
@@ -161,6 +163,22 @@ export default function AdminDashboardHome() {
         </div>
 
         {/* Total Sales card removed per request */}
+
+        <div className="metric-card revenue">
+          <div className="metric-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 1v22"></path>
+              <path d="M18 6h-6a3 3 0 0 0 0 6h5a3 3 0 0 1 0 6H6"></path>
+            </svg>
+          </div>
+          <div className="metric-content">
+            <div className="metric-label">Total Revenue</div>
+            <div className="metric-value" aria-live="polite">
+              LKR {Number.isFinite(safe.revenue) ? safe.revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+            </div>
+            <div className="metric-subtitle">Earnings from completed orders</div>
+          </div>
+        </div>
       </div>
 
       {/* Welcome Card */}
@@ -318,6 +336,15 @@ export default function AdminDashboardHome() {
         }
         
         .metric-card.sales:hover .metric-icon {
+          transform: scale(1.1);
+        }
+        
+        .metric-card.revenue .metric-icon {
+          background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
+          color: white;
+        }
+
+        .metric-card.revenue:hover .metric-icon {
           transform: scale(1.1);
         }
         

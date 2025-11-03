@@ -4,9 +4,16 @@ import { api } from '../lib/api'
 
 export default function OrderHistory() {
   const navigate = useNavigate()
-  const [orders, setOrders] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  type Order = {
+    id: string
+    created_at?: string
+    total_amount?: number
+    tracking_status?: 'placed' | 'verified' | 'processing' | 'shipped' | 'delivered' | 'rejected' | 'cancelled' | string
+    payment_status?: 'pending' | 'verified' | 'failed' | string
+  }
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState('all')
   const [unauth, setUnauth] = useState(false)
 
@@ -16,7 +23,7 @@ export default function OrderHistory() {
     try {
       const res = await api.get('/orders/history', { params: { status_filter: filter } })
       setOrders(res.data.orders || [])
-    } catch (err) {
+    } catch (err: any) {
       const status = err?.response?.status
       if (status === 401) {
         setUnauth(true)
@@ -33,7 +40,7 @@ export default function OrderHistory() {
 
   // Removed auto-refresh - now manual only via refresh button
 
-  function formatDate(dateString) {
+  function formatDate(dateString?: string) {
     if (!dateString) return 'N/A'
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -44,12 +51,12 @@ export default function OrderHistory() {
     }
   }
 
-  function formatMoney(amount) {
+  function formatMoney(amount?: number) {
     if (!amount) return 'LKR 0.00'
     return `LKR ${amount.toFixed(2)}`
   }
 
-  function getStatusColor(status) {
+  function getStatusColor(status?: string) {
     switch (status) {
       case 'placed': return '#d97706'
       case 'verified': return '#0284c7'
@@ -62,7 +69,7 @@ export default function OrderHistory() {
     }
   }
 
-  function getProgressPercentage(status) {
+  function getProgressPercentage(status?: string) {
     switch (status) {
       case 'placed': return 20
       case 'verified': return 40
@@ -83,36 +90,41 @@ export default function OrderHistory() {
     }
   }
 
-  async function handleReorder(orderId) {
+  async function handleReorder(orderId: string) {
     try {
       await api.post(`/orders/${orderId}/reorder`)
       alert('Items added to cart!')
       navigate('/cart')
-    } catch (err) {
+    } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to reorder')
     }
   }
 
   async function handleDownloadInvoice(orderId: string) {
+    // Most robust approach: trigger a file download via a hidden iframe using a tokenized URL.
+    // This avoids XHR/fetch blob issues and pop-up blockers.
+    const token = localStorage.getItem('access_token') || ''
+    if (!token) {
+      alert('Not authenticated')
+      return
+    }
+
+    const url = `/api/v1/orders/${orderId}/invoice?token=${encodeURIComponent(token)}`
+
     try {
-      // Use api instance which includes auth headers
-      const response = await api.get(`/orders/${orderId}/invoice`, {
-        responseType: 'blob' // Important: tell axios to expect binary data
-      })
-      
-      // Create a blob URL and trigger download
-      const blob = new Blob([response.data], { type: 'application/pdf' })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `Invoice_${orderId.slice(-8)}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      const iframe = document.createElement('iframe')
+      iframe.style.display = 'none'
+      iframe.src = url
+      document.body.appendChild(iframe)
+
+      // Best-effort cleanup after a few seconds
+      setTimeout(() => {
+        try { document.body.removeChild(iframe) } catch {}
+      }, 8000)
     } catch (err) {
       console.error('Invoice download error:', err)
-      alert(err.response?.data?.detail || 'Failed to download invoice. Please try again.')
+      // Final fallback: navigate current tab
+      try { window.location.href = url } catch {}
     }
   }
 

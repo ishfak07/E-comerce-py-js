@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, Body
 from fastapi.responses import FileResponse, StreamingResponse
 from ....dependencies.mongo import get_mongo_db
-from ....dependencies.auth import get_current_user
+from ....dependencies.auth import get_current_user, get_current_user_loose
 from ....services.invoice import generate_order_invoice
 from pydantic import BaseModel
 from typing import Optional
@@ -200,7 +200,7 @@ def reorder(
 def download_invoice(
     order_id: str,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user_loose)
 ):
     """Download invoice PDF (only available for verified payments)."""
     if db is None:

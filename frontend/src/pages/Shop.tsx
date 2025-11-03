@@ -5,7 +5,7 @@ import { useCart } from '../lib/cart'
 import { animateFlyToCart } from '../lib/flyToCart'
 
 type Product = {
-  id: number
+  id: string | number  // Can be MongoDB ObjectId string or number
   name: string
   slug: string
   price: number

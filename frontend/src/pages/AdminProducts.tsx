@@ -844,6 +844,24 @@ export default function AdminProducts() {
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                       </svg>
                     </button>
+                    <button
+                      onClick={() => p.id && update(p.id, { is_published: !p.is_published })}
+                      type="button"
+                      className={`btn-action btn-toggle ${p.is_published ? 'unpublish' : 'publish'}`}
+                      title={p.is_published ? 'Mark as Draft (unpublish)' : 'Publish product'}
+                    >
+                      {p.is_published ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z" />
+                          <path d="M12 9a3 3 0 100 6 3 3 0 000-6z" />
+                        </svg>
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z" opacity="0.4" />
+                          <path d="M12 9a3 3 0 100 6 3 3 0 000-6z" />
+                        </svg>
+                      )}
+                    </button>
                     <button 
                       onClick={() => p.id && remove(p.id)} 
                       type="button"

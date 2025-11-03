@@ -16,6 +16,7 @@ export default function OrderHistory() {
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState('all')
   const [unauth, setUnauth] = useState(false)
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
   const fetchOrders = useCallback(async () => {
     setLoading(true)
@@ -101,6 +102,8 @@ export default function OrderHistory() {
   }
 
   async function handleDownloadInvoice(orderId: string) {
+    // set UI feedback
+    setDownloadingId(orderId)
     // Most robust approach: trigger a file download via a hidden iframe using a tokenized URL.
     // This avoids XHR/fetch blob issues and pop-up blockers.
     const token = localStorage.getItem('access_token') || ''
@@ -117,14 +120,23 @@ export default function OrderHistory() {
       iframe.src = url
       document.body.appendChild(iframe)
 
+      // Remove downloading state when iframe loads (best-effort)
+      const onLoad = () => {
+        setDownloadingId(null)
+        try { iframe.removeEventListener('load', onLoad) } catch {}
+      }
+      try { iframe.addEventListener('load', onLoad) } catch {}
+
       // Best-effort cleanup after a few seconds
       setTimeout(() => {
         try { document.body.removeChild(iframe) } catch {}
-      }, 8000)
+        setDownloadingId(null)
+      }, 10000)
     } catch (err) {
       console.error('Invoice download error:', err)
       // Final fallback: navigate current tab
       try { window.location.href = url } catch {}
+      setDownloadingId(null)
     }
   }
 
@@ -267,9 +279,21 @@ export default function OrderHistory() {
                     {order.payment_status === 'verified' && (
                       <button
                         onClick={() => handleDownloadInvoice(order.id)}
-                        className="btn btn-ghost"
+                        className="btn btn-ghost invoice-btn"
+                        disabled={downloadingId === order.id}
+                        aria-busy={downloadingId === order.id}
                       >
-                        📄 Invoice
+                        {downloadingId === order.id ? (
+                          <>
+                            <svg className="invoice-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10" strokeOpacity="0.25"></circle>
+                              <path d="M22 12a10 10 0 0 1-10 10" strokeLinecap="round"></path>
+                            </svg>
+                            Downloading...
+                          </>
+                        ) : (
+                          <>📄 Invoice</>
+                        )}
                       </button>
                     )}
                     {order.tracking_status === 'delivered' && (
@@ -310,6 +334,9 @@ export default function OrderHistory() {
         .alert.error{background:#3b0d0d;color:#ffbaba}
         .alert.warning{background:#302b0b;color:#fff1b0;text-align:center}
         .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+        .invoice-btn[disabled]{opacity:0.7;cursor:not-allowed}
+        .invoice-spinner{display:inline-block;margin-right:8px;vertical-align:middle;animation:spinner-rotate 1s linear infinite}
+        @keyframes spinner-rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
       `}</style> 
     </> 
   )

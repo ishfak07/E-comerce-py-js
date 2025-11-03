@@ -59,6 +59,35 @@ class InvoiceGenerator:
             parent=self.styles['Normal'],
             alignment=TA_RIGHT
         ))
+
+        # Table header
+        self.styles.add(ParagraphStyle(
+            name='TableHeader',
+            parent=self.styles['Normal'],
+            fontSize=11,
+            textColor=colors.whitesmoke,
+            alignment=TA_LEFT,
+            spaceAfter=6,
+            leading=12
+        ))
+
+        # Table cell (left)
+        self.styles.add(ParagraphStyle(
+            name='TableCell',
+            parent=self.styles['Normal'],
+            fontSize=10,
+            alignment=TA_LEFT,
+            leading=12
+        ))
+
+        # Table cell (right aligned)
+        self.styles.add(ParagraphStyle(
+            name='TableCellRight',
+            parent=self.styles['Normal'],
+            fontSize=10,
+            alignment=TA_RIGHT,
+            leading=12
+        ))
     
     def generate_invoice(self, order_data: dict) -> BytesIO:
         """
@@ -187,9 +216,14 @@ class InvoiceGenerator:
         elements.append(Paragraph('<b>Order Details</b>', self.styles['SectionHeading']))
         elements.append(Spacer(1, 3*mm))
         
-        # Table header
+        # Table header (use Paragraphs so markup renders correctly)
         items_data = [
-            ['Item', 'Quantity', 'Price', 'Total']
+            [
+                Paragraph('Item', self.styles['TableHeader']),
+                Paragraph('Quantity', self.styles['TableHeader']),
+                Paragraph('Price', self.styles['TableHeader']),
+                Paragraph('Total', self.styles['TableHeader'])
+            ]
         ]
         
         # Table rows
@@ -204,34 +238,64 @@ class InvoiceGenerator:
             subtotal += total
             
             items_data.append([
-                title,
-                str(quantity),
-                f"LKR {price:.2f}",
-                f"LKR {total:.2f}"
+                Paragraph(title, self.styles['TableCell']),
+                Paragraph(str(quantity), self.styles['TableCellRight']),
+                Paragraph(f"LKR {price:.2f}", self.styles['TableCellRight']),
+                Paragraph(f"LKR {total:.2f}", self.styles['TableCellRight'])
             ])
         
-        # Subtotal, shipping, tax rows
-        items_data.append(['', '', '', ''])  # Empty row for spacing
-        items_data.append(['', '', 'Subtotal:', f"LKR {subtotal:.2f}"])
-        
+        # Subtotal, shipping, tax rows (use Paragraphs for markup)
+        # Add a small spacer row
+        items_data.append([
+            Paragraph('', self.styles['TableCell']),
+            Paragraph('', self.styles['TableCell']),
+            Paragraph('', self.styles['TableCell']),
+            Paragraph('', self.styles['TableCell'])
+        ])
+
+        items_data.append([
+            Paragraph('', self.styles['TableCell']),
+            Paragraph('', self.styles['TableCell']),
+            Paragraph('Subtotal:', self.styles['TableCellRight']),
+            Paragraph(f"LKR {subtotal:.2f}", self.styles['TableCellRight'])
+        ])
+
         # Shipping (if available)
         shipping_cost = float(order_data.get('shipping_cost', 0))
         if shipping_cost > 0:
-            items_data.append(['', '', 'Shipping:', f"LKR {shipping_cost:.2f}"])
-        
+            items_data.append([
+                Paragraph('', self.styles['TableCell']),
+                Paragraph('', self.styles['TableCell']),
+                Paragraph('Shipping:', self.styles['TableCellRight']),
+                Paragraph(f"LKR {shipping_cost:.2f}", self.styles['TableCellRight'])
+            ])
+
         # Tax (if available)
         tax = float(order_data.get('tax', 0))
         if tax > 0:
-            items_data.append(['', '', 'Tax:', f"LKR {tax:.2f}"])
-        
+            items_data.append([
+                Paragraph('', self.styles['TableCell']),
+                Paragraph('', self.styles['TableCell']),
+                Paragraph('Tax:', self.styles['TableCellRight']),
+                Paragraph(f"LKR {tax:.2f}", self.styles['TableCellRight'])
+            ])
+
         # Total
         total_amount = float(order_data.get('total_amount', subtotal))
-        items_data.append(['', '', '<b>Total:</b>', f"<b>LKR {total_amount:.2f}</b>"])
+        items_data.append([
+            Paragraph('', self.styles['TableCell']),
+            Paragraph('', self.styles['TableCell']),
+            Paragraph('<b>Total:</b>', self.styles['TableCellRight']),
+            Paragraph(f"<b>LKR {total_amount:.2f}</b>", self.styles['TableCellRight'])
+        ])
         
         # Create table
         items_table = Table(items_data, colWidths=[80*mm, 25*mm, 30*mm, 35*mm])
         
         # Style the table
+        row_count = len(items_data)
+        summary_start = max(1, row_count - 3)  # roughly the starting index for summary rows
+
         table_style = [
             # Header row
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6D74FF')),
@@ -239,27 +303,23 @@ class InvoiceGenerator:
             ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('TOPPADDING', (0, 0), (-1, 0), 12),
-            
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('TOPPADDING', (0, 0), (-1, 0), 10),
+
             # Content rows
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('TOPPADDING', (0, 1), (-1, -5), 8),
-            ('BOTTOMPADDING', (0, 1), (-1, -5), 8),
-            ('GRID', (0, 0), (-1, -5), 0.5, colors.grey),
-            
-            # Summary rows (last 4 rows)
-            ('FONTNAME', (0, -4), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, -4), (-1, -1), 10),
-            ('TOPPADDING', (0, -4), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, -4), (-1, -1), 6),
-            ('LINEABOVE', (2, -4), (-1, -4), 1, colors.grey),
-            
+            ('FONTNAME', (0, 1), (-1, row_count-1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, row_count-1), 10),
+            ('TOPPADDING', (0, 1), (-1, row_count-1), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, row_count-1), 6),
+            ('GRID', (0, 0), (-1, row_count-1), 0.4, colors.HexColor('#e6e6e6')),
+
+            # Line above summary
+            ('LINEABOVE', (2, summary_start), (-1, summary_start), 0.8, colors.HexColor('#cbd5e1')),
+
             # Total row (bold)
-            ('FONTNAME', (2, -1), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (2, -1), (-1, -1), 12),
-            ('LINEABOVE', (2, -1), (-1, -1), 2, colors.HexColor('#6D74FF')),
+            ('FONTNAME', (2, row_count-1), (-1, row_count-1), 'Helvetica-Bold'),
+            ('FONTSIZE', (2, row_count-1), (-1, row_count-1), 12),
+            ('LINEABOVE', (2, row_count-1), (-1, row_count-1), 1.5, colors.HexColor('#6D74FF')),
         ]
         
         items_table.setStyle(TableStyle(table_style))

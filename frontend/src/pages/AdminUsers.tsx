@@ -230,7 +230,7 @@ export default function AdminUsers() {
                 <div className="td-actions-users">
                   <div className="action-buttons">
                     <button 
-                      onClick={() => block(u.id, !u.is_active)} 
+                      onClick={() => block(u.id, u.is_active)} 
                       disabled={acting}
                       type="button"
                       className={`btn-action ${u.is_active ? 'btn-block' : 'btn-unblock'}`}

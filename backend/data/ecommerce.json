@@ -46,13 +46,74 @@
       "_id": "00000000-0000-0000-0000-000000000001"
     },
     {
-      "email": "memberofpfc20@gmail.com",
-      "password_hash": "sha256$8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-      "full_name": "Ishfaque",
+      "email": "user1@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "User One",
       "is_active": true,
       "is_staff": false,
       "is_superuser": false,
-      "_id": "f7028bde-0cc0-423b-8153-aae475d8c21d"
+      "_id": "user_001",
+      "created_at": "2025-10-01T10:00:00Z"
+    },
+    {
+      "email": "user2@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "User Two",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "user_002",
+      "created_at": "2025-10-05T14:30:00Z"
+    },
+    {
+      "email": "user3@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "User Three",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "user_003",
+      "created_at": "2025-10-10T09:15:00Z"
+    },
+    {
+      "email": "user4@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "User Four",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "user_004",
+      "created_at": "2025-10-15T16:45:00Z"
+    },
+    {
+      "email": "user5@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "User Five",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "user_005",
+      "created_at": "2025-10-20T11:20:00Z"
+    },
+    {
+      "email": "user6@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "User Six",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "user_006",
+      "created_at": "2025-10-25T13:10:00Z"
+    },
+    {
+      "email": "user7@example.com",
+      "password_hash": "sha256$8d82115d4af493110e24fd67c80ea00c2cc91e9280da36c9194f283e50cd87f8",
+      "full_name": "User Seven",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "user_007",
+      "created_at": "2025-11-01T08:00:00Z"
     }
   ],
   "products": [
@@ -82,6 +143,82 @@
         "/static/uploads/39e9f753c5ae45b7bd201dd391683c87.jpg"
       ],
       "_id": "0b2da532-1756-419a-bb2a-3961adab5bb4"
+    }
+  ],
+  "orders": [
+    {
+      "_id": "order_001",
+      "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
+      "number": "ORD-001",
+      "total": 79.00,
+      "status": "delivered",
+      "tracking_status": "delivered",
+      "created_at": "2025-10-01T10:00:00Z",
+      "items": [{"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00}]
+    },
+    {
+      "_id": "order_002",
+      "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
+      "number": "ORD-002",
+      "total": 34.00,
+      "status": "delivered",
+      "tracking_status": "delivered",
+      "created_at": "2025-10-05T14:30:00Z",
+      "items": [{"product_id": "7797d88b-d324-49b3-8996-ace368a872c9", "qty": 1, "price": 34.00}]
+    },
+    {
+      "_id": "order_003",
+      "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
+      "number": "ORD-003",
+      "total": 23.00,
+      "status": "paid",
+      "created_at": "2025-10-10T09:15:00Z",
+      "items": [{"product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4", "qty": 1, "price": 23.00}]
+    },
+    {
+      "_id": "order_004",
+      "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
+      "number": "ORD-004",
+      "total": 113.00,
+      "status": "delivered",
+      "tracking_status": "delivered",
+      "created_at": "2025-10-15T16:45:00Z",
+      "items": [
+        {"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00},
+        {"product_id": "7797d88b-d324-49b3-8996-ace368a872c9", "qty": 1, "price": 34.00}
+      ]
+    },
+    {
+      "_id": "order_005",
+      "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
+      "number": "ORD-005",
+      "total": 46.00,
+      "status": "shipped",
+      "created_at": "2025-10-20T11:20:00Z",
+      "items": [{"product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4", "qty": 2, "price": 23.00}]
+    },
+    {
+      "_id": "order_006",
+      "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
+      "number": "ORD-006",
+      "total": 136.00,
+      "status": "delivered",
+      "tracking_status": "delivered",
+      "created_at": "2025-10-25T13:10:00Z",
+      "items": [
+        {"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00},
+        {"product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4", "qty": 1, "price": 23.00},
+        {"product_id": "7797d88b-d324-49b3-8996-ace368a872c9", "qty": 1, "price": 34.00}
+      ]
+    },
+    {
+      "_id": "order_007",
+      "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
+      "number": "ORD-007",
+      "total": 79.00,
+      "status": "pending",
+      "created_at": "2025-11-01T08:00:00Z",
+      "items": [{"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00}]
     }
   ]
 }

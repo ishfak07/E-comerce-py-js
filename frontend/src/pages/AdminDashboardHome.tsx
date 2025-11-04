@@ -1,5 +1,30 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../lib/api'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js'
+import { Line, Bar } from 'react-chartjs-2'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+)
 
 type Metrics = {
   total_users: number
@@ -17,10 +42,25 @@ type ApiError = {
   message?: string
 }
 
+type ChartData = {
+  data: Array<{
+    date?: string
+    month?: string
+    orders?: number
+    revenue?: number
+    registrations?: number
+  }>
+}
+
 export default function AdminDashboardHome() {
   const [data, setData] = useState<Metrics | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
+
+  // Chart data states
+  const [salesTrends, setSalesTrends] = useState<ChartData | null>(null)
+  const [revenueGrowth, setRevenueGrowth] = useState<ChartData | null>(null)
+  const [userActivity, setUserActivity] = useState<ChartData | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -29,9 +69,23 @@ export default function AdminDashboardHome() {
 
     ;(async () => {
       try {
-        const r = await api.get<Metrics>('/admin/metrics', { signal: controller.signal })
+        // Fetch main metrics
+        const metricsResponse = await api.get<Metrics>('/admin/metrics', { signal: controller.signal })
         if (!mounted) return
-        setData(r.data)
+        setData(metricsResponse.data)
+
+        // Fetch chart data in parallel
+        const [salesResponse, revenueResponse, userResponse] = await Promise.all([
+          api.get<ChartData>('/admin/metrics/charts/sales-trends', { signal: controller.signal }),
+          api.get<ChartData>('/admin/metrics/charts/revenue-growth', { signal: controller.signal }),
+          api.get<ChartData>('/admin/metrics/charts/user-activity', { signal: controller.signal })
+        ])
+
+        if (!mounted) return
+        setSalesTrends(salesResponse.data)
+        setRevenueGrowth(revenueResponse.data)
+        setUserActivity(userResponse.data)
+
         setError(null)
       } catch (err) {
         if (!mounted) return
@@ -47,7 +101,7 @@ export default function AdminDashboardHome() {
         }
 
         const serverDetail = e?.response?.data?.detail || e?.response?.data?.message
-        setError(serverDetail || 'Failed to load metrics')
+        setError(serverDetail || 'Failed to load dashboard data')
       } finally {
         if (mounted) setLoading(false)
       }
@@ -196,6 +250,242 @@ export default function AdminDashboardHome() {
             <div className="welcome-stat">
               <span className="stat-number">{safe.orders > 0 ? ((safe.products / safe.orders) * 100).toFixed(1) : '0'}%</span>
               <span className="stat-label">Conversion Rate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="charts-section">
+        <h2 className="section-title">Analytics & Trends</h2>
+        <div className="charts-grid">
+          {/* Sales Trends Chart */}
+          <div className="chart-card">
+            <div className="chart-header">
+              <h3>Sales Trends (Last 30 Days)</h3>
+              <div className="chart-legend">
+                <div className="legend-item">
+                  <div className="legend-color orders"></div>
+                  <span>Orders</span>
+                </div>
+                <div className="legend-item">
+                  <div className="legend-color revenue"></div>
+                  <span>Revenue (LKR)</span>
+                </div>
+              </div>
+            </div>
+            <div className="chart-container">
+              {salesTrends?.data ? (
+                <Line
+                  data={{
+                    labels: salesTrends.data.map(item => {
+                      const date = new Date(item.date!)
+                      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    }),
+                    datasets: [
+                      {
+                        label: 'Orders',
+                        data: salesTrends.data.map(item => item.orders || 0),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        yAxisID: 'y',
+                        tension: 0.4,
+                        fill: true,
+                      },
+                      {
+                        label: 'Revenue (LKR)',
+                        data: salesTrends.data.map(item => item.revenue || 0),
+                        borderColor: '#34a853',
+                        backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                        yAxisID: 'y1',
+                        tension: 0.4,
+                        fill: true,
+                      }
+                    ]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                      mode: 'index',
+                      intersect: false,
+                    },
+                    plugins: {
+                      legend: {
+                        display: false, // Hide legend since we have custom one
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            if (context.datasetIndex === 0) {
+                              return `Orders: ${context.parsed.y || 0}`
+                            } else {
+                              return `Revenue: LKR ${(context.parsed.y || 0).toLocaleString()}`
+                            }
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          display: false,
+                        },
+                      },
+                      y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                          display: true,
+                          text: 'Orders',
+                        },
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                      },
+                      y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                          display: true,
+                          text: 'Revenue (LKR)',
+                        },
+                        grid: {
+                          drawOnChartArea: false,
+                        },
+                      }
+                    }
+                  }}
+                />
+              ) : (
+                <div className="chart-loading">Loading sales trends...</div>
+              )}
+            </div>
+          </div>
+
+          {/* Revenue Growth Chart */}
+          <div className="chart-card">
+            <div className="chart-header">
+              <h3>Revenue Growth (Last 12 Months)</h3>
+            </div>
+            <div className="chart-container">
+              {revenueGrowth?.data ? (
+                <Bar
+                  data={{
+                    labels: revenueGrowth.data.map(item => {
+                      const [year, month] = (item.month || '').split('-')
+                      const date = new Date(parseInt(year), parseInt(month) - 1)
+                      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                    }),
+                    datasets: [{
+                      label: 'Revenue (LKR)',
+                      data: revenueGrowth.data.map(item => item.revenue || 0),
+                      backgroundColor: 'rgba(52, 168, 83, 0.8)',
+                      borderColor: '#34a853',
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      borderSkipped: false,
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            return `Revenue: LKR ${(context.parsed.y || 0).toLocaleString()}`
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          display: false,
+                        },
+                      },
+                      y: {
+                        beginAtZero: true,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        ticks: {
+                          callback: function(value) {
+                            return 'LKR ' + value.toLocaleString()
+                          }
+                        }
+                      }
+                    }
+                  }}
+                />
+              ) : (
+                <div className="chart-loading">Loading revenue growth...</div>
+              )}
+            </div>
+          </div>
+
+          {/* User Activity Chart */}
+          <div className="chart-card">
+            <div className="chart-header">
+              <h3>User Registrations (Last 30 Days)</h3>
+            </div>
+            <div className="chart-container">
+              {userActivity?.data ? (
+                <Bar
+                  data={{
+                    labels: userActivity.data.map(item => {
+                      const date = new Date(item.date!)
+                      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    }),
+                    datasets: [{
+                      label: 'Registrations',
+                      data: userActivity.data.map(item => item.registrations || 0),
+                      backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                      borderColor: '#667eea',
+                      borderWidth: 1,
+                      borderRadius: 4,
+                      borderSkipped: false,
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: false,
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: function(context) {
+                            return `Registrations: ${context.parsed.y}`
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          display: false,
+                        },
+                      },
+                      y: {
+                        beginAtZero: true,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                      }
+                    }
+                  }}
+                />
+              ) : (
+                <div className="chart-loading">Loading user activity...</div>
+              )}
             </div>
           </div>
         </div>
@@ -485,6 +775,116 @@ export default function AdminDashboardHome() {
           
           .welcome-stat {
             width: 100%;
+          }
+        }
+      `}</style>
+
+      <style>{`
+        /* Charts Section */
+        .charts-section {
+          margin-top: 40px;
+        }
+
+        .section-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #1a202c;
+          margin: 0 0 24px 0;
+        }
+
+        .charts-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          gap: 24px;
+        }
+
+        .chart-card {
+          background: white;
+          border-radius: 16px;
+          padding: 24px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          border: 1px solid #e2e8f0;
+        }
+
+        .chart-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .chart-header h3 {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1a202c;
+          margin: 0;
+        }
+
+        .chart-legend {
+          display: flex;
+          gap: 16px;
+        }
+
+        .legend-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          color: #718096;
+        }
+
+        .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 2px;
+        }
+
+        .legend-color.orders {
+          background-color: #667eea;
+        }
+
+        .legend-color.revenue {
+          background-color: #34a853;
+        }
+
+        .chart-container {
+          height: 300px;
+          position: relative;
+        }
+
+        .chart-loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          color: #a0aec0;
+          font-size: 14px;
+        }
+
+        /* Responsive Charts */
+        @media (max-width: 1200px) {
+          .charts-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .chart-card {
+            padding: 16px;
+          }
+
+          .chart-container {
+            height: 250px;
+          }
+
+          .chart-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+
+          .chart-legend {
+            align-self: flex-end;
           }
         }
       `}</style>

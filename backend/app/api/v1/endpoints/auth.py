@@ -101,6 +101,11 @@ def login(payload: LoginRequest, db=Depends(get_mongo_db)):
     
     if not user or not verify_password(payload.password, stored_password or ""):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    # Prevent blocked/inactive users from logging in
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive or blocked user")
+
     user_id = str(user.get("_id"))
     access = create_access_token(user_id)
     refresh = create_refresh_token(user_id)
@@ -140,6 +145,11 @@ def refresh(payload: RefreshRequest, db=Depends(get_mongo_db)):
     user = users.find_one({"_id": lookup_id}) if lookup_id else None
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    # Do not refresh tokens for inactive/blocked users
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive or blocked user")
+
     uid = str(user.get("_id"))
     access = create_access_token(uid)
     refresh_token = create_refresh_token(uid)

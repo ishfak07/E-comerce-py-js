@@ -77,29 +77,18 @@ def get_sales_trends(days: int = 30, db=Depends(get_mongo_db)):
     start_date = end_date - timedelta(days=days)
 
     try:
-        # Get all orders (FileDatabase doesn't support complex queries)
-        cursor = orders.find()
+        # Get all orders in date range
+        cursor = orders.find({
+            "created_at": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
+            "status": {"$in": ["paid", "delivered"]}
+        })
         all_orders = list(cursor)
 
-        # Filter and group by date in Python
+        # Group by date
         date_groups = defaultdict(lambda: {"orders": 0, "revenue": 0.0})
         for order in all_orders:
             try:
-                # Check status
-                if order.get("status") not in ["paid", "delivered"]:
-                    continue
-
-                # Parse date
-                created_at = order.get("created_at", "")
-                if isinstance(created_at, str):
-                    order_date = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                else:
-                    continue
-
-                # Check date range
-                if not (start_date <= order_date <= end_date):
-                    continue
-
+                order_date = datetime.fromisoformat(order["created_at"].replace('Z', '+00:00'))
                 date_str = order_date.strftime("%Y-%m-%d")
                 date_groups[date_str]["orders"] += 1
                 date_groups[date_str]["revenue"] += float(order.get("total", 0))
@@ -143,29 +132,18 @@ def get_revenue_growth(months: int = 12, db=Depends(get_mongo_db)):
     start_date = end_date - timedelta(days=months * 30)
 
     try:
-        # Get all orders
-        cursor = orders.find()
+        # Get all orders in date range
+        cursor = orders.find({
+            "created_at": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
+            "status": {"$in": ["paid", "delivered"]}
+        })
         all_orders = list(cursor)
 
-        # Filter and group by month in Python
+        # Group by month
         month_groups = defaultdict(float)
         for order in all_orders:
             try:
-                # Check status
-                if order.get("status") not in ["paid", "delivered"]:
-                    continue
-
-                # Parse date
-                created_at = order.get("created_at", "")
-                if isinstance(created_at, str):
-                    order_date = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                else:
-                    continue
-
-                # Check date range
-                if not (start_date <= order_date <= end_date):
-                    continue
-
+                order_date = datetime.fromisoformat(order["created_at"].replace('Z', '+00:00'))
                 month_str = order_date.strftime("%Y-%m")
                 month_groups[month_str] += float(order.get("total", 0))
             except Exception:
@@ -204,25 +182,17 @@ def get_user_activity(days: int = 30, db=Depends(get_mongo_db)):
     start_date = end_date - timedelta(days=days)
 
     try:
-        # Get all users
-        cursor = users.find()
+        # Get all users in date range
+        cursor = users.find({
+            "created_at": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}
+        })
         all_users = list(cursor)
 
-        # Filter and group by date in Python
+        # Group by date
         date_groups = defaultdict(int)
         for user in all_users:
             try:
-                # Parse date
-                created_at = user.get("created_at", "")
-                if isinstance(created_at, str):
-                    user_date = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                else:
-                    continue
-
-                # Check date range
-                if not (start_date <= user_date <= end_date):
-                    continue
-
+                user_date = datetime.fromisoformat(user["created_at"].replace('Z', '+00:00'))
                 date_str = user_date.strftime("%Y-%m-%d")
                 date_groups[date_str] += 1
             except Exception:

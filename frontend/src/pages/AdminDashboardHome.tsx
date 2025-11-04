@@ -113,6 +113,34 @@ export default function AdminDashboardHome() {
     }
   }, [])
 
+  // Polling to refresh dashboard data periodically (every 30 seconds)
+  useEffect(() => {
+    let mounted = true
+
+    const fetchLatest = async () => {
+      try {
+        const [metricsResp, salesResp, revenueResp, usersResp] = await Promise.all([
+          api.get<Metrics>('/admin/metrics'),
+          api.get<ChartData>('/admin/metrics/charts/sales-trends'),
+          api.get<ChartData>('/admin/metrics/charts/revenue-growth'),
+          api.get<ChartData>('/admin/metrics/charts/user-activity'),
+        ])
+        if (!mounted) return
+        setData(metricsResp.data)
+        setSalesTrends(salesResp.data)
+        setRevenueGrowth(revenueResp.data)
+        setUserActivity(usersResp.data)
+      } catch (e) {
+        // polling errors should not break the UI; ignore silently
+      }
+    }
+
+    const id = setInterval(fetchLatest, 30_000)
+    return () => {
+      mounted = false
+      clearInterval(id)
+    }
+  }, [])
   const safe = useMemo(() => {
     const totals = {
       users: data?.total_users ?? 0,

@@ -25,6 +25,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   
   // Load cart from server when user logs in
   useEffect(() => {
+    // Don't load cart on auth pages to prevent API calls that could trigger redirects
+    if (typeof window !== 'undefined' && (window.location.pathname === '/login' || window.location.pathname === '/register')) {
+      return
+    }
+
     if (!user?.email) {
       // User logged out - clear cart
       setItems([])

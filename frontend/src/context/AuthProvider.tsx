@@ -21,12 +21,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Restore authentication state from localStorage
-    const token = localStorage.getItem('access_token')
-    const userJson = localStorage.getItem('user')
-    if (token) setAccessToken(token)
-    if (userJson) setUser(JSON.parse(userJson))
-    setLoading(false)
+    // Restore authentication state from localStorage and validate token
+    const initAuth = async () => {
+      const token = localStorage.getItem('access_token')
+      const userJson = localStorage.getItem('user')
+      
+      if (token && userJson) {
+        try {
+          // Validate token by making a request to /auth/me
+          await api.get('/auth/me')
+          // If successful, set the user
+          setUser(JSON.parse(userJson))
+          setAccessToken(token)
+        } catch (error) {
+          // Token is invalid, clear it
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          localStorage.removeItem('user')
+        }
+      }
+      setLoading(false)
+    }
+
+    initAuth()
   }, [])
 
   useEffect(() => {

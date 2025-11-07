@@ -74,7 +74,10 @@ api.interceptors.response.use(
           processQueue(null)
           isRefreshing = false
           try { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token') } catch (_) {}
-          try { window.location.href = '/login' } catch (_) {}
+          // Only redirect to login if not already on login page to prevent infinite loop
+          if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+            try { window.location.href = '/login' } catch (_) {}
+          }
           return Promise.reject(err)
         }
         const resp = await axios.post('/api/v1/auth/refresh', { refresh_token: refreshToken })
@@ -97,7 +100,10 @@ api.interceptors.response.use(
         isRefreshing = false
         // clear tokens on failure
         try { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token') } catch (ex) {}
-        try { window.location.href = '/login' } catch (_) {}
+        // Only redirect to login if not already on login page to prevent infinite loop
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          try { window.location.href = '/login' } catch (_) {}
+        }
         return Promise.reject(err)
       }
     }

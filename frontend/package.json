@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^1.7.7",
     "chart.js": "^4.5.1",
+    "lucide-react": "^0.553.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^18.3.1",
@@ -20,6 +21,7 @@
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.3.8",
@@ -27,6 +29,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^9.11.1",
     "eslint-plugin-react": "^7.37.0",
+    "jsdom": "^27.1.0",
     "typescript": "^5.6.2",
     "vite": "^5.4.6",
     "vitest": "^2.1.1"

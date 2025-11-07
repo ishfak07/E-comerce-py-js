@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom'
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    globals: true
   },
   server: {
     // Prefer 5174; if it's occupied Vite will bump to the next. We'll list 5174-5176 to allow small range.

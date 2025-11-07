@@ -585,15 +585,15 @@ const FAQ: React.FC = () => {
 
           <div className="faq-docs-grid">
             {[
-              { name: '🚀 Quick Start Guide', url: '/QUICK_START.md', desc: 'Get started in minutes' },
-              { name: '🔐 Authentication Guide', url: '/AUTHENTICATION_IMPLEMENTATION.md', desc: 'User management & security' },
-              { name: '📦 Order Status System', url: '/ORDER_STATUS_TECHNICAL_DOCS.md', desc: 'Order lifecycle management' },
-              { name: '📄 Invoice Feature', url: '/INVOICE_FEATURE_COMPLETE.md', desc: 'PDF generation & billing' },
-              { name: '📸 Multiple Images Guide', url: '/MULTIPLE_IMAGES_FEATURE.md', desc: 'Product image handling' },
-              { name: '💰 Currency Configuration', url: '/CURRENCY_CHANGE.md', desc: 'Multi-currency support' },
-              { name: '👑 Admin Panel Fixes', url: '/ADMIN_PANEL_FIXES.md', desc: 'Admin interface updates' },
-              { name: '🏦 Bank Transfer Payments', url: '/BANK_TRANSFER_UPGRADE.md', desc: 'Payment processing' },
-              { name: '🖼️ Image Upload System', url: '/IMAGE_UPLOAD_FIX.md', desc: 'File upload & storage' }
+              { name: '🚀 Quick Start Guide', url: '/docs/QUICK_START.md', desc: 'Get started in minutes' },
+              { name: '🔐 Authentication Guide', url: '/docs/AUTHENTICATION_IMPLEMENTATION.md', desc: 'User management & security' },
+              { name: '📦 Order Status System', url: '/docs/ORDER_STATUS_TECHNICAL_DOCS.md', desc: 'Order lifecycle management' },
+              { name: '📄 Invoice Feature', url: '/docs/INVOICE_FEATURE_COMPLETE.md', desc: 'PDF generation & billing' },
+              { name: '📸 Multiple Images Guide', url: '/docs/MULTIPLE_IMAGES_FEATURE.md', desc: 'Product image handling' },
+              { name: '💰 Currency Configuration', url: '/docs/CURRENCY_CHANGE.md', desc: 'Multi-currency support' },
+              { name: '👑 Admin Panel Fixes', url: '/docs/ADMIN_PANEL_FIXES.md', desc: 'Admin interface updates' },
+              { name: '🏦 Bank Transfer Payments', url: '/docs/BANK_TRANSFER_UPGRADE.md', desc: 'Payment processing' },
+              { name: '🖼️ Image Upload System', url: '/docs/IMAGE_UPLOAD_FIX.md', desc: 'File upload & storage' }
             ].map((doc, index) => (
               <a
                 key={index}

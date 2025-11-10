@@ -8,4 +8,3 @@ def test_register_and_login_flow(client):
   assert data['user']['email'] == 'test@example.com'  
 
 
-

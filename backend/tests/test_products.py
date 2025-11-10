@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.models import Product
+from ..app.models.models import Product
 
 
 def test_products_list_empty(client):

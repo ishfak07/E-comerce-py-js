@@ -63,12 +63,6 @@ def require_admin(user: dict = Depends(get_current_user)) -> dict:
     return user
 
 
-def require_non_admin(user: dict = Depends(get_current_user)) -> dict:
-    if user.get("is_staff") or user.get("is_superuser"):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admins cannot perform shopping actions")
-    return user
-
-
 def get_current_user_loose(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),

@@ -1844,8 +1844,9 @@ export default function AdminProducts() {
         
         .product-cell {
           display: flex;
-          align-items: center;
-          gap: 12px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
         }
         
         .product-images {

@@ -8,7 +8,10 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Brand + Tagline */}
           <div className="col brand-col">
-            <Link to="/" className="brand">Own Setup 💼</Link>
+            <Link to="/" className="brand" aria-label="Home">
+              <img src="/images/title.png" alt="Own Setup logo" />
+              <span className="sr-only">Own Setup</span>
+            </Link>
             <p className="tagline">Everyday essentials with thoughtful design and lasting quality.</p>
           </div>
 
@@ -119,7 +122,8 @@ export default function Footer() {
         .container{max-width:1120px;margin:0 auto;padding:0 20px}
         .footer-inner{display:flex;flex-direction:column;gap:16px}
         .footer-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.2fr 1.2fr;gap:16px}
-        .brand{color:var(--text);text-decoration:none;font-weight:800;letter-spacing:.2px}
+        .brand{display:inline-flex;align-items:center;text-decoration:none}
+        .brand img{display:block;height:46px;width:auto}
         .tagline{color:var(--muted);margin-top:6px;max-width:36ch}
         .col-title{margin:0 0 8px;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
         .list{list-style:none;margin:0;padding:0;display:grid;gap:6px}

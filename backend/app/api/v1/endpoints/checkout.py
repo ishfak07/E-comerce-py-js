@@ -9,6 +9,7 @@ import uuid
 import os
 
 from ....dependencies.mongo import get_mongo_db
+from ....dependencies.auth import require_non_admin
 from ....services.payments import create_payment_intent
 
 
@@ -50,7 +51,7 @@ class CheckoutRequest(BaseModel):
 
 
 @router.post("")
-def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
+def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db), current_user=Depends(require_non_admin)):
     # Only support bank_transfer now (removed stripe)
     if payload.payment_method != "bank_transfer":
         raise HTTPException(status_code=400, detail="Only bank transfer payment is supported")
@@ -65,6 +66,10 @@ def checkout(payload: CheckoutRequest, db=Depends(get_mongo_db)):
             raise HTTPException(status_code=400, detail="Bank selection is required")
         if not payload.transfer_receipt_url:
             raise HTTPException(status_code=400, detail="Transfer receipt upload is required")
+
+    # Validate that customer email matches authenticated user
+    if payload.customer_email != current_user.get("email"):
+        raise HTTPException(status_code=400, detail="Customer email must match authenticated user")
 
     # Derive total from payload if provided; otherwise fallback to items or placeholder
     if payload.total_amount is not None:

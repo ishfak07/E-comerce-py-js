@@ -9,7 +9,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from ....dependencies.mongo import get_mongo_db
-from ....dependencies.auth import get_current_user
+from ....dependencies.auth import require_non_admin
 
 
 router = APIRouter(prefix="/cart")
@@ -42,7 +42,7 @@ class CartResponse(BaseModel):
 @router.get("", response_model=CartResponse)
 def get_cart(
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Get the current user's cart"""
     if db is None:
@@ -77,7 +77,7 @@ def get_cart(
 def add_to_cart(
     item: CartItemRequest,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Add an item to the cart"""
     if db is None:
@@ -158,7 +158,7 @@ def update_cart_item(
     item_id: str,
     qty: int,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Update the quantity of a cart item"""
     if db is None:
@@ -204,7 +204,7 @@ def update_cart_item(
 def remove_from_cart(
     item_id: str,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Remove an item from the cart"""
     if db is None:
@@ -230,7 +230,7 @@ def remove_from_cart(
 @router.delete("/clear")
 def clear_cart(
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Clear all items from the cart"""
     if db is None:
@@ -256,7 +256,7 @@ def clear_cart(
 def sync_cart(
     items: List[CartItemRequest],
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """
     Sync local cart items to server.

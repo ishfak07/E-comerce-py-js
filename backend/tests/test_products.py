@@ -6,7 +6,7 @@ import to reach the sibling `app` package regardless of the working
 directory pytest is invoked from.
 """
 
-from ..app.models.models import Product  # noqa: F401 (import used for type/reference)
+from app.models.models import Product  # noqa: F401 (import used for type/reference)
 
 
 def test_products_list_empty(client):

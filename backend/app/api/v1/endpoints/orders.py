@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, Body
 from fastapi.responses import FileResponse, StreamingResponse
 from ....dependencies.mongo import get_mongo_db
-from ....dependencies.auth import get_current_user, get_current_user_loose
+from ....dependencies.auth import require_non_admin, get_current_user_loose
 from ....services.invoice import generate_order_invoice
 from pydantic import BaseModel
 from typing import Optional
@@ -25,7 +25,7 @@ class ReviewRequest(BaseModel):
 def get_order_history(
     status_filter: Optional[str] = None,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Get user's order history with optional status filter."""
     try:
@@ -124,7 +124,7 @@ def get_order_history(
 def get_order_details(
     order_id: str,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Get detailed information about a specific order."""
     if db is None:
@@ -161,7 +161,7 @@ def get_order_details(
 def reorder(
     order_id: str,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Duplicate an order's items into the user's cart."""
     if db is None:
@@ -283,7 +283,7 @@ def reupload_receipt(
     request: Request,
     file: UploadFile = File(...),
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Re-upload receipt (only allowed if payment was rejected and resubmit_required=true)."""
     if db is None:
@@ -364,7 +364,7 @@ def submit_review(
     order_id: str,
     payload: ReviewRequest,
     db=Depends(get_mongo_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(require_non_admin)
 ):
     """Submit a product review (only allowed after delivery)."""
     if db is None:

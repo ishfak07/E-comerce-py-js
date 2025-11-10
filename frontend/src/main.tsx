@@ -23,6 +23,7 @@ import Shop from './pages/Shop'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import FAQ from './pages/FAQ'
+import Search from './pages/Search'
 import './styles.css'
 import Toaster from './components/Toaster'
 import Account from './pages/Account'
@@ -65,6 +66,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   <Route path="/home" element={<Home />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/faq" element={<FAQ />} />
+                  <Route path="/search" element={<Search />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   

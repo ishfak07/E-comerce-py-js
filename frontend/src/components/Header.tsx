@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Link, useLocation } from 'react-router-dom'
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
 import { useCart } from '../lib/cart'
+import { api } from '../lib/api'
 
 
 export default function Header() {
@@ -11,9 +12,22 @@ export default function Header() {
   const [open, setOpen] = useState(false)
   const [userOpen, setUserOpen] = useState(false)
   const [logoLoaded, setLogoLoaded] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [suggestions, setSuggestions] = useState<Array<{
+    id: string;
+    name: string;
+    type: 'product' | 'faq' | 'page';
+    url: string;
+    content?: string;
+  }>>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedSuggestion, setSelectedSuggestion] = useState(-1)
   const location = useLocation()
+  const navigate = useNavigate()
   const headerRef = useRef<HTMLElement | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
+  const searchRef = useRef<HTMLDivElement | null>(null)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
 
 
   useEffect(() => {
@@ -36,11 +50,34 @@ export default function Header() {
       if (e.key === 'Escape') {
         setOpen(false)
         setUserOpen(false)
+        setShowSuggestions(false)
+        setSelectedSuggestion(-1)
+        searchInputRef.current?.blur()
+      } else if (showSuggestions && suggestions.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault()
+          setSelectedSuggestion(prev => 
+            prev < suggestions.length - 1 ? prev + 1 : 0
+          )
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault()
+          setSelectedSuggestion(prev => 
+            prev > 0 ? prev - 1 : suggestions.length - 1
+          )
+        } else if (e.key === 'Enter' && selectedSuggestion >= 0) {
+          e.preventDefault()
+          const selectedProduct = suggestions[selectedSuggestion]
+          navigate(`/search?q=${encodeURIComponent(selectedProduct.name)}`)
+          setSearchQuery('')
+          setShowSuggestions(false)
+          setSelectedSuggestion(-1)
+          setOpen(false)
+        }
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [showSuggestions, suggestions, selectedSuggestion, navigate])
 
 
   // Animate cart badge when count changes
@@ -57,6 +94,11 @@ export default function Header() {
       if (!menuRef.current) return
       if (!menuRef.current.contains(e.target as Node)) {
         setUserOpen(false)
+      }
+      if (!searchRef.current) return
+      if (!searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+        setSelectedSuggestion(-1)
       }
     }
     document.addEventListener('mousedown', onClick)
@@ -75,8 +117,355 @@ export default function Header() {
 
   const inAdmin = location.pathname.startsWith('/admin')
   
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const query = selectedSuggestion >= 0 ? suggestions[selectedSuggestion].name : searchQuery.trim()
+    if (query) {
+      navigate(`/search?q=${encodeURIComponent(query)}`)
+      setSearchQuery('')
+      setShowSuggestions(false)
+      setSelectedSuggestion(-1)
+      setOpen(false) // Close mobile menu if open
+    }
+  }
+
+  // Debounced search suggestions
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      setSelectedSuggestion(-1)
+      return
+    }
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        // Fetch products
+        const productsResponse = await api.get('/api/v1/products', {
+          params: { q: searchQuery.trim(), size: 10 }
+        })
+        const products = productsResponse.data?.items || []
+
+        // Static content for other pages
+        const staticContent: Array<{
+          id: string;
+          name: string;
+          type: 'product' | 'faq' | 'page';
+          url: string;
+          content: string;
+        }> = [
+          // FAQ content
+          {
+            id: 'faq-general',
+            name: 'What is this platform?',
+            type: 'faq',
+            url: '/faq',
+            content: 'modern e-commerce platform built with FastAPI backend and React frontend'
+          },
+          {
+            id: 'faq-account',
+            name: 'How do I create an account?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Click on Register in the navigation menu, fill in your details'
+          },
+          {
+            id: 'faq-payment',
+            name: 'What payment methods are available?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Stripe credit/debit cards and Bank Transfer'
+          },
+          {
+            id: 'faq-shopping',
+            name: 'How do I browse products?',
+            type: 'faq',
+            url: '/faq',
+            content: 'After logging in, click Shop in the navigation menu'
+          },
+          {
+            id: 'faq-cart',
+            name: 'How do I add items to my cart?',
+            type: 'faq',
+            url: '/faq',
+            content: 'On the product detail page, select quantity and click Add to Cart'
+          },
+          {
+            id: 'faq-checkout',
+            name: 'What information do I need to provide during checkout?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Customer name, contact information, shipping address, payment method'
+          },
+          {
+            id: 'faq-orders',
+            name: 'How do I view my order history?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Access your order history from the Orders page in navigation'
+          },
+          {
+            id: 'faq-password',
+            name: 'I forgot my password. What should I do?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Contact support through the contact page for assistance'
+          },
+
+          // About page content
+          {
+            id: 'about-story',
+            name: 'Our Story',
+            type: 'page',
+            url: '/about',
+            content: 'Design-led essentials, made to last. Everyday apparel and accessories built with comfort, durability'
+          },
+          {
+            id: 'about-values',
+            name: 'Our Values',
+            type: 'page',
+            url: '/about',
+            content: 'Quality, sustainability, transparency, and customer satisfaction'
+          },
+          {
+            id: 'about-team',
+            name: 'Our Team',
+            type: 'page',
+            url: '/about',
+            content: 'Passionate designers and craftsmen dedicated to creating timeless pieces'
+          },
+
+          // Contact page content
+          {
+            id: 'contact-support',
+            name: 'Contact Support',
+            type: 'page',
+            url: '/contact',
+            content: 'Get in touch with our support team for help with orders, products, or account issues'
+          },
+          {
+            id: 'contact-form',
+            name: 'Contact Form',
+            type: 'page',
+            url: '/contact',
+            content: 'Send us a message through our contact form and we\'ll respond within 1-2 business days'
+          },
+          {
+            id: 'contact-whatsapp',
+            name: 'WhatsApp Support',
+            type: 'page',
+            url: '/contact',
+            content: 'Chat with us on WhatsApp for immediate assistance'
+          },
+          {
+            id: 'contact-phone',
+            name: 'Phone Support',
+            type: 'page',
+            url: '/contact',
+            content: 'Call us directly for urgent inquiries and support'
+          },
+
+          // Other pages
+          {
+            id: 'home',
+            name: 'Home',
+            type: 'page',
+            url: '/',
+            content: 'Welcome to our e-commerce platform. Browse our latest collections and featured products'
+          },
+          {
+            id: 'shop',
+            name: 'Shop',
+            type: 'page',
+            url: '/shop',
+            content: 'Browse our complete product catalog with advanced filtering and search'
+          }
+        ]
+
+        // Filter static content based on search query
+        const searchTerm = searchQuery.toLowerCase()
+        const filteredStatic = staticContent.filter(item =>
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.content.toLowerCase().includes(searchTerm)
+        )
+
+        // Combine and format suggestions
+        const allSuggestions: Array<{
+          id: string;
+          name: string;
+          type: 'product' | 'faq' | 'page';
+          url: string;
+          content?: string;
+        }> = [
+          ...products.map((p: any) => ({
+            id: `product-${p.id}`,
+            name: p.name,
+            type: 'product' as const,
+            url: `/product/${p.slug}`,
+            content: p.category || 'Product'
+          })),
+          ...filteredStatic
+        ].slice(0, 8) // Limit to 8 total suggestions
+
+        setSuggestions(allSuggestions)
+        setShowSuggestions(true)
+        setSelectedSuggestion(-1)
+      } catch (error) {
+        // Even if API fails, show static content
+        const staticContent: Array<{
+          id: string;
+          name: string;
+          type: 'product' | 'faq' | 'page';
+          url: string;
+          content: string;
+        }> = [
+          // FAQ content
+          {
+            id: 'faq-general',
+            name: 'What is this platform?',
+            type: 'faq',
+            url: '/faq',
+            content: 'modern e-commerce platform built with FastAPI backend and React frontend'
+          },
+          {
+            id: 'faq-account',
+            name: 'How do I create an account?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Click on Register in the navigation menu, fill in your details'
+          },
+          {
+            id: 'faq-payment',
+            name: 'What payment methods are available?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Stripe credit/debit cards and Bank Transfer'
+          },
+          {
+            id: 'faq-shopping',
+            name: 'How do I browse products?',
+            type: 'faq',
+            url: '/faq',
+            content: 'After logging in, click Shop in the navigation menu'
+          },
+          {
+            id: 'faq-cart',
+            name: 'How do I add items to my cart?',
+            type: 'faq',
+            url: '/faq',
+            content: 'On the product detail page, select quantity and click Add to Cart'
+          },
+          {
+            id: 'faq-checkout',
+            name: 'What information do I need to provide during checkout?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Customer name, contact information, shipping address, payment method'
+          },
+          {
+            id: 'faq-orders',
+            name: 'How do I view my order history?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Access your order history from the Orders page in navigation'
+          },
+          {
+            id: 'faq-password',
+            name: 'I forgot my password. What should I do?',
+            type: 'faq',
+            url: '/faq',
+            content: 'Contact support through the contact page for assistance'
+          },
+
+          // About page content
+          {
+            id: 'about-story',
+            name: 'Our Story',
+            type: 'page',
+            url: '/about',
+            content: 'Design-led essentials, made to last. Everyday apparel and accessories built with comfort, durability'
+          },
+          {
+            id: 'about-values',
+            name: 'Our Values',
+            type: 'page',
+            url: '/about',
+            content: 'Quality, sustainability, transparency, and customer satisfaction'
+          },
+          {
+            id: 'about-team',
+            name: 'Our Team',
+            type: 'page',
+            url: '/about',
+            content: 'Passionate designers and craftsmen dedicated to creating timeless pieces'
+          },
+
+          // Contact page content
+          {
+            id: 'contact-support',
+            name: 'Contact Support',
+            type: 'page',
+            url: '/contact',
+            content: 'Get in touch with our support team for help with orders, products, or account issues'
+          },
+          {
+            id: 'contact-form',
+            name: 'Contact Form',
+            type: 'page',
+            url: '/contact',
+            content: 'Send us a message through our contact form and we\'ll respond within 1-2 business days'
+          },
+          {
+            id: 'contact-whatsapp',
+            name: 'WhatsApp Support',
+            type: 'page',
+            url: '/contact',
+            content: 'Chat with us on WhatsApp for immediate assistance'
+          },
+          {
+            id: 'contact-phone',
+            name: 'Phone Support',
+            type: 'page',
+            url: '/contact',
+            content: 'Call us directly for urgent inquiries and support'
+          },
+
+          // Other pages
+          {
+            id: 'home',
+            name: 'Home',
+            type: 'page',
+            url: '/',
+            content: 'Welcome to our e-commerce platform. Browse our latest collections and featured products'
+          },
+          {
+            id: 'shop',
+            name: 'Shop',
+            type: 'page',
+            url: '/shop',
+            content: 'Browse our complete product catalog with advanced filtering and search'
+          }
+        ]
+
+        const searchTerm = searchQuery.toLowerCase()
+        const filteredStatic = staticContent.filter(item =>
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.content.toLowerCase().includes(searchTerm)
+        )
+        setSuggestions(filteredStatic.slice(0, 8))
+        setShowSuggestions(filteredStatic.length > 0)
+        setSelectedSuggestion(-1)
+      }
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
+  
   return (
     <header className="header" ref={headerRef}>
+      {/* Skip to main content link for accessibility */}
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      
       <div className="container header-inner">
         <div className="left">
           <button
@@ -113,6 +502,96 @@ export default function Header() {
             <>
               <NavLink to="/" end className={linkClass}>Home</NavLink>
                <NavLink to="/shop" className={linkClass}>Shop</NavLink>
+              
+              {/* Search Form */}
+              <div className="search-container" ref={searchRef}>
+                <form onSubmit={handleSearch} className="search-form">
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => {
+                      if (suggestions.length > 0) {
+                        setShowSuggestions(true)
+                      }
+                    }}
+                    className="search-input"
+                    aria-label="Search"
+                    autoComplete="off"
+                  />
+                  {searchQuery && (
+                    <button 
+                      type="button" 
+                      className="search-clear" 
+                      onClick={() => {
+                        setSearchQuery('')
+                        setShowSuggestions(false)
+                        setSelectedSuggestion(-1)
+                        searchInputRef.current?.focus()
+                      }}
+                      aria-label="Clear search"
+                    >
+                      ×
+                    </button>
+                  )}
+                  <button type="submit" className="search-btn" aria-label="Submit search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                  </button>
+                </form>
+                
+                {/* Search Suggestions Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="search-suggestions">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={suggestion.id}
+                        type="button"
+                        className={`suggestion-item ${selectedSuggestion === index ? 'selected' : ''}`}
+                        onClick={() => {
+                          navigate(suggestion.url)
+                          setSearchQuery('')
+                          setShowSuggestions(false)
+                          setSelectedSuggestion(-1)
+                          setOpen(false)
+                        }}
+                        onMouseEnter={() => setSelectedSuggestion(index)}
+                      >
+                        <div className="suggestion-icon">
+                          {suggestion.type === 'product' && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/>
+                              <line x1="7" y1="7" x2="7" y2="7"/>
+                            </svg>
+                          )}
+                          {suggestion.type === 'faq' && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                          )}
+                          {suggestion.type === 'page' && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                              <polyline points="14,2 14,8 20,8"/>
+                            </svg>
+                          )}
+                        </div>
+                        <div className="suggestion-content">
+                          <span className="suggestion-title">{suggestion.name}</span>
+                          <span className="suggestion-type">{suggestion.type}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
               <NavLink to="/about" className={linkClass}>About</NavLink>
               {user && (
                 <>
@@ -193,6 +672,8 @@ export default function Header() {
           --ghost:#232434;
         }
         .container{max-width:1120px;margin:0 auto;padding:0 20px}
+        .skip-link{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;background:var(--brand);color:white;padding:8px;text-decoration:none;border-radius:4px;z-index:1000}
+        .skip-link:focus{left:20px;top:20px;width:auto;height:auto}
         .header{
           position:sticky;
           top:0;
@@ -387,7 +868,7 @@ export default function Header() {
         }
         
         /* Particle effect - smaller and contained */
-        .logo-wrapper::after {
+        /* .logo-wrapper::after {
           content: '';
           position: absolute;
           width: 3px;
@@ -402,7 +883,7 @@ export default function Header() {
           animation: particleFloat 5s ease-in-out infinite;
           z-index: 0;
           pointer-events: none;
-        }
+        } */
         
         @keyframes particleFloat {
           0%, 100% {
@@ -464,6 +945,26 @@ export default function Header() {
         .hamburger{display:none;flex-direction:column;gap:4px;width:36px;height:36px;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:var(--ghost);color:var(--text)}
         .hamburger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px}
         .nav{display:flex;align-items:center;gap:14px}
+        
+        /* Search form styles */
+        .search-container{position:relative}
+        .search-form{display:flex;align-items:center;gap:8px;border-radius:8px;border:1px solid var(--line);background:var(--ghost);padding:0 12px;min-width:200px;max-width:300px}
+        .search-input{flex:1;border:none;background:transparent;color:var(--text);font-size:14px;padding:8px 0;outline:none}
+        .search-input::placeholder{color:var(--muted)}
+        .search-clear{border:none;background:transparent;color:var(--muted);cursor:pointer;padding:4px;border-radius:4px;font-size:18px;line-height:1;transition:all 0.2s ease}
+        .search-clear:hover{color:var(--text);background:var(--ghost)}
+        .search-btn{border:none;background:transparent;color:var(--text);cursor:pointer;padding:4px;border-radius:4px;transition:background 0.2s ease}
+        
+        /* Search suggestions dropdown */
+        .search-suggestions{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-top:4px;max-height:300px;overflow-y:auto;z-index:1000;box-shadow:0 6px 22px rgba(0,0,0,.3)}
+        .suggestion-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px;border:none;background:transparent;color:var(--text);cursor:pointer;border-radius:6px;font-size:14px;font-family:inherit;transition:background 0.2s ease}
+        .suggestion-item:hover,.suggestion-item.selected{background:var(--ghost)}
+        .suggestion-icon{flex-shrink:0;color:var(--muted);display:flex;align-items:center;justify-content:center;width:16px;height:16px}
+        .suggestion-content{flex:1;display:flex;flex-direction:column;gap:2px}
+        .suggestion-title{font-weight:500;color:var(--text)}
+        .suggestion-type{font-size:11px;color:var(--muted);text-transform:capitalize}
+        .search-btn:hover{background:var(--ghost)}
+        .search-btn:focus{outline:2px solid var(--brand);outline-offset:-2px}
         
         /* Base nav-link styles */
         .nav-link{
@@ -605,6 +1106,8 @@ export default function Header() {
           .hamburger{display:flex}
           .nav{position:fixed;inset:64px 0 auto auto;top:64px;right:0;flex-direction:column;align-items:stretch;background:var(--surface);border-left:1px solid var(--line);padding:12px;gap:6px;width:min(300px,90vw);height:calc(100vh - 64px);transform:translateX(100%);transition:.2s}
           .nav.open{transform:translateX(0)}
+          .search-container{min-width:unset;max-width:unset;width:100%;margin:6px 0}
+          .search-suggestions{position:static;border:none;border-radius:0;margin-top:0;max-height:200px;box-shadow:none}
           .divider{display:none}
           .auth{margin-top:6px;flex-direction:column;width:100%}
           .auth-btn{width:100%}

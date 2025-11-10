@@ -36,11 +36,37 @@ Environment
 - SECRET_KEY for JWT
 - STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET (optional)
 
-CI
+## 🌐 Deployment
+
+### GitHub Pages (Frontend Only)
+The frontend is automatically deployed to GitHub Pages on every push to `main`.
+
+**Live Demo:** `https://ishfak07.github.io/E-comerce-py-js/`
+
+**Documentation:**
+- [Complete Deployment Guide](DEPLOYMENT.md)
+- [GitHub Pages Fix Summary](GITHUB_PAGES_FIX.md)
+
+**Note:** GitHub Pages hosts only the static frontend. For full functionality, deploy the backend separately and configure the API URL.
+
+## CI/CD
 - GitHub Actions builds/lints backend and frontend
+- Automated deployment to GitHub Pages via workflow
+
+## 📚 Documentation
+- [Quick Start Guide](QUICK_START.md)
+- [Authentication Implementation](AUTHENTICATION_IMPLEMENTATION.md)
+- [Order Status System](ORDER_STATUS_TECHNICAL_DOCS.md)
+- [Invoice Feature](INVOICE_FEATURE_COMPLETE.md)
+- [Multiple Images](MULTIPLE_IMAGES_FEATURE.md)
+- [Currency Change](CURRENCY_CHANGE.md)
+- [Admin Panel Fixes](ADMIN_PANEL_FIXES.md)
+- [Bank Transfer Payments](BANK_TRANSFER_UPGRADE.md)
+- [Image Upload System](IMAGE_UPLOAD_FIX.md)
 
 Next steps
 - Complete cart persistence, admin portal, and tests
 - Harden security (rate limiting, input validation)
+- Deploy backend for production
 
 

@@ -27,6 +27,13 @@ import './styles.css'
 import Toaster from './components/Toaster'
 import Account from './pages/Account'
 
+// Handle GitHub Pages 404 redirect for client-side routing
+const redirect = sessionStorage.redirect;
+delete sessionStorage.redirect;
+if (redirect && redirect !== location.href) {
+  history.replaceState(null, '', redirect);
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   // Suppress specific React Router future-flag warnings in development only.
   // These are informational and originate from react-router's deprecations module.

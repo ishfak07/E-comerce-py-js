@@ -6,6 +6,6 @@ def test_register_and_login_flow(client):
   data = r.json()
   assert 'access_token' in data
   assert data['user']['email'] == 'test@example.com'  
-
+ 
 
 

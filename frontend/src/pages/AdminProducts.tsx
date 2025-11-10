@@ -800,14 +800,13 @@ export default function AdminProducts() {
                 <div className="td-product">
                   <div className="product-cell">
                     {p.images && p.images.length > 0 ? (
-                      <div className="product-images">
+                      <div className="product-images" title={p.description || ''}>
                         {p.images.slice(0, 3).map((img, idx) => (
                           <img
                             key={idx}
                             src={img}
                             alt={`${p.name} ${idx + 1}`}
                             className="product-thumbnail"
-                            title={`Image ${idx + 1} of ${p.images?.length || 0}`}
                           />
                         ))}
                         {p.images.length > 3 && (
@@ -815,7 +814,7 @@ export default function AdminProducts() {
                         )}
                       </div>
                     ) : (
-                      <div className="no-image">
+                      <div className="no-image" title={p.description || ''}>
                         <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" opacity="0.3">
                           <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
                         </svg>

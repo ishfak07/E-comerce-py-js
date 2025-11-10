@@ -5,7 +5,7 @@ def test_register_and_login_flow(client):
   assert r.status_code == 200
   data = r.json()
   assert 'access_token' in data
-  assert data['user']['email'] == 'test@example.com'
+  assert data['user']['email'] == 'test@example.com' 
 
 
 

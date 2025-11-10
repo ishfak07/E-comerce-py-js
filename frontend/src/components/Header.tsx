@@ -112,10 +112,10 @@ export default function Header() {
           {!inAdmin && (
             <>
               <NavLink to="/" end className={linkClass}>Home</NavLink>
+               <NavLink to="/shop" className={linkClass}>Shop</NavLink>
               <NavLink to="/about" className={linkClass}>About</NavLink>
               {user && (
                 <>
-                  <NavLink to="/shop" className={linkClass}>Shop</NavLink>
                   <NavLink to="/contact" className={linkClass}>Contact</NavLink>
                   <NavLink to="/cart" className={({ isActive }) => isActive ? 'nav-link cart-link active' : 'nav-link cart-link'}>
                     Cart

@@ -1,14 +1,44 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthProvider'
+import { useState, useEffect } from 'react'
 
 export default function AdminShell() {
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [currentTime, setCurrentTime] = useState(new Date())
 
   const handleLogout = () => {
     logout()
     navigate('/login')
+  }
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  // Format time and date
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour12: true,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  }
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
   }
 
   return (
@@ -16,22 +46,29 @@ export default function AdminShell() {
       {/* Top Header */}
       <header className="admin-header">
         <div className="admin-header-left">
-          <div className="admin-logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="url(#grad)"/>
-              <path d="M16 8L24 14L16 20L8 14L16 8Z" fill="white" fillOpacity="0.9"/>
-              <path d="M16 20L24 26L16 32L8 26L16 20Z" fill="white" fillOpacity="0.6"/>
-              <defs>
-                <linearGradient id="grad" x1="0" y1="0" x2="32" y2="32">
-                  <stop offset="0%" stopColor="#667eea"/>
-                  <stop offset="100%" stopColor="#764ba2"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <span className="admin-brand">Admin Panel</span>
-          </div>
+          <Link to="/" className="admin-brand-link" aria-label="Home">
+            <div className="logo-container">
+              <div className="logo-wrapper">
+                <img 
+                  src="/images/title1.png" 
+                  alt="Own Setup logo"
+                />
+                <div className="logo-glow" aria-hidden="true" />
+                <div className="logo-ring ring-1" aria-hidden="true" />
+                <div className="logo-ring ring-2" aria-hidden="true" />
+                <div className="logo-ring ring-3" aria-hidden="true" />
+              </div>
+            </div>
+          </Link>
+          <span className="admin-brand animated-text">Own Setup</span>
         </div>
         <div className="admin-header-right">
+          {/* Digital Clock */}
+          <div className="admin-clock">
+            <div className="clock-time">{formatTime(currentTime)}</div>
+            <div className="clock-date">{formatDate(currentTime)}</div>
+          </div>
+
           <button className="admin-btn-icon" title="Notifications">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
@@ -322,6 +359,349 @@ export default function AdminShell() {
             display: none;
           }
         }
+
+        /* ========================================
+           LOGO ANIMATIONS FOR ADMIN HEADER
+           ======================================== */
+
+        .admin-brand-link {
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+          margin-right: 12px;
+        }
+
+        /* Container to clip all effects within bounds */
+        .logo-container {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 60px;
+          height: 42px;
+          overflow: hidden;
+        }
+
+        /* ========================================
+           CONTINUOUS AUTO-ANIMATING LOGO EFFECTS
+           ======================================== */
+
+        .logo-wrapper {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          animation: logoEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Entrance animation */
+        @keyframes logoEntrance {
+          0% {
+            opacity: 0;
+            transform: scale(0.5) rotate(-180deg);
+          }
+          60% {
+            transform: scale(1.1) rotate(10deg);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+          }
+        }
+
+        /* Logo image - continuous floating + subtle rotation */
+        .logo-wrapper img {
+          display: block;
+          height: 30px;
+          width: auto;
+          position: relative;
+          z-index: 3;
+          filter: drop-shadow(0 0 6px rgba(109, 116, 255, 0.4));
+          animation: logoFloat 4s ease-in-out infinite, logoRotate 8s linear infinite;
+        }
+
+        /* Continuous floating motion - reduced range */
+        @keyframes logoFloat {
+          0%, 100% {
+            transform: translateY(0px) scale(1);
+          }
+          25% {
+            transform: translateY(-3px) scale(1.05);
+          }
+          50% {
+            transform: translateY(0px) scale(1);
+          }
+          75% {
+            transform: translateY(-2px) scale(1.02);
+          }
+        }
+
+        /* Subtle continuous rotation */
+        @keyframes logoRotate {
+          0% {
+            transform: rotate(0deg);
+          }
+          25% {
+            transform: rotate(3deg);
+          }
+          50% {
+            transform: rotate(0deg);
+          }
+          75% {
+            transform: rotate(-3deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
+        }
+
+        /* Animated pulsing glow behind logo - contained size */
+        .logo-glow {
+          position: absolute;
+          width: 45px;
+          height: 45px;
+          background: radial-gradient(circle at center, rgba(109, 116, 255, 0.6), transparent 70%);
+          border-radius: 50%;
+          z-index: 1;
+          filter: blur(9px);
+          animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+          0%, 100% {
+            opacity: 0.4;
+            transform: scale(0.9);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.2);
+          }
+        }
+
+        /* Rotating rings around logo - smaller sizes */
+        .logo-ring {
+          position: absolute;
+          border: 2px solid transparent;
+          border-radius: 50%;
+          z-index: 2;
+        }
+
+        .ring-1 {
+          width: 38px;
+          height: 38px;
+          border-top-color: rgba(109, 116, 255, 0.6);
+          border-right-color: rgba(109, 116, 255, 0.3);
+          animation: ringRotate 4s linear infinite;
+        }
+
+        .ring-2 {
+          width: 42px;
+          height: 42px;
+          border-bottom-color: rgba(109, 116, 255, 0.5);
+          border-left-color: rgba(109, 116, 255, 0.2);
+          animation: ringRotate 6s linear infinite reverse;
+        }
+
+        .ring-3 {
+          width: 46px;
+          height: 46px;
+          border-top-color: rgba(109, 116, 255, 0.4);
+          border-bottom-color: rgba(109, 116, 255, 0.1);
+          animation: ringRotate 8s linear infinite;
+        }
+
+        @keyframes ringRotate {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        /* Enhanced hover effect on top of continuous animation */
+        .admin-brand-link:hover .logo-wrapper img {
+          animation: logoFloat 4s ease-in-out infinite, logoRotate 8s linear infinite, logoHoverBounce 0.6s ease;
+        }
+
+        @keyframes logoHoverBounce {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.15);
+          }
+        }
+
+        .admin-brand-link:hover .logo-glow {
+          filter: blur(12px);
+          animation: glowPulse 1.5s ease-in-out infinite;
+        }
+
+        .admin-brand-link:hover .ring-1 {
+          border-top-color: rgba(109, 116, 255, 1);
+          border-right-color: rgba(109, 116, 255, 0.6);
+        }
+
+        .admin-brand-link:hover .ring-2 {
+          border-bottom-color: rgba(109, 116, 255, 0.9);
+          border-left-color: rgba(109, 116, 255, 0.5);
+        }
+
+        .admin-brand-link:hover .ring-3 {
+          border-top-color: rgba(109, 116, 255, 0.8);
+          border-bottom-color: rgba(109, 116, 255, 0.4);
+        }
+
+        /* ========================================
+           END LOGO ANIMATIONS
+           ======================================== */
+
+        /* ========================================
+           DIGITAL CLOCK STYLES
+           ======================================== */
+
+        .admin-clock {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: rgba(103, 126, 234, 0.15);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(103, 126, 234, 0.3);
+          border-radius: 12px;
+          padding: 8px 16px;
+          margin-right: 16px;
+          min-width: 140px;
+          box-shadow: 0 4px 15px rgba(103, 126, 234, 0.2);
+          animation: clockGlow 2s ease-in-out infinite alternate;
+        }
+
+        .clock-time {
+          font-family: 'Courier New', monospace;
+          font-size: 18px;
+          font-weight: 600;
+          color: #000000;
+          text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+          animation: timePulse 1s ease-in-out infinite;
+          letter-spacing: 1px;
+        }
+
+        .clock-date {
+          font-size: 10px;
+          color: rgba(0, 0, 0, 0.7);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-top: 2px;
+          font-weight: 500;
+          animation: dateFade 3s ease-in-out infinite;
+        }
+
+        /* Clock glow animation */
+        @keyframes clockGlow {
+          0% {
+            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.2), 0 0 20px rgba(103, 126, 234, 0.1);
+          }
+          100% {
+            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.2), 0 0 30px rgba(103, 126, 234, 0.2);
+          }
+        }
+
+        /* Time pulse animation */
+        @keyframes timePulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.02);
+          }
+        }
+
+        /* Date fade animation */
+        @keyframes dateFade {
+          0%, 100% {
+            opacity: 0.8;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+
+        /* Hover effects for clock */
+        .admin-clock:hover {
+          transform: translateY(-2px);
+          transition: transform 0.3s ease;
+        }
+
+        .admin-clock:hover .clock-time {
+          animation: timePulse 0.5s ease-in-out infinite, timeGlow 0.5s ease-in-out;
+        }
+
+        @keyframes timeGlow {
+          0% {
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+          }
+          100% {
+            text-shadow: 0 0 20px rgba(103, 126, 234, 1), 0 0 30px rgba(103, 126, 234, 0.5);
+          }
+        }
+
+        /* ========================================
+           END DIGITAL CLOCK STYLES
+           ======================================== */
+
+        /* ========================================
+           ANIMATED TEXT STYLES
+           ======================================== */
+
+        .animated-text {
+          font-size: 24px;
+          font-weight: 800;
+          color: #000000 !important;
+          background: none !important;
+          -webkit-background-clip: initial !important;
+          -webkit-text-fill-color: initial !important;
+          background-clip: initial !important;
+          position: relative;
+          display: inline-block;
+          margin-left: -30px;
+        }
+
+        /* Text glow animation */
+        @keyframes textGlow {
+          0%, 100% {
+            text-shadow: 0 0 20px rgba(103, 126, 234, 0.5), 0 0 30px rgba(103, 126, 234, 0.3);
+          }
+          50% {
+            text-shadow: 0 0 30px rgba(103, 126, 234, 0.8), 0 0 40px rgba(103, 126, 234, 0.5), 0 0 50px rgba(103, 126, 234, 0.3);
+          }
+        }
+
+        /* Text floating animation */
+        @keyframes textFloat {
+          0%, 100% {
+            transform: translateY(0px) scale(1);
+          }
+          25% {
+            transform: translateY(-2px) scale(1.02);
+          }
+          50% {
+            transform: translateY(0px) scale(1);
+          }
+          75% {
+            transform: translateY(-1px) scale(1.01);
+          }
+        }
+
+        /* Hover effects for animated text */
+        .animated-text:hover {
+          /* No animations */
+        }
+
+        /* ========================================
+           END ANIMATED TEXT STYLES
+           ======================================== */
       `}</style>
     </div>
   )

@@ -29,12 +29,14 @@ export default function AdminUsers() {
 
   const normalized = useMemo(
     () =>
-      items.map((u) => ({
-        ...u,
-        is_active: u.is_active ?? true,
-        is_staff: u.is_staff ?? false,
-        is_superuser: u.is_superuser ?? false,
-      })),
+      items
+        .map((u) => ({
+          ...u,
+          is_active: u.is_active ?? true,
+          is_staff: u.is_staff ?? false,
+          is_superuser: u.is_superuser ?? false,
+        }))
+        .sort((a, b) => (b.is_superuser ? 1 : 0) - (a.is_superuser ? 1 : 0)),
     [items]
   )
 
@@ -182,7 +184,7 @@ export default function AdminUsers() {
             </div>
             
             {normalized.map((u) => (
-              <div key={u.id} className="table-row-users">
+              <div key={u.id} className={`table-row-users ${u.is_superuser ? 'admin-row' : ''}`}>
                 <div className="td-email">
                   <div className="user-cell">
                     <div className="user-avatar">
@@ -228,36 +230,45 @@ export default function AdminUsers() {
                   </span>
                 </div>
                 <div className="td-actions-users">
-                  <div className="action-buttons">
-                    <button 
-                      onClick={() => block(u.id, u.is_active)} 
-                      disabled={acting}
-                      type="button"
-                      className={`btn-action ${u.is_active ? 'btn-block' : 'btn-unblock'}`}
-                      title={u.is_active ? 'Block user' : 'Unblock user'}
-                    >
-                      {u.is_active ? (
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z"/>
-                        </svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
-                        </svg>
-                      )}
-                    </button>
-                    <button 
-                      onClick={() => remove(u.id)} 
-                      disabled={acting}
-                      type="button"
-                      className="btn-action btn-delete"
-                      title="Delete user"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
+                  {u.is_superuser ? (
+                    <div className="admin-indicator">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" style={{ color: '#d97706' }}>
+                        <path d="M5 4a1 1 0 00-.894.553L2.382 8H1a1 1 0 000 2h1.618l1.447 2.894A1 1 0 006 13h8a1 1 0 00.894-.553L16.618 10H18a1 1 0 100-2h-1.382l-1.724-3.447A1 1 0 0014 4H5z"/>
                       </svg>
-                    </button>
-                  </div>
+                      <span style={{ fontSize: '12px', color: '#d97706', fontWeight: '600', marginLeft: '6px' }}>System Admin</span>
+                    </div>
+                  ) : (
+                    <div className="action-buttons">
+                      <button 
+                        onClick={() => block(u.id, u.is_active)} 
+                        disabled={acting}
+                        type="button"
+                        className={`btn-action ${u.is_active ? 'btn-block' : 'btn-unblock'}`}
+                        title={u.is_active ? 'Block user' : 'Unblock user'}
+                      >
+                        {u.is_active ? (
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z"/>
+                          </svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                          </svg>
+                        )}
+                      </button>
+                      <button 
+                        onClick={() => remove(u.id)} 
+                        disabled={acting}
+                        type="button"
+                        className="btn-action btn-delete"
+                        title="Delete user"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -378,6 +389,40 @@ export default function AdminUsers() {
           to { transform: rotate(360deg); }
         }
         
+        @keyframes adminPulse {
+          0% { transform: scale(1); border-left-color: #667eea; }
+          50% { transform: scale(1.01); border-left-color: #764ba2; }
+          100% { transform: scale(1); border-left-color: #667eea; }
+        }
+        
+        @keyframes adminImpress {
+          0% { 
+            border-left-color: #667eea; 
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3), inset 0 0 20px rgba(102, 126, 234, 0.1); 
+          }
+          25% { 
+            border-left-color: #764ba2; 
+            box-shadow: 0 0 30px rgba(118, 75, 162, 0.5), inset 0 0 30px rgba(118, 75, 162, 0.2); 
+          }
+          50% { 
+            border-left-color: #f093fb; 
+            box-shadow: 0 0 40px rgba(240, 147, 251, 0.6), inset 0 0 40px rgba(240, 147, 251, 0.3); 
+          }
+          75% { 
+            border-left-color: #764ba2; 
+            box-shadow: 0 0 30px rgba(118, 75, 162, 0.5), inset 0 0 30px rgba(118, 75, 162, 0.2); 
+          }
+          100% { 
+            border-left-color: #667eea; 
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3), inset 0 0 20px rgba(102, 126, 234, 0.1); 
+          }
+        }
+        
+        @keyframes adminShimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
         .empty-state-large {
           text-align: center;
           padding: 60px 20px;
@@ -439,6 +484,29 @@ export default function AdminUsers() {
         
         .table-row-users:hover {
           background: #f7fafc;
+        }
+        
+        .admin-row {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+          border-left: 8px solid #667eea;
+          position: relative;
+          animation: adminImpress 2s ease-in-out infinite;
+        }
+        
+        .admin-row::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+          animation: adminShimmer 3s linear infinite;
+          pointer-events: none;
+        }
+        
+        .admin-row:hover {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
         }
         
         .td-email, .td-status, .td-role, .td-actions-users {
@@ -525,6 +593,15 @@ export default function AdminUsers() {
         .action-buttons {
           display: flex;
           gap: 8px;
+        }
+        
+        .admin-indicator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          color: #d97706;
+          font-weight: 600;
         }
         
         .btn-action {

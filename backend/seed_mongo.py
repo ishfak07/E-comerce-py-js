@@ -19,15 +19,10 @@ async def seed():
     await db.orders.delete_many({})
 
     users = [
-        {"_id": 1, "email": "admin@example.com", "password": "adminpass", "is_staff": True, "is_superuser": True, "full_name": "Admin User"},
-        {"_id": 2, "email": "user@example.com", "password": "userpass", "is_staff": False, "is_superuser": False, "full_name": "Regular User"},
     ]
     products = [
-        {"_id": 1, "name": "T-shirt", "slug": "t-shirt", "price": 19.99, "image": "", "stock": 10, "is_published": True, "created_at": "2025-10-08T00:00:00Z"},
-        {"_id": 2, "name": "Mug", "slug": "mug", "price": 9.99, "image": "", "stock": 30, "is_published": True, "created_at": "2025-10-08T00:00:00Z"},
     ]
     orders = [
-        {"_id": 1, "user_id": 2, "items": [{"product_id": 1, "qty": 2, "price": 19.99}], "total": 39.98, "status": "pending", "payment_method": "bank_transfer"}
     ]
 
     await db.users.insert_many(users)

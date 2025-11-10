@@ -130,32 +130,7 @@ export default function Header() {
           <div className="divider" aria-hidden />
 
 
-          {user ? (
-            <div className="user-wrap" ref={menuRef}>
-              {user.is_staff && !inAdmin && (
-                <NavLink to="/admin" className={linkClass}>Admin</NavLink>
-              )}
-              <button
-                className="user-btn"
-                aria-haspopup="menu"
-                aria-expanded={userOpen}
-                onClick={() => setUserOpen(v => !v)}
-                title={user.email}
-              >
-                <div className="avatar" aria-hidden>
-                  {user?.avatar_url ? <img src={user.avatar_url} alt="" /> : null}
-                </div>
-                <span className="email">{user.email}</span>
-              </button>
-              {userOpen && (
-                <div className="user-menu" role="menu">
-                  <Link to="/account" className="menu-item" role="menuitem">Account</Link>
-                  <Link to="/orders" className="menu-item" role="menuitem">Orders</Link>
-                  <button className="menu-item" role="menuitem" onClick={logout}>Logout</button>
-                </div>
-              )}
-            </div>
-          ) : (
+          {!user && (
             <div className="auth">
               <NavLink 
                 to="/login" 
@@ -173,6 +148,32 @@ export default function Header() {
             </div>
           )}
         </nav>
+        {user && (
+          <div className="user-wrap" ref={menuRef}>
+            {user.is_staff && !inAdmin && (
+              <NavLink to="/admin" className={linkClass}>Admin</NavLink>
+            )}
+            <button
+              className="user-btn"
+              aria-haspopup="menu"
+              aria-expanded={userOpen}
+              onClick={() => setUserOpen(v => !v)}
+              title={user.email}
+            >
+              <div className="avatar" aria-hidden>
+                {user?.avatar_url ? <img src={user.avatar_url} alt="" /> : null}
+              </div>
+              <span className="email">{user.email}</span>
+            </button>
+            {userOpen && (
+              <div className="user-menu" role="menu">
+                <Link to="/account" className="menu-item" role="menuitem">Account</Link>
+                <Link to="/orders" className="menu-item" role="menuitem">Orders</Link>
+                <button className="menu-item" role="menuitem" onClick={logout}>Logout</button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
 
@@ -199,7 +200,6 @@ export default function Header() {
           background:rgba(13,13,15,.8);
           backdrop-filter:blur(8px);
           border-bottom:1px solid var(--line);
-          overflow:hidden;
         }
         .header-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
         .left{display:flex;align-items:center;gap:10px}

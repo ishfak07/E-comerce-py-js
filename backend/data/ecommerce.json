@@ -114,6 +114,101 @@
       "is_superuser": false,
       "_id": "user_007",
       "created_at": "2025-11-01T08:00:00Z"
+    },
+    {
+      "email": "test@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "f9a999f0-6b67-4124-a81a-7cc861dabefa"
+    },
+    {
+      "email": "test2@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "0eb21f42-0cf1-417c-9eea-0aec9300570f",
+      "avatar_url": "/static/uploads/avatars/0eb21f42-0cf1-417c-9eea-0aec9300570f.png"
+    },
+    {
+      "email": "testfa9cd784@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "baaf101f-2efb-4322-8a4d-22293a8e6f17",
+      "avatar_url": "/static/uploads/avatars/baaf101f-2efb-4322-8a4d-22293a8e6f17.png"
+    },
+    {
+      "email": "testfe48513b@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "b6662e3f-2644-4eae-b692-0a9e2734d534",
+      "avatar_url": "/static/uploads/avatars/b6662e3f-2644-4eae-b692-0a9e2734d534.png"
+    },
+    {
+      "email": "testbdbc5f10@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "4ffdcf11-2c84-4c72-9826-34e8409de6d4",
+      "avatar_url": "/static/uploads/avatars/4ffdcf11-2c84-4c72-9826-34e8409de6d4.png"
+    },
+    {
+      "email": "testbe8bdfc8@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "409a982e-26f0-4cef-9715-a7dc28e79c2a",
+      "avatar_url": "/static/uploads/avatars/409a982e-26f0-4cef-9715-a7dc28e79c2a.png"
+    },
+    {
+      "email": "test44e6b305@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "3a01bbc4-60c6-44d4-919a-105b5600c052"
+    },
+    {
+      "email": "testfa1523a0@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "e6801d7b-a2ed-4ac6-8174-cbe0d1abaea3"
+    },
+    {
+      "email": "test4d40059d@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "beda39fa-dd78-4589-b22c-817749dce9b5"
+    },
+    {
+      "email": "testf63d479c@example.com",
+      "password_hash": "sha256$2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+      "full_name": "Test User",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "_id": "f18cb43a-3768-44a2-afcc-54cc8f2ac176"
     }
   ],
   "products": [
@@ -150,75 +245,125 @@
       "_id": "order_001",
       "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
       "number": "ORD-001",
-      "total": 79.00,
+      "total": 79.0,
       "status": "delivered",
       "tracking_status": "delivered",
       "created_at": "2025-10-15T10:00:00Z",
-      "items": [{"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00}]
+      "items": [
+        {
+          "product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9",
+          "qty": 1,
+          "price": 79.0
+        }
+      ]
     },
     {
       "_id": "order_002",
       "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
       "number": "ORD-002",
-      "total": 34.00,
+      "total": 34.0,
       "status": "delivered",
       "tracking_status": "delivered",
       "created_at": "2025-10-20T14:30:00Z",
-      "items": [{"product_id": "7797d88b-d324-49b3-8996-ace368a872c9", "qty": 1, "price": 34.00}]
+      "items": [
+        {
+          "product_id": "7797d88b-d324-49b3-8996-ace368a872c9",
+          "qty": 1,
+          "price": 34.0
+        }
+      ]
     },
     {
       "_id": "order_003",
       "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
       "number": "ORD-003",
-      "total": 23.00,
+      "total": 23.0,
       "status": "paid",
       "created_at": "2025-10-25T09:15:00Z",
-      "items": [{"product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4", "qty": 1, "price": 23.00}]
+      "items": [
+        {
+          "product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4",
+          "qty": 1,
+          "price": 23.0
+        }
+      ]
     },
     {
       "_id": "order_004",
       "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
       "number": "ORD-004",
-      "total": 113.00,
+      "total": 113.0,
       "status": "delivered",
       "tracking_status": "delivered",
       "created_at": "2025-10-28T16:45:00Z",
       "items": [
-        {"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00},
-        {"product_id": "7797d88b-d324-49b3-8996-ace368a872c9", "qty": 1, "price": 34.00}
+        {
+          "product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9",
+          "qty": 1,
+          "price": 79.0
+        },
+        {
+          "product_id": "7797d88b-d324-49b3-8996-ace368a872c9",
+          "qty": 1,
+          "price": 34.0
+        }
       ]
     },
     {
       "_id": "order_005",
       "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
       "number": "ORD-005",
-      "total": 46.00,
+      "total": 46.0,
       "status": "shipped",
       "created_at": "2025-11-01T11:20:00Z",
-      "items": [{"product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4", "qty": 2, "price": 23.00}]
+      "items": [
+        {
+          "product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4",
+          "qty": 2,
+          "price": 23.0
+        }
+      ]
     },
     {
       "_id": "order_006",
       "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
       "number": "ORD-006",
-      "total": 136.00,
+      "total": 136.0,
       "status": "delivered",
       "tracking_status": "delivered",
       "created_at": "2025-11-02T13:10:00Z",
       "items": [
-        {"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00},
-        {"product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4", "qty": 1, "price": 23.00},
-        {"product_id": "7797d88b-d324-49b3-8996-ace368a872c9", "qty": 1, "price": 34.00}
+        {
+          "product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9",
+          "qty": 1,
+          "price": 79.0
+        },
+        {
+          "product_id": "0b2da532-1756-419a-bb2a-3961adab5bb4",
+          "qty": 1,
+          "price": 23.0
+        },
+        {
+          "product_id": "7797d88b-d324-49b3-8996-ace368a872c9",
+          "qty": 1,
+          "price": 34.0
+        }
       ]
     },
     {
       "_id": "order_007",
       "user_id": "f7028bde-0cc0-423b-8153-aae475d8c21d",
       "number": "ORD-007",
-      "total": 79.00,
+      "total": 79.0,
       "status": "pending",
       "created_at": "2025-11-03T08:00:00Z",
-      "items": [{"product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9", "qty": 1, "price": 79.00}]
+      "items": [
+        {
+          "product_id": "944bec6f-8f8a-4d88-aa63-01c90dedd9d9",
+          "qty": 1,
+          "price": 79.0
+        }
+      ]
     }
   ]
 }

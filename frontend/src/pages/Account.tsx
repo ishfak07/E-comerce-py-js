@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthProvider'
 import { toast } from '../lib/toast'
+import ImageEditor from '../components/ImageEditor'
 
 export default function Account() {
   const { user, updateUser } = useAuth()
@@ -18,6 +19,9 @@ export default function Account() {
   const [oldPw, setOldPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
+  const [showImageEditor, setShowImageEditor] = useState(false)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>('')
   const liveRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -95,21 +99,53 @@ export default function Account() {
   async function onAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!/image\/(png|jpe?g|webp)/.test(file.type)) { toast('Please select a PNG, JPG, or WEBP image', 'error'); return }
-    if (file.size > 3 * 1024 * 1024) { toast('Image must be under 3MB', 'error'); return }
+    if (!/image\/(png|jpe?g|webp)/.test(file.type)) {
+      toast('Please select a PNG, JPG, or WEBP image', 'error')
+      return
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      toast('Image must be under 3MB', 'error')
+      return
+    }
+
+    // Create object URL for the selected image
+    const imageUrl = URL.createObjectURL(file)
+    setSelectedImageFile(file)
+    setSelectedImageUrl(imageUrl)
+    setShowImageEditor(true)
+  }
+
+  async function onImageEdited(editedImageBlob: Blob) {
+    if (!selectedImageFile) return
+
     const form = new FormData()
-    form.append('file', file)
+    form.append('file', editedImageBlob, selectedImageFile.name)
+
     try {
-      const res = await api.post('/auth/avatar', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await api.post('/auth/avatar', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
       let url = res.data?.avatar_url as string
       // Bust cache so the freshly uploaded image is displayed immediately
       if (url) url = `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`
       setAvatarUrl(url)
       updateUser({ avatar_url: url })
       toast('Profile picture updated', 'success')
+      setShowImageEditor(false)
+      setSelectedImageFile(null)
+      setSelectedImageUrl('')
     } catch (e) {
       toast('Failed to upload picture', 'error')
     }
+  }
+
+  function onImageEditorCancel() {
+    setShowImageEditor(false)
+    setSelectedImageFile(null)
+    setSelectedImageUrl('')
+    // Clear the file input
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    if (fileInput) fileInput.value = ''
   }
 
   return (
@@ -236,6 +272,14 @@ export default function Account() {
           .acct-wrap{grid-template-columns:1fr}
         }
       `}</style>
+
+      {showImageEditor && selectedImageUrl && (
+        <ImageEditor
+          imageSrc={selectedImageUrl}
+          onSave={onImageEdited}
+          onCancel={onImageEditorCancel}
+        />
+      )}
     </>
   )
 }

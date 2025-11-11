@@ -98,8 +98,16 @@ export default function AdminShell() {
           <div className="admin-user-menu">
             <div className="admin-user-info">
               <div className="admin-avatar">
-                <div className="avatar-inner">
-                  {user?.email?.charAt(0).toUpperCase()}
+                <div className={`avatar-inner ${user?.avatar_url ? 'has-image' : ''}`}>
+                  {user?.avatar_url ? (
+                    <img 
+                      src={user.avatar_url} 
+                      alt="Profile" 
+                      style={{ width: '100%', height: '100%', borderRadius: '12px', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    user?.email?.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="avatar-ring"></div>
               </div>
@@ -714,6 +722,11 @@ export default function AdminShell() {
           box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
           position: relative;
           z-index: 2;
+        }
+        
+        .avatar-inner.has-image {
+          background: none;
+          box-shadow: none;
         }
         
         .avatar-ring {

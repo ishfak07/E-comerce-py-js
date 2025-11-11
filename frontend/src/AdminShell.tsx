@@ -416,7 +416,7 @@ export default function AdminShell() {
           width: auto;
           position: relative;
           z-index: 3;
-          filter: drop-shadow(0 0 6px rgba(109, 116, 255, 0.4));
+          filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
           animation: logoFloat 4s ease-in-out infinite, logoRotate 8s linear infinite;
         }
 
@@ -460,7 +460,7 @@ export default function AdminShell() {
           position: absolute;
           width: 45px;
           height: 45px;
-          background: radial-gradient(circle at center, rgba(109, 116, 255, 0.6), transparent 70%);
+          background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6), transparent 70%);
           border-radius: 50%;
           z-index: 1;
           filter: blur(9px);
@@ -489,24 +489,24 @@ export default function AdminShell() {
         .ring-1 {
           width: 38px;
           height: 38px;
-          border-top-color: rgba(109, 116, 255, 0.6);
-          border-right-color: rgba(109, 116, 255, 0.3);
+          border-top-color: rgba(0, 0, 0, 0.6);
+          border-right-color: rgba(0, 0, 0, 0.3);
           animation: ringRotate 4s linear infinite;
         }
 
         .ring-2 {
           width: 42px;
           height: 42px;
-          border-bottom-color: rgba(109, 116, 255, 0.5);
-          border-left-color: rgba(109, 116, 255, 0.2);
+          border-bottom-color: rgba(0, 0, 0, 0.5);
+          border-left-color: rgba(0, 0, 0, 0.2);
           animation: ringRotate 6s linear infinite reverse;
         }
 
         .ring-3 {
           width: 46px;
           height: 46px;
-          border-top-color: rgba(109, 116, 255, 0.4);
-          border-bottom-color: rgba(109, 116, 255, 0.1);
+          border-top-color: rgba(0, 0, 0, 0.4);
+          border-bottom-color: rgba(0, 0, 0, 0.1);
           animation: ringRotate 8s linear infinite;
         }
 

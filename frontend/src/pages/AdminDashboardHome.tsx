@@ -141,6 +141,54 @@ export default function AdminDashboardHome() {
       clearInterval(id)
     }
   }, [])
+
+  // Real-time metrics updates via SSE
+  useEffect(() => {
+    let mounted = true
+    let eventSource: EventSource | null = null
+
+    const connectSSE = () => {
+      if (!mounted) return
+
+      // Get auth token for SSE
+      const token = localStorage.getItem('access_token')
+      if (!token) return
+
+      const url = `${window.location.origin}/api/v1/admin/stream-metrics?token=${encodeURIComponent(token)}`
+      eventSource = new EventSource(url)
+
+      eventSource.onmessage = (event) => {
+        if (!mounted) return
+        try {
+          const metrics = JSON.parse(event.data)
+          if (metrics && typeof metrics === 'object' && !metrics.error) {
+            setData(metrics)
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+
+      eventSource.onerror = () => {
+        // On error, close and retry after a delay
+        if (eventSource) {
+          eventSource.close()
+          eventSource = null
+        }
+        setTimeout(connectSSE, 5000)
+      }
+    }
+
+    connectSSE()
+
+    return () => {
+      mounted = false
+      if (eventSource) {
+        eventSource.close()
+      }
+    }
+  }, [])
+
   const safe = useMemo(() => {
     const totals = {
       users: data?.total_users ?? 0,

@@ -29,12 +29,12 @@ def get_metrics(db=Depends(get_mongo_db)):
     except Exception:
         total_orders = 0
 
-    # Basic sales total: sum 'total' on paid/delivered orders if present
+    # Basic sales total: sum 'total_amount' on paid/delivered orders if present
     total_sales = 0.0
     try:
         pipeline = [
             {"$match": {"status": {"$in": ["paid", "delivered"]}}},
-            {"$group": {"_id": None, "sum": {"$sum": "$total"}}},
+            {"$group": {"_id": None, "sum": {"$sum": "$total_amount"}}},
         ]
         agg = list(orders.aggregate(pipeline))
         if agg:
@@ -42,13 +42,13 @@ def get_metrics(db=Depends(get_mongo_db)):
     except Exception:
         pass
 
-    # Total revenue for completed orders: sum 'total' where order is delivered/completed
+    # Total revenue for completed orders: sum 'total_amount' where order is delivered/completed
     total_revenue = 0.0
     try:
         # Consider an order completed if tracking_status == 'delivered' or status == 'delivered'
         pipeline_rev = [
             {"$match": {"$or": [{"tracking_status": "delivered"}, {"status": "delivered"}]}},
-            {"$group": {"_id": None, "sum": {"$sum": "$total"}}},
+            {"$group": {"_id": None, "sum": {"$sum": "$total_amount"}}},
         ]
         agg_rev = list(orders.aggregate(pipeline_rev))
         if agg_rev:
@@ -91,7 +91,7 @@ def get_sales_trends(days: int = 30, db=Depends(get_mongo_db)):
                 order_date = datetime.fromisoformat(order["created_at"].replace('Z', '+00:00'))
                 date_str = order_date.strftime("%Y-%m-%d")
                 date_groups[date_str]["orders"] += 1
-                date_groups[date_str]["revenue"] += float(order.get("total", 0))
+                date_groups[date_str]["revenue"] += float(order.get("total_amount", 0))
             except Exception:
                 continue
 
@@ -145,7 +145,7 @@ def get_revenue_growth(months: int = 12, db=Depends(get_mongo_db)):
             try:
                 order_date = datetime.fromisoformat(order["created_at"].replace('Z', '+00:00'))
                 month_str = order_date.strftime("%Y-%m")
-                month_groups[month_str] += float(order.get("total", 0))
+                month_groups[month_str] += float(order.get("total_amount", 0))
             except Exception:
                 continue
 

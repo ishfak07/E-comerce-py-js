@@ -108,7 +108,19 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="users-page">
+    <div className="users-page" style={{
+      opacity: 0,
+      transform: 'translateY(30px)',
+      animation: 'pageEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+    }}>
+      <style>{`
+        @keyframes pageEntrance {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
       {/* Page Header */}
       <div className="page-header">
         <div className="page-header-content">

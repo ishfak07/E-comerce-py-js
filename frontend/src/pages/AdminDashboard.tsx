@@ -432,7 +432,19 @@ export default function AdminDashboard() {
   }, [tab])
 
   return (
-    <div className="admin">
+    <div className="admin" style={{
+      opacity: 0,
+      transform: 'translateY(30px)',
+      animation: 'pageEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+    }}>
+      <style>{`
+        @keyframes pageEntrance {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
       <aside className="sidebar">
         <div className="brand">Admin</div>
         <nav className="menu" aria-label="Admin navigation">

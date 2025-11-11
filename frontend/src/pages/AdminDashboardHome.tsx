@@ -571,10 +571,24 @@ export default function AdminDashboardHome() {
         /* Page Layout */
         .dashboard-page {
           max-width: 100%;
+          opacity: 0;
+          transform: translateY(30px);
+          animation: pageEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes pageEntrance {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         
         .page-header {
           margin-bottom: 32px;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: sectionEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation-delay: 0.2s;
         }
         
         .page-header-content {
@@ -639,6 +653,17 @@ export default function AdminDashboardHome() {
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           gap: 20px;
           margin-bottom: 32px;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: sectionEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation-delay: 0.4s;
+        }
+        
+        @keyframes sectionEntrance {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         
         .metric-card {
@@ -649,13 +674,48 @@ export default function AdminDashboardHome() {
           display: flex;
           gap: 20px;
           align-items: flex-start;
-          transition: all 0.3s;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           border: 2px solid transparent;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: cardEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .metric-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          animation: shimmer 3s ease-in-out infinite;
+          animation-delay: 1s;
+        }
+        
+        @keyframes shimmer {
+          0% { left: -100%; }
+          100% { left: 100%; }
+        }
+        
+        .metric-card:nth-child(1) { animation-delay: 0.1s; }
+        .metric-card:nth-child(2) { animation-delay: 0.2s; }
+        .metric-card:nth-child(3) { animation-delay: 0.3s; }
+        .metric-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes cardEntrance {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         
         .metric-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 20px rgba(102, 126, 234, 0.1);
+          border-color: rgba(102, 126, 234, 0.2);
         }
         
         .metric-icon {
@@ -666,52 +726,81 @@ export default function AdminDashboardHome() {
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          transition: all 0.3s;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .metric-icon::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: inherit;
+          opacity: 0;
+          animation: iconPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes iconPulse {
+          0%, 100% { opacity: 0; transform: scale(1); }
+          50% { opacity: 0.3; transform: scale(1.05); }
         }
         
         .metric-card.users .metric-icon {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
         .metric-card.users:hover .metric-icon {
-          transform: scale(1.1);
+          transform: scale(1.1) rotate(5deg);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         
         .metric-card.products .metric-icon {
           background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
           color: white;
+          box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
         }
         
         .metric-card.products:hover .metric-icon {
-          transform: scale(1.1);
+          transform: scale(1.1) rotate(-5deg);
+          box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
         }
         
         .metric-card.orders .metric-icon {
           background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
           color: white;
+          box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
         }
         
         .metric-card.orders:hover .metric-icon {
-          transform: scale(1.1);
+          transform: scale(1.1) rotate(3deg);
+          box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
         }
         
         .metric-card.sales .metric-icon {
           background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
           color: white;
+          box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
         }
         
         .metric-card.sales:hover .metric-icon {
-          transform: scale(1.1);
+          transform: scale(1.1) rotate(-3deg);
+          box-shadow: 0 8px 25px rgba(67, 233, 123, 0.4);
         }
         
         .metric-card.revenue .metric-icon {
           background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
           color: white;
+          box-shadow: 0 4px 15px rgba(52, 168, 83, 0.3);
         }
 
         .metric-card.revenue:hover .metric-icon {
-          transform: scale(1.1);
+          transform: scale(1.1) rotate(2deg);
+          box-shadow: 0 8px 25px rgba(52, 168, 83, 0.4);
         }
         
         .metric-content {
@@ -734,6 +823,29 @@ export default function AdminDashboardHome() {
           font-weight: 700;
           color: #1a202c;
           line-height: 1.2;
+          animation: countUp 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        
+        .metric-card:nth-child(1) .metric-value { animation-delay: 0.3s; }
+        .metric-card:nth-child(2) .metric-value { animation-delay: 0.4s; }
+        .metric-card:nth-child(3) .metric-value { animation-delay: 0.5s; }
+        .metric-card:nth-child(4) .metric-value { animation-delay: 0.6s; }
+        
+        @keyframes countUp {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          50% {
+            opacity: 0.7;
+            transform: translateY(-2px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         
         .metric-subtitle {
@@ -753,6 +865,10 @@ export default function AdminDashboardHome() {
         .welcome-card {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           padding: 32px;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: sectionEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation-delay: 0.6s;
         }
         
         .welcome-content {
@@ -859,6 +975,10 @@ export default function AdminDashboardHome() {
         /* Charts Section */
         .charts-section {
           margin-top: 40px;
+          opacity: 0;
+          transform: translateY(20px);
+          animation: sectionEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation-delay: 0.8s;
         }
 
         .section-title {

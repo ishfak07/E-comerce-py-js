@@ -1090,8 +1090,8 @@ export default function Header() {
         .user-btn:hover{background:var(--ghost)}
         .user-btn:focus{outline:none}
         .user-btn:active{background:var(--ghost)}
-        .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#2a2b36,#171821);border:1px solid var(--line);overflow:hidden}
-        .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+        .user-btn .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#2a2b36,#171821);border:1px solid var(--line);overflow:hidden}
+        .user-btn .avatar img{width:100%;height:100%;object-fit:cover;display:block}
         .email{color:var(--muted);font-size:12px;user-select:none}
         .user-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:180px;border:1px solid var(--line);background:var(--surface);border-radius:10px;box-shadow:0 6px 22px rgba(0,0,0,.3);padding:6px;z-index:100}
         .menu-item{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:8px;color:var(--text) !important;text-decoration:none;border:none;background:transparent !important;cursor:pointer;font-size:14px;font-family:inherit;user-select:none;-webkit-tap-highlight-color:transparent}

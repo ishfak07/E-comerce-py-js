@@ -509,42 +509,54 @@ export default function AdminProducts() {
   }
 
   return (
-    <div className="products-page" style={{
-      opacity: 0,
-      transform: 'translateY(30px)',
-      animation: 'pageEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-    }}>
-      <style>{`
-        @keyframes pageEntrance {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+    <div className="products-page">
       {/* Page Header */}
       <div className="page-header">
         <div className="page-header-content">
           <h1 className="page-title">
-            <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style={{ marginRight: 12 }}>
-              <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
-            </svg>
+            <div className="title-icon-wrapper">
+              <svg width="28" height="28" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+              </svg>
+            </div>
             Product Management
           </h1>
-          <p className="page-subtitle">Manage your product inventory</p>
+          <p className="page-subtitle">Manage your product catalog and inventory</p>
         </div>
         <div className="page-header-stats">
-          <div className="stat-card">
-            <div className="stat-value">{items.length}</div>
-            <div className="stat-label">Total Products</div>
+          <div className="stat-card total">
+            <div className="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+              </svg>
+            </div>
+            <div className="stat-info">
+              <div className="stat-value">{items.length}</div>
+              <div className="stat-label">Total Products</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-value">{items.filter(p => p.is_published).length}</div>
-            <div className="stat-label">Published</div>
+          <div className="stat-card published">
+            <div className="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+            </div>
+            <div className="stat-info">
+              <div className="stat-value">{items.filter(p => p.is_published).length}</div>
+              <div className="stat-label">Published</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-value">{items.filter(p => !p.is_published).length}</div>
-            <div className="stat-label">Draft</div>
+          <div className="stat-card draft">
+            <div className="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/>
+              </svg>
+            </div>
+            <div className="stat-info">
+              <div className="stat-value">{items.filter(p => !p.is_published).length}</div>
+              <div className="stat-label">Draft</div>
+            </div>
           </div>
         </div>
       </div>
@@ -554,20 +566,22 @@ export default function AdminProducts() {
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
           </svg>
-          {error}
+          <span>{error}</span>
         </div>
       )}
 
       {/* Add Product Card */}
       <div className="card-modern">
         <div className="card-header">
-          <h2 className="card-title">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" style={{ marginRight: 8 }}>
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"/>
-            </svg>
-            Add New Product
-          </h2>
-          <p className="card-subtitle">Fill in the details below to add a new product</p>
+          <div>
+            <h2 className="card-title">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"/>
+              </svg>
+              Add New Product
+            </h2>
+            <p className="card-subtitle">Fill in the product details and upload images</p>
+          </div>
         </div>
         
         <div className="card-body">
@@ -578,15 +592,16 @@ export default function AdminProducts() {
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                 </svg>
-                Product Name *
+                Product Name
+                <span className="required">*</span>
               </label>
               <input
-                className="form-input"
-                placeholder="e.g., Premium Headphones"
+                className={`form-input ${!validation.nameOk && form.name ? 'error' : ''}`}
+                placeholder="e.g., Premium Wireless Headphones"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
-              {!validation.nameOk && <span className="form-error">Name must be at least 2 characters</span>}
+              {!validation.nameOk && form.name && <span className="form-error">Name must be at least 2 characters</span>}
             </div>
             
             <div className="form-group">
@@ -594,15 +609,16 @@ export default function AdminProducts() {
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z"/>
                 </svg>
-                URL Slug *
+                URL Slug
+                <span className="required">*</span>
               </label>
               <input
-                className="form-input"
-                placeholder="e.g., premium-headphones"
+                className={`form-input ${!validation.slugOk && form.slug ? 'error' : ''}`}
+                placeholder="e.g., premium-wireless-headphones"
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
               />
-              {!validation.slugOk && <span className="form-error">Slug must be at least 2 characters</span>}
+              {!validation.slugOk && form.slug && <span className="form-error">Slug must be at least 2 characters</span>}
             </div>
             
             <div className="form-group">
@@ -611,11 +627,12 @@ export default function AdminProducts() {
                   <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"/>
                 </svg>
-                Price (LKR) *
+                Price (LKR)
+                <span className="required">*</span>
               </label>
               <input
-                className="form-input"
-                placeholder="e.g., 5000.00"
+                className={`form-input ${!validation.priceOk && form.price > 0 ? 'error' : ''}`}
+                placeholder="e.g., 15000.00"
                 type="number"
                 inputMode="decimal"
                 value={Number.isFinite(form.price) ? form.price : 0}
@@ -623,19 +640,20 @@ export default function AdminProducts() {
                 min={0}
                 step="0.01"
               />
-              {!validation.priceOk && <span className="form-error">Price must be ≥ 0</span>}
+              {!validation.priceOk && form.price > 0 && <span className="form-error">Price must be ≥ 0</span>}
             </div>
             
             <div className="form-group">
               <label className="form-label">
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
+                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                 </svg>
-                Stock Quantity *
+                Stock Quantity
+                <span className="required">*</span>
               </label>
               <input
-                className="form-input"
-                placeholder="e.g., 100"
+                className={`form-input ${!validation.stockOk && form.stock > 0 ? 'error' : ''}`}
+                placeholder="e.g., 50"
                 type="number"
                 inputMode="numeric"
                 value={Number.isFinite(form.stock) ? form.stock : 0}
@@ -643,7 +661,7 @@ export default function AdminProducts() {
                 min={0}
                 step={1}
               />
-              {!validation.stockOk && <span className="form-error">Stock must be an integer ≥ 0</span>}
+              {!validation.stockOk && form.stock > 0 && <span className="form-error">Stock must be an integer ≥ 0</span>}
             </div>
           </div>
         
@@ -652,265 +670,286 @@ export default function AdminProducts() {
               <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586a1 1 0 01.707.293l7.414 7.414a1 1 0 010 1.414l-4.586 4.586a1 1 0 01-1.414 0L4.293 7.707A1 1 0 014 7V4zm2 0v3.586l6.293 6.293 3.586-3.586L9.586 4H6z"/>
               </svg>
-              Product Description *
+              Product Description
+              <span className="required">*</span>
             </label>
             <textarea
-              className="form-input"
+              className={`form-input ${!validation.descriptionOk && form.description ? 'error' : ''}`}
               placeholder="Describe your product in detail (minimum 10 characters)..."
               value={form.description || ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={4}
-              style={{ resize: 'vertical', minHeight: '80px' }}
             />
-            {!validation.descriptionOk && <span className="form-error">Description must be at least 10 characters</span>}
+            {!validation.descriptionOk && form.description && <span className="form-error">Description must be at least 10 characters</span>}
           </div>
         
-        <div className="form-group-full">
-          <label className="form-label">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
-            </svg>
-            Product Images <span className="badge-info">{selectedFiles.length}/5 selected</span>
-          </label>
-          <div className="upload-zone">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              id="file-upload"
-              className="file-input"
-            />
-            <label htmlFor="file-upload" className="upload-button">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"/>
-              </svg>
-              Choose Images (1-5)
-            </label>
-            {selectedFiles.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowImagePreview(true)}
-                className="preview-button"
-              >
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-                Preview & Edit ({selectedFiles.length})
-              </button>
-            )}
-          </div>
-          {selectedFiles.length > 0 && (
-            <div className="image-preview-grid">
-              {previewUrls.map((url, index) => (
-                <div key={index} className="image-preview-item">
-                  <img
-                    src={url}
-                    alt={`Preview ${index + 1}`}
-                  />
-                  <button
-                    onClick={() => openCropModal(index)}
-                    className="btn-crop"
-                    type="button"
-                    title="Crop image"
-                  >
-                    ✂️
-                  </button>
-                  <button
-                    onClick={() => removePreviewImage(index)}
-                    className="btn-remove"
-                    type="button"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          {selectedFiles.length === 0 && (
-            <div className="empty-state">
-              <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor" opacity="0.3">
+          <div className="form-group-full">
+            <label className="form-label">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
               </svg>
-              <p>No images selected. Please select 1-5 images.</p>
+              Product Images
+              <span className="badge-count">{selectedFiles.length}/5</span>
+              <span className="required">*</span>
+            </label>
+            <div className="upload-zone">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileSelect}
+                id="file-upload"
+                className="file-input"
+              />
+              <label htmlFor="file-upload" className="upload-button">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"/>
+                </svg>
+                Choose Images
+              </label>
+              {selectedFiles.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowImagePreview(true)}
+                  className="preview-button"
+                >
+                  <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  </svg>
+                  Preview & Edit
+                </button>
+              )}
             </div>
-          )}
-        </div>
+            {selectedFiles.length > 0 && (
+              <div className="image-preview-grid">
+                {previewUrls.map((url, index) => (
+                  <div key={index} className="image-preview-item">
+                    <img src={url} alt={`Preview ${index + 1}`} />
+                    <div className="image-overlay">
+                      <button
+                        onClick={() => openCropModal(index)}
+                        className="btn-overlay btn-crop-overlay"
+                        type="button"
+                        title="Crop image"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z"/>
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => removePreviewImage(index)}
+                        className="btn-overlay btn-remove-overlay"
+                        type="button"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div className="image-badge">{index + 1}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {selectedFiles.length === 0 && (
+              <div className="empty-state-upload">
+                <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                </svg>
+                <p>No images selected</p>
+                <span>Upload 1-5 product images</span>
+              </div>
+            )}
+          </div>
         
-        <button 
-          onClick={create} 
-          disabled={!isValid || submitting || selectedFiles.length === 0} 
-          type="button"
-          className="btn-primary"
-        >
-          {submitting ? (
-            <>
-              <svg className="spinner" width="18" height="18" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25"/>
-                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" opacity="0.75"/>
-              </svg>
-              Adding Product...
-            </>
-          ) : (
-            <>
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"/>
-              </svg>
-              Add Product
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-
-      <div style={{ margin: '8px 0', color: '#8aa' }}>
-        {loading ? 'Loading products…' : `Total: ${items.length}`}
+          <button 
+            onClick={create} 
+            disabled={!isValid || submitting || selectedFiles.length === 0} 
+            type="button"
+            className="btn-primary"
+          >
+            {submitting ? (
+              <>
+                <svg className="spinner" width="18" height="18" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25"/>
+                  <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" opacity="0.75"/>
+                </svg>
+                Creating Product...
+              </>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"/>
+                </svg>
+                Add Product
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Products List */}
       <div className="card-modern" style={{ marginTop: 24 }}>
         <div className="card-header">
-          <h2 className="card-title">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" style={{ marginRight: 8 }}>
-              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/>
-            </svg>
-            All Products
-          </h2>
-          <span className="badge-count">{items.length} total</span>
+          <div>
+            <h2 className="card-title">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/>
+              </svg>
+              All Products
+            </h2>
+            <p className="card-subtitle">Manage existing products</p>
+          </div>
+          <span className="badge-count-lg">{items.length} total</span>
         </div>
 
         {loading ? (
           <div className="loading-state">
-            <svg className="spinner" width="48" height="48" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.25"/>
-              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" opacity="0.75"/>
-            </svg>
+            <div className="loading-spinner-modern">
+              <div className="spinner-ring-modern"></div>
+              <div className="spinner-ring-modern"></div>
+              <div className="spinner-ring-modern"></div>
+            </div>
             <p>Loading products...</p>
           </div>
         ) : items.length === 0 ? (
           <div className="empty-state-large">
-            <svg width="64" height="64" viewBox="0 0 20 20" fill="currentColor" opacity="0.2">
+            <svg width="80" height="80" viewBox="0 0 20 20" fill="currentColor">
               <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
             </svg>
             <h3>No Products Yet</h3>
-            <p>Start by adding your first product above</p>
+            <p>Start by adding your first product using the form above</p>
           </div>
         ) : (
-          <div className="products-table">
-            <div className="table-header">
-              <div className="th-product">Product</div>
-              <div className="th-slug">Slug</div>
-              <div className="th-price">Price (LKR)</div>
-              <div className="th-stock">Stock</div>
-              <div className="th-status">Status</div>
-              <div className="th-actions">Actions</div>
-            </div>
-            
-            {items.map((p) => (
-              <div key={p.id || `${p.slug}-${p.name}`} className="table-row">
-                <div className="td-product">
-                  <div className="product-cell">
-                    {p.images && p.images.length > 0 ? (
-                      <div className="product-images" title={p.description || ''}>
-                        {p.images.slice(0, 3).map((img, idx) => (
+          <div className="products-table-wrapper">
+            <div className="products-table">
+              <div className="table-header">
+                <div className="th-product">Product</div>
+                <div className="th-slug">Slug</div>
+                <div className="th-price">Price</div>
+                <div className="th-stock">Stock</div>
+                <div className="th-status">Status</div>
+                <div className="th-actions">Actions</div>
+              </div>
+              
+              {items.map((p) => (
+                <div key={p.id || `${p.slug}-${p.name}`} className="table-row">
+                  <div className="td-product">
+                    <div className="product-cell">
+                      {p.images && p.images.length > 0 ? (
+                        <div className="product-images">
                           <img
-                            key={idx}
-                            src={img}
-                            alt={`${p.name} ${idx + 1}`}
-                            className="product-thumbnail"
+                            src={p.images[0]}
+                            alt={p.name}
+                            className="product-thumbnail-main"
                           />
-                        ))}
-                        {p.images.length > 3 && (
-                          <span className="image-count">+{p.images.length - 3}</span>
-                        )}
+                          {p.images.length > 1 && (
+                            <span className="image-count-badge">+{p.images.length - 1}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="no-image">
+                          <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                          </svg>
+                        </div>
+                      )}
+                      <div className="product-info">
+                        <span className="product-name">{p.name}</span>
+                        {p.description && <span className="product-desc">{p.description.substring(0, 50)}...</span>}
                       </div>
-                    ) : (
-                      <div className="no-image" title={p.description || ''}>
-                        <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" opacity="0.3">
-                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                    </div>
+                  </div>
+                  <div className="td-slug"><code>{p.slug}</code></div>
+                  <div className="td-price">
+                    <input
+                      type="number"
+                      className="inline-input"
+                      defaultValue={p.price}
+                      onBlur={(e) => {
+                        const next = parseMoneyInput(e.target.value)
+                        if (p.id && next !== p.price) update(p.id, { price: next })
+                      }}
+                      min={0}
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="td-stock">
+                    <input
+                      type="number"
+                      className="inline-input"
+                      defaultValue={p.stock}
+                      onBlur={(e) => {
+                        const next = parseIntInput(e.target.value)
+                        if (p.id && next !== p.stock) update(p.id, { stock: next })
+                      }}
+                      min={0}
+                      step={1}
+                    />
+                  </div>
+                  <div className="td-status">
+                    <span className={`status-badge ${p.is_published ? 'published' : 'draft'}`}>
+                      {p.is_published ? (
+                        <>
+                          <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                          </svg>
+                          Published
+                        </>
+                      ) : (
+                        <>
+                          <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z"/>
+                          </svg>
+                          Draft
+                        </>
+                      )}
+                    </span>
+                  </div>
+                  <div className="td-actions">
+                    <div className="action-buttons">
+                      <button 
+                        onClick={() => openEditModal(p)} 
+                        type="button"
+                        className="btn-action btn-edit"
+                        title="Edit product"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                         </svg>
-                      </div>
-                    )}
-                    <span className="product-name">{p.name}</span>
+                      </button>
+                      <button
+                        onClick={() => p.id && update(p.id, { is_published: !p.is_published })}
+                        type="button"
+                        className={`btn-action ${p.is_published ? 'btn-unpublish' : 'btn-publish'}`}
+                        title={p.is_published ? 'Unpublish' : 'Publish'}
+                      >
+                        {p.is_published ? (
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
+                          </svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"/>
+                            <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
+                          </svg>
+                        )}
+                      </button>
+                      <button 
+                        onClick={() => p.id && remove(p.id)} 
+                        type="button"
+                        className="btn-action btn-delete"
+                        title="Delete product"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <td className="td-slug"><code>{p.slug}</code></td>
-                <td className="td-price">
-                  <input
-                    type="number"
-                    className="inline-input"
-                    defaultValue={p.price}
-                    onBlur={(e) => {
-                      const next = parseMoneyInput(e.target.value)
-                      if (p.id && next !== p.price) update(p.id, { price: next })
-                    }}
-                    min={0}
-                    step="0.01"
-                  />
-                </td>
-                <td className="td-stock">
-                  <input
-                    type="number"
-                    className="inline-input"
-                    defaultValue={p.stock}
-                    onBlur={(e) => {
-                      const next = parseIntInput(e.target.value)
-                      if (p.id && next !== p.stock) update(p.id, { stock: next })
-                    }}
-                    min={0}
-                    step={1}
-                  />
-                </td>
-                <td className="td-status">
-                  <span className={`status-badge ${p.is_published ? 'published' : 'draft'}`}>
-                    {p.is_published ? 'Published' : 'Draft'}
-                  </span>
-                </td>
-                <td className="td-actions">
-                  <div className="action-buttons">
-                    <button 
-                      onClick={() => openEditModal(p)} 
-                      type="button"
-                      className="btn-action btn-edit"
-                      title="Edit product"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => p.id && update(p.id, { is_published: !p.is_published })}
-                      type="button"
-                      className={`btn-action btn-toggle ${p.is_published ? 'unpublish' : 'publish'}`}
-                      title={p.is_published ? 'Mark as Draft (unpublish)' : 'Publish product'}
-                    >
-                      {p.is_published ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z" />
-                          <path d="M12 9a3 3 0 100 6 3 3 0 000-6z" />
-                        </svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z" opacity="0.4" />
-                          <path d="M12 9a3 3 0 100 6 3 3 0 000-6z" />
-                        </svg>
-                      )}
-                    </button>
-                    <button 
-                      onClick={() => p.id && remove(p.id)} 
-                      type="button"
-                      className="btn-action btn-delete"
-                      title="Delete product"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -921,7 +960,7 @@ export default function AdminProducts() {
           <div className="modal-content-modern" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-modern">
               <h2>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" style={{ marginRight: 8 }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                 </svg>
                 Edit Product
@@ -934,11 +973,11 @@ export default function AdminProducts() {
             </div>
             
             {error && (
-              <div className="alert-error" style={{ margin: '16px 0' }}>
+              <div className="alert-error" style={{ margin: '0 24px 16px' }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>
                 </svg>
-                {error}
+                <span>{error}</span>
               </div>
             )}
             
@@ -949,171 +988,132 @@ export default function AdminProducts() {
                   <input
                     type="text"
                     className="form-input"
-                  value={editingProduct.name}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  style={{ width: '100%', padding: 8, borderRadius: 4, background: '#14151d', border: '1px solid #2a2b36', color: '#e9e9ef' }}
-                />
-              </div>
-              
-              <div>
-                <label style={{ display: 'block', marginBottom: 4, color: '#e9e9ef' }}>Slug</label>
-                <input
-                  type="text"
-                  value={editingProduct.slug}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, slug: e.target.value })}
-                  style={{ width: '100%', padding: 8, borderRadius: 4, background: '#14151d', border: '1px solid #2a2b36', color: '#e9e9ef' }}
-                />
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: 4, color: '#e9e9ef' }}>Price</label>
+                    value={editingProduct.name}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label className="form-label">Slug</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={editingProduct.slug}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, slug: e.target.value })}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label className="form-label">Price (LKR)</label>
                   <input
                     type="number"
+                    className="form-input"
                     value={editingProduct.price}
                     onChange={(e) => setEditingProduct({ ...editingProduct, price: parseMoneyInput(e.target.value) })}
                     min={0}
                     step="0.01"
-                    style={{ width: '100%', padding: 8, borderRadius: 4, background: '#14151d', border: '1px solid #2a2b36', color: '#e9e9ef' }}
                   />
                 </div>
                 
-                <div>
-                  <label style={{ display: 'block', marginBottom: 4, color: '#e9e9ef' }}>Stock</label>
+                <div className="form-group">
+                  <label className="form-label">Stock</label>
                   <input
                     type="number"
+                    className="form-input"
                     value={editingProduct.stock}
                     onChange={(e) => setEditingProduct({ ...editingProduct, stock: parseIntInput(e.target.value) })}
                     min={0}
                     step={1}
-                    style={{ width: '100%', padding: 8, borderRadius: 4, background: '#14151d', border: '1px solid #2a2b36', color: '#e9e9ef' }}
                   />
                 </div>
               </div>
               
-              <div>
-                <label style={{ display: 'block', marginBottom: 4, color: '#e9e9ef' }}>Description</label>
+              <div className="form-group-full">
+                <label className="form-label">Description</label>
                 <textarea
+                  className="form-input"
                   value={editingProduct.description || ''}
                   onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
                   rows={4}
-                  style={{
-                    width: '100%',
-                    padding: 8,
-                    borderRadius: 4,
-                    background: '#14151d',
-                    border: '1px solid #2a2b36',
-                    color: '#e9e9ef',
-                    resize: 'vertical',
-                    minHeight: '80px'
-                  }}
                 />
               </div>
               
-              <div>
-                <label style={{ display: 'block', marginBottom: 4, color: '#e9e9ef' }}>
+              <div className="form-group-full">
+                <label className="form-label">
                   Current Images ({editingProduct.images?.length || 0}/5)
                 </label>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-                  {editingProduct.images && editingProduct.images.length > 0 ? (
-                    editingProduct.images.map((imgUrl, index) => (
-                      <div key={index} style={{ position: 'relative', width: 100, height: 100 }}>
-                        <img
-                          src={imgUrl}
-                          alt={`Product ${index + 1}`}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            borderRadius: 8,
-                            border: '2px solid #6D74FF'
-                          }}
-                        />
-                        <button
-                          onClick={() => removeProductImage(index)}
-                          style={{
-                            position: 'absolute',
-                            top: -8,
-                            right: -8,
-                            width: 24,
-                            height: 24,
-                            borderRadius: '50%',
-                            background: '#ff5d5d',
-                            color: 'white',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: 14,
-                            lineHeight: '24px',
-                            padding: 0
-                          }}
-                          type="button"
-                        >
-                          ×
-                        </button>
+                {editingProduct.images && editingProduct.images.length > 0 ? (
+                  <div className="image-preview-grid">
+                    {editingProduct.images.map((imgUrl, index) => (
+                      <div key={index} className="image-preview-item">
+                        <img src={imgUrl} alt={`Product ${index + 1}`} />
+                        <div className="image-overlay">
+                          <button
+                            onClick={() => removeProductImage(index)}
+                            className="btn-overlay btn-remove-overlay"
+                            type="button"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="image-badge">{index + 1}</div>
                       </div>
-                    ))
-                  ) : (
-                    <p style={{ color: '#b8bbd9' }}>No images yet</p>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state-upload">
+                    <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                    </svg>
+                    <p>No images yet</p>
+                  </div>
+                )}
                 
-                <label style={{ display: 'block', marginBottom: 4, color: '#e9e9ef' }}>
-                  Add New Images (Total must be 1-5)
+                <label className="form-label" style={{ marginTop: 16 }}>
+                  Add New Images
                 </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileSelect}
-                  style={{ marginBottom: 8 }}
-                />
+                <div className="upload-zone">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileSelect}
+                    id="edit-file-upload"
+                    className="file-input"
+                  />
+                  <label htmlFor="edit-file-upload" className="upload-button">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"/>
+                    </svg>
+                    Choose Images
+                  </label>
+                </div>
                 {previewUrls.length > 0 && (
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                  <div className="image-preview-grid" style={{ marginTop: 12 }}>
                     {previewUrls.map((url, index) => (
-                      <div key={index} style={{ position: 'relative', width: 80, height: 80 }}>
-                        <img
-                          src={url}
-                          alt={`New ${index + 1}`}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            borderRadius: 8,
-                            border: '2px solid #4ade80'
-                          }}
-                        />
-                        <button
-                          onClick={() => removePreviewImage(index)}
-                          style={{
-                            position: 'absolute',
-                            top: -8,
-                            right: -8,
-                            width: 24,
-                            height: 24,
-                            borderRadius: '50%',
-                            background: '#ff5d5d',
-                            color: 'white',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: 14,
-                            lineHeight: '24px',
-                            padding: 0
-                          }}
-                          type="button"
-                        >
-                          ×
-                        </button>
+                      <div key={index} className="image-preview-item">
+                        <img src={url} alt={`New ${index + 1}`} />
+                        <div className="image-overlay">
+                          <button
+                            onClick={() => removePreviewImage(index)}
+                            className="btn-overlay btn-remove-overlay"
+                            type="button"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="image-badge new">New</div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
               
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+              <div className="modal-footer">
                 <button 
                   onClick={closeEditModal} 
                   type="button"
-                  style={{ padding: '10px 20px', background: '#2a2b36', color: '#e9e9ef' }}
+                  className="btn-secondary"
                 >
                   Cancel
                 </button>
@@ -1121,202 +1121,107 @@ export default function AdminProducts() {
                   onClick={saveEditedProduct} 
                   disabled={submitting}
                   type="button"
-                  style={{ padding: '10px 20px', background: '#6D74FF', color: 'white' }}
+                  className="btn-primary"
                 >
-                  {submitting ? 'Saving...' : 'Save Changes'}
+                  {submitting ? (
+                    <>
+                      <svg className="spinner" width="18" height="18" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25"/>
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" opacity="0.75"/>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                      </svg>
+                      Save Changes
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {/* Image Preview Modal */}
+      {/* Image Preview Modal */}
       {showImagePreview && selectedFiles.length > 0 && (
         <div className="modal-overlay" onClick={() => setShowImagePreview(false)}>
-          <div 
-            className="preview-modal-content" 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: '#14151d',
-              borderRadius: 12,
-              padding: 24,
-              maxWidth: '90vw',
-              maxHeight: '90vh',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 16,
-              border: '1px solid #2a2b36'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0 }}>
+          <div className="preview-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h2>
                 Image Preview ({currentImageIndex + 1}/{selectedFiles.length})
               </h2>
-              <button
-                onClick={() => setShowImagePreview(false)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#e9e9ef',
-                  fontSize: 24,
-                  cursor: 'pointer',
-                  padding: 0,
-                  width: 32,
-                  height: 32
-                }}
-              >
-                ×
+              <button onClick={() => setShowImagePreview(false)} className="btn-close">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                </svg>
               </button>
             </div>
 
-            {/* Main Image Display - UNIFORM SIZE */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#0a0a0f',
-              borderRadius: 8,
-              padding: 16,
-              width: '100%',
-              height: 500, // Fixed height for uniform display
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
+            <div className="preview-image-container">
               {previewUrls[currentImageIndex] && (
                 <img
                   src={previewUrls[currentImageIndex]}
                   alt={`Preview ${currentImageIndex + 1}`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain', // Maintains aspect ratio within fixed frame
-                    borderRadius: 4
-                  }}
                 />
               )}
             </div>
 
-            {/* Navigation & Actions */}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="preview-controls">
               <button
                 onClick={prevImage}
                 disabled={selectedFiles.length <= 1}
-                style={{
-                  padding: '8px 16px',
-                  background: selectedFiles.length > 1 ? '#2a2b36' : '#1a1b26',
-                  color: selectedFiles.length > 1 ? '#e9e9ef' : '#666',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: selectedFiles.length > 1 ? 'pointer' : 'not-allowed'
-                }}
+                className="btn-nav"
               >
-                ← Previous
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                </svg>
+                Previous
               </button>
 
-              <button
-                onClick={() => openCropModal(currentImageIndex)}
-                style={{
-                  padding: '8px 16px',
-                  background: '#6D74FF',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer'
-                }}
-              >
-                ✂️ Crop Image
+              <button onClick={() => openCropModal(currentImageIndex)} className="btn-crop-main">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z"/>
+                </svg>
+                Crop Image
               </button>
 
-              <button
-                onClick={() => removePreviewImage(currentImageIndex)}
-                style={{
-                  padding: '8px 16px',
-                  background: '#5b1a1a',
-                  color: '#ffd1d1',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer'
-                }}
-              >
-                🗑️ Remove
+              <button onClick={() => removePreviewImage(currentImageIndex)} className="btn-remove-main">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
+                </svg>
+                Remove
               </button>
 
               <button
                 onClick={nextImage}
                 disabled={selectedFiles.length <= 1}
-                style={{
-                  padding: '8px 16px',
-                  background: selectedFiles.length > 1 ? '#2a2b36' : '#1a1b26',
-                  color: selectedFiles.length > 1 ? '#e9e9ef' : '#666',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: selectedFiles.length > 1 ? 'pointer' : 'not-allowed'
-                }}
+                className="btn-nav"
               >
-                Next →
+                Next
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
               </button>
             </div>
 
-            {/* Thumbnail Strip */}
             {selectedFiles.length > 1 && (
-              <div style={{
-                display: 'flex',
-                gap: 8,
-                overflowX: 'auto',
-                padding: '8px 0',
-                borderTop: '1px solid #2a2b36',
-                paddingTop: 16
-              }}>
+              <div className="preview-thumbnails">
                 {previewUrls.map((url, idx) => (
-                  <div key={idx} style={{ position: 'relative', flexShrink: 0 }}>
-                    <img
-                      src={url}
-                      alt={`Thumbnail ${idx + 1}`}
-                      onClick={() => setCurrentImageIndex(idx)}
-                      style={{
-                        width: 80,
-                        height: 80,
-                        objectFit: 'cover',
-                        borderRadius: 4,
-                        cursor: 'pointer',
-                        border: idx === currentImageIndex ? '3px solid #6D74FF' : '3px solid transparent',
-                        opacity: idx === currentImageIndex ? 1 : 0.6,
-                        transition: 'all 0.2s',
-                        display: 'block'
-                      }}
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        openCropModal(idx)
-                      }}
-                      style={{
-                        position: 'absolute',
-                        bottom: 4,
-                        right: 4,
-                        background: 'rgba(109, 116, 255, 0.9)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 3,
-                        padding: '2px 6px',
-                        fontSize: 11,
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                      }}
-                      title="Crop this image"
-                    >
-                      ✂️
-                    </button>
+                  <div
+                    key={idx}
+                    className={`preview-thumbnail ${idx === currentImageIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentImageIndex(idx)}
+                  >
+                    <img src={url} alt={`Thumbnail ${idx + 1}`} />
+                    <div className="thumbnail-number">{idx + 1}</div>
                   </div>
                 ))}
               </div>
             )}
-
-            <div style={{ textAlign: 'center', color: '#999', fontSize: 14 }}>
-              Navigate with arrow buttons or click thumbnails • Remove unwanted images • Close when done
-            </div>
           </div>
         </div>
       )}
@@ -1324,65 +1229,41 @@ export default function AdminProducts() {
       {/* Image Cropper Modal */}
       {showCropper && previewUrls[cropImageIndex] && (
         <div className="modal-overlay" onClick={() => setShowCropper(false)}>
-          <div 
-            className="cropper-modal-content" 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: '#14151d',
-              borderRadius: 12,
-              padding: 24,
-              maxWidth: '800px',
-              width: '90%',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 16,
-              border: '1px solid #2a2b36'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0 }}>
-                ✂️ Crop Image ({cropImageIndex + 1}/{selectedFiles.length})
+          <div className="cropper-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-modern">
+              <h2>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z"/>
+                </svg>
+                Crop Image ({cropImageIndex + 1}/{selectedFiles.length})
               </h2>
-              <button
-                onClick={() => setShowCropper(false)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#e9e9ef',
-                  fontSize: 24,
-                  cursor: 'pointer',
-                  padding: 0,
-                  width: 32,
-                  height: 32
-                }}
-              >
-                ×
+              <button onClick={() => setShowCropper(false)} className="btn-close">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                </svg>
               </button>
             </div>
 
-            {/* Cropper Container */}
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              height: 400,
-              background: '#0a0a0f',
-              borderRadius: 8,
-              overflow: 'hidden'
-            }}>
+            <div className="cropper-container">
               <Cropper
                 image={previewUrls[cropImageIndex]}
                 crop={crop}
                 zoom={zoom}
-                aspect={1} // Square crop (1:1 ratio)
+                aspect={1}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
               />
             </div>
 
-            {/* Zoom Control */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <label style={{ color: '#e9e9ef', minWidth: 60 }}>Zoom:</label>
+            <div className="cropper-controls">
+              <label className="zoom-label">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5 8a1 1 0 011-1h1V6a1 1 0 012 0v1h1a1 1 0 110 2H9v1a1 1 0 11-2 0V9H6a1 1 0 01-1-1z"/>
+                  <path fillRule="evenodd" d="M2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8zm6-4a4 4 0 100 8 4 4 0 000-8z"/>
+                </svg>
+                Zoom: {zoom.toFixed(1)}x
+              </label>
               <input
                 type="range"
                 min={1}
@@ -1390,56 +1271,61 @@ export default function AdminProducts() {
                 step={0.1}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                style={{ flex: 1 }}
+                className="zoom-slider"
               />
-              <span style={{ color: '#999', minWidth: 40 }}>{zoom.toFixed(1)}x</span>
             </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setShowCropper(false)}
-                style={{
-                  padding: '10px 20px',
-                  background: '#2a2b36',
-                  color: '#e9e9ef',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer'
-                }}
-              >
+            <div className="modal-footer">
+              <button onClick={() => setShowCropper(false)} className="btn-secondary">
                 Cancel
               </button>
-              <button
-                onClick={applyCrop}
-                style={{
-                  padding: '10px 20px',
-                  background: '#6D74FF',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer'
-                }}
-              >
-                ✓ Apply Crop
+              <button onClick={applyCrop} className="btn-primary">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                </svg>
+                Apply Crop
               </button>
-            </div>
-
-            <div style={{ textAlign: 'center', color: '#999', fontSize: 14 }}>
-              Drag to position • Scroll or use slider to zoom • Square crop (1:1 ratio)
             </div>
           </div>
         </div>
       )}
 
       <style>{`
-        /* Page Layout */
-        .products-page {
-          max-width: 100%;
+        /* Global Styles */
+        * {
+          box-sizing: border-box;
         }
         
+        .products-page {
+          max-width: 100%;
+          padding: 24px;
+          background: #f8fafc;
+          min-height: 100vh;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+          opacity: 0;
+          animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        @keyframes fadeIn {
+          to { opacity: 1; }
+        }
+        
+        /* Page Header */
         .page-header {
           margin-bottom: 32px;
+          opacity: 0;
+          animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         
         .page-header-content {
@@ -1447,144 +1333,233 @@ export default function AdminProducts() {
         }
         
         .page-title {
-          font-size: 28px;
+          font-size: 32px;
           font-weight: 700;
-          color: #1a202c;
+          color: #0f172a;
           margin: 0 0 8px 0;
           display: flex;
           align-items: center;
+          gap: 12px;
+          letter-spacing: -0.5px;
+        }
+        
+        .title-icon-wrapper {
+          width: 48px;
+          height: 48px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
         
         .page-subtitle {
-          font-size: 14px;
-          color: #718096;
+          font-size: 15px;
+          color: #64748b;
           margin: 0;
         }
         
         .page-header-stats {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
           gap: 16px;
         }
         
         .stat-card {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: white;
           padding: 20px;
           border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          border: 1px solid #e5e7eb;
+          transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stat-card.total { border-left: 4px solid #667eea; }
+        .stat-card.published { border-left: 4px solid #10b981; }
+        .stat-card.draft { border-left: 4px solid #f59e0b; }
+        
+        .stat-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        
+        .stat-card.total .stat-icon {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+          color: #667eea;
+        }
+        
+        .stat-card.published .stat-icon {
+          background: rgba(16, 185, 129, 0.1);
+          color: #10b981;
+        }
+        
+        .stat-card.draft .stat-icon {
+          background: rgba(245, 158, 11, 0.1);
+          color: #f59e0b;
+        }
+        
+        .stat-info {
+          flex: 1;
         }
         
         .stat-value {
-          font-size: 32px;
+          font-size: 28px;
           font-weight: 700;
-          color: white;
+          color: #0f172a;
+          line-height: 1;
           margin-bottom: 4px;
         }
         
         .stat-label {
           font-size: 13px;
-          color: rgba(255, 255, 255, 0.9);
+          color: #64748b;
           font-weight: 500;
         }
         
-        /* Modern Card */
+        /* Alert */
+        .alert-error {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px 20px;
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          border-radius: 12px;
+          color: #dc2626;
+          font-size: 14px;
+          font-weight: 500;
+          margin-bottom: 24px;
+          box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+        }
+        
+        /* Card Modern */
         .card-modern {
           background: white;
           border-radius: 16px;
-          padding: 0;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          border: 1px solid #e5e7eb;
           overflow: hidden;
+          margin-bottom: 24px;
+          opacity: 0;
+          animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+        }
+        
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
         }
         
         .card-header {
           padding: 24px;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid #e5e7eb;
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
         }
         
         .card-title {
-          font-size: 18px;
-          font-weight: 600;
-          color: #1a202c;
-          margin: 0;
+          font-size: 20px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 4px 0;
           display: flex;
           align-items: center;
+          gap: 8px;
         }
         
         .card-subtitle {
           font-size: 14px;
-          color: #718096;
-          margin: 4px 0 0 0;
+          color: #64748b;
+          margin: 0;
+        }
+        
+        .badge-count {
+          background: rgba(102, 126, 234, 0.1);
+          color: #667eea;
+          padding: 4px 12px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 600;
+          margin-left: 8px;
+        }
+        
+        .badge-count-lg {
+          background: rgba(102, 126, 234, 0.1);
+          color: #667eea;
+          padding: 8px 16px;
+          border-radius: 12px;
+          font-size: 14px;
+          font-weight: 700;
         }
         
         .card-body {
           padding: 24px;
         }
         
-        .badge-info {
-          background: rgba(102, 126, 234, 0.1);
-          color: #667eea;
-          padding: 4px 12px;
-          border-radius: 12px;
-          font-size: 13px;
-          font-weight: 600;
-          margin-left: 8px;
-        }
-        
-        .badge-count {
-          background: rgba(102, 126, 234, 0.1);
-          color: #667eea;
-          padding: 6px 14px;
-          border-radius: 12px;
-          font-size: 14px;
-          font-weight: 600;
-        }
-        
         /* Forms */
         .form-grid {
           display: grid;
-          /* two-column layout for predictable alignment */
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(2, 1fr);
           gap: 20px;
           margin-bottom: 20px;
-          align-items: start;
         }
-
+        
         .form-group {
           display: flex;
           flex-direction: column;
           gap: 8px;
         }
-
-        /* full-width rows (span both columns) */
+        
         .form-group-full {
-          width: 100%;
           grid-column: 1 / -1;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
         
         .form-label {
           font-size: 14px;
           font-weight: 600;
-          color: #2d3748;
+          color: #374151;
           display: flex;
           align-items: center;
           gap: 6px;
         }
         
-        .form-label svg {
-          opacity: 0.6;
+        .required {
+          color: #ef4444;
+          font-weight: 700;
         }
         
         .form-input {
           padding: 12px 16px;
-          border: 2px solid #e2e8f0;
+          border: 2px solid #e5e7eb;
           border-radius: 10px;
           font-size: 14px;
-          color: #2d3748;
+          color: #0f172a;
           transition: all 0.2s;
           background: white;
+          font-family: inherit;
         }
         
         .form-input:focus {
@@ -1593,12 +1568,23 @@ export default function AdminProducts() {
           box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
+        .form-input.error {
+          border-color: #ef4444;
+        }
+        
+        .form-input.error:focus {
+          box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
         .form-error {
           font-size: 13px;
           color: #ef4444;
-          display: flex;
-          align-items: center;
-          gap: 4px;
+          font-weight: 500;
+        }
+        
+        textarea.form-input {
+          resize: vertical;
+          min-height: 100px;
         }
         
         /* Upload Zone */
@@ -1607,6 +1593,7 @@ export default function AdminProducts() {
           gap: 12px;
           align-items: center;
           margin-top: 12px;
+          flex-wrap: wrap;
         }
         
         .file-input {
@@ -1624,8 +1611,9 @@ export default function AdminProducts() {
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s;
           box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+          border: none;
         }
         
         .upload-button:hover {
@@ -1656,24 +1644,25 @@ export default function AdminProducts() {
         /* Image Preview Grid */
         .image-preview-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-          gap: 12px;
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          gap: 16px;
           margin-top: 16px;
         }
         
         .image-preview-item {
           position: relative;
-          width: 100px;
-          height: 100px;
+          aspect-ratio: 1;
           border-radius: 12px;
           overflow: hidden;
-          border: 2px solid #e2e8f0;
-          transition: all 0.2s;
+          border: 2px solid #e5e7eb;
+          transition: all 0.3s;
+          background: #f8fafc;
         }
         
         .image-preview-item:hover {
           border-color: #667eea;
           transform: scale(1.05);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
         
         .image-preview-item img {
@@ -1682,99 +1671,178 @@ export default function AdminProducts() {
           object-fit: cover;
         }
         
-        .btn-crop {
+        .image-overlay {
           position: absolute;
-          bottom: 6px;
-          left: 6px;
-          background: rgba(102, 126, 234, 0.95);
-          color: white;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          opacity: 0;
+          transition: opacity 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        
+        .image-preview-item:hover .image-overlay {
+          opacity: 1;
+        }
+        
+        .btn-overlay {
+          width: 40px;
+          height: 40px;
+          border-radius: 8px;
           border: none;
-          border-radius: 6px;
-          padding: 4px 8px;
-          font-size: 12px;
           cursor: pointer;
-          font-weight: 600;
-          transition: all 0.2s;
-        }
-        
-        .btn-crop:hover {
-          background: rgba(102, 126, 234, 1);
-          transform: scale(1.05);
-        }
-        
-        .btn-remove {
-          position: absolute;
-          top: -8px;
-          right: -8px;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          background: #ef4444;
-          color: white;
-          border: 2px solid white;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: bold;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: all 0.2s;
-          box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+          font-weight: 600;
         }
         
-        .btn-remove:hover {
+        .btn-crop-overlay {
+          background: #667eea;
+          color: white;
+        }
+        
+        .btn-crop-overlay:hover {
+          background: #5568d3;
+          transform: scale(1.1);
+        }
+        
+        .btn-remove-overlay {
+          background: #ef4444;
+          color: white;
+          font-size: 24px;
+          line-height: 1;
+        }
+        
+        .btn-remove-overlay:hover {
           background: #dc2626;
           transform: scale(1.1);
         }
         
-        /* Empty State */
-        .empty-state {
-          text-align: center;
-          padding: 40px 20px;
-          color: #a0aec0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
+        .image-badge {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
         }
         
-        .empty-state p {
-          margin: 0;
-          font-size: 14px;
+        .image-badge.new {
+          background: #10b981;
+        }
+        
+        /* Empty State */
+        .empty-state-upload {
+          text-align: center;
+          padding: 40px 20px;
+          background: #f8fafc;
+          border-radius: 12px;
+          border: 2px dashed #cbd5e1;
+          margin-top: 12px;
+        }
+        
+        .empty-state-upload svg {
+          opacity: 0.3;
+          margin-bottom: 12px;
+        }
+        
+        .empty-state-upload p {
+          margin: 0 0 4px 0;
+          color: #64748b;
+          font-weight: 600;
+          font-size: 15px;
+        }
+        
+        .empty-state-upload span {
+          color: #94a3b8;
+          font-size: 13px;
         }
         
         .empty-state-large {
           text-align: center;
-          padding: 60px 20px;
-          color: #a0aec0;
+          padding: 80px 40px;
+          color: #94a3b8;
+        }
+        
+        .empty-state-large svg {
+          opacity: 0.2;
+          margin-bottom: 20px;
         }
         
         .empty-state-large h3 {
-          color: #4a5568;
-          margin: 16px 0 8px 0;
-          font-size: 20px;
+          font-size: 24px;
+          color: #475569;
+          margin: 0 0 8px 0;
         }
         
         .empty-state-large p {
+          font-size: 15px;
           margin: 0;
-          color: #a0aec0;
-          font-size: 14px;
         }
         
         /* Loading State */
         .loading-state {
           text-align: center;
-          padding: 60px 20px;
-          color: #a0aec0;
+          padding: 80px 40px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
+          gap: 24px;
+        }
+        
+        .loading-spinner-modern {
+          position: relative;
+          width: 80px;
+          height: 80px;
+        }
+        
+        .spinner-ring-modern {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border: 4px solid transparent;
+          border-top-color: #667eea;
+          border-radius: 50%;
+          animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+        
+        .spinner-ring-modern:nth-child(2) {
+          width: 70%;
+          height: 70%;
+          top: 15%;
+          left: 15%;
+          border-top-color: #764ba2;
+          animation-delay: -0.5s;
+        }
+        
+        .spinner-ring-modern:nth-child(3) {
+          width: 40%;
+          height: 40%;
+          top: 30%;
+          left: 30%;
+          border-top-color: #10b981;
+          animation-delay: -1s;
+        }
+        
+        @keyframes spin {
+          100% { transform: rotate(360deg); }
         }
         
         .loading-state p {
+          font-size: 16px;
+          color: #64748b;
+          font-weight: 600;
           margin: 0;
-          font-size: 14px;
         }
         
         /* Buttons */
@@ -1791,7 +1859,7 @@ export default function AdminProducts() {
           font-size: 15px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s;
           box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
           margin-top: 20px;
         }
@@ -1806,119 +1874,166 @@ export default function AdminProducts() {
           cursor: not-allowed;
         }
         
+        .btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 12px 24px;
+          background: white;
+          color: #64748b;
+          border: 2px solid #e5e7eb;
+          border-radius: 10px;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+          background: #f8fafc;
+          border-color: #cbd5e1;
+          color: #475569;
+        }
+        
         .spinner {
           animation: spin 1s linear infinite;
         }
         
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        /* Products Table */
+        .products-table-wrapper {
+          overflow-x: auto;
         }
         
-        /* Products Table */
         .products-table {
           display: flex;
           flex-direction: column;
+          min-width: 1000px;
         }
         
         .table-header {
           display: grid;
-          grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 120px;
+          grid-template-columns: 2.5fr 1.5fr 1fr 1fr 1.2fr 140px;
           gap: 16px;
           padding: 16px 24px;
-          background: #f7fafc;
-          font-weight: 600;
+          background: #f8fafc;
+          font-weight: 700;
           font-size: 13px;
-          color: #4a5568;
+          color: #475569;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          border-bottom: 2px solid #e5e7eb;
         }
         
         .table-row {
           display: grid;
-          grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 120px;
+          grid-template-columns: 2.5fr 1.5fr 1fr 1fr 1.2fr 140px;
           gap: 16px;
-          padding: 16px 24px;
-          border-bottom: 1px solid #e2e8f0;
+          padding: 20px 24px;
+          border-bottom: 1px solid #e5e7eb;
           align-items: center;
           transition: all 0.2s;
         }
         
         .table-row:hover {
-          background: #f7fafc;
+          background: #f8fafc;
         }
         
-        .td-product, .td-slug, .td-price, .td-stock, .td-status, .td-actions {
+        .td-product {
           display: flex;
           align-items: center;
         }
         
         .product-cell {
           display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 8px;
+          align-items: center;
+          gap: 16px;
         }
         
         .product-images {
-          display: flex;
-          gap: 6px;
-          align-items: center;
+          position: relative;
+          flex-shrink: 0;
         }
         
-        .product-thumbnail {
-          width: 48px;
-          height: 48px;
+        .product-thumbnail-main {
+          width: 64px;
+          height: 64px;
           object-fit: cover;
-          border-radius: 8px;
-          border: 2px solid #e2e8f0;
-          transition: all 0.2s;
+          border-radius: 12px;
+          border: 2px solid #e5e7eb;
+          transition: all 0.3s;
         }
         
-        .product-thumbnail:hover {
+        .product-thumbnail-main:hover {
           border-color: #667eea;
           transform: scale(1.1);
         }
         
-        .image-count {
-          font-size: 12px;
-          color: #a0aec0;
-          font-weight: 600;
+        .image-count-badge {
+          position: absolute;
+          bottom: -6px;
+          right: -6px;
+          background: #667eea;
+          color: white;
+          padding: 2px 8px;
+          border-radius: 10px;
+          font-size: 11px;
+          font-weight: 700;
+          border: 2px solid white;
         }
         
         .no-image {
-          width: 48px;
-          height: 48px;
-          background: #f7fafc;
-          border-radius: 8px;
+          width: 64px;
+          height: 64px;
+          background: #f8fafc;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px dashed #e2e8f0;
+          border: 2px dashed #e5e7eb;
+          flex-shrink: 0;
+        }
+        
+        .no-image svg {
+          opacity: 0.3;
+        }
+        
+        .product-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
         }
         
         .product-name {
           font-weight: 600;
-          color: #2d3748;
-          font-size: 14px;
+          color: #0f172a;
+          font-size: 15px;
+        }
+        
+        .product-desc {
+          font-size: 13px;
+          color: #64748b;
         }
         
         .td-slug code {
-          background: #f7fafc;
-          padding: 4px 8px;
-          border-radius: 6px;
+          background: #f8fafc;
+          padding: 6px 12px;
+          border-radius: 8px;
           font-size: 13px;
-          color: #4a5568;
-          font-family: 'Consolas', monospace;
+          color: #475569;
+          font-family: 'Monaco', 'Menlo', monospace;
+          border: 1px solid #e5e7eb;
         }
         
         .inline-input {
           padding: 8px 12px;
-          border: 2px solid #e2e8f0;
+          border: 2px solid #e5e7eb;
           border-radius: 8px;
           font-size: 14px;
-          width: 100px;
+          width: 100%;
+          max-width: 120px;
           transition: all 0.2s;
+          font-family: inherit;
         }
         
         .inline-input:focus {
@@ -1927,12 +2042,15 @@ export default function AdminProducts() {
         }
         
         .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
           padding: 6px 12px;
           border-radius: 12px;
           font-size: 12px;
-          font-weight: 600;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.3px;
         }
         
         .status-badge.published {
@@ -1941,7 +2059,7 @@ export default function AdminProducts() {
         }
         
         .status-badge.draft {
-          background: rgba(251, 191, 36, 0.1);
+          background: rgba(245, 158, 11, 0.1);
           color: #d97706;
         }
         
@@ -1951,9 +2069,9 @@ export default function AdminProducts() {
         }
         
         .btn-action {
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
           border: none;
           cursor: pointer;
           display: flex;
@@ -1970,7 +2088,29 @@ export default function AdminProducts() {
         .btn-edit:hover {
           background: #667eea;
           color: white;
-          transform: scale(1.05);
+          transform: scale(1.1);
+        }
+        
+        .btn-publish {
+          background: rgba(16, 185, 129, 0.1);
+          color: #10b981;
+        }
+        
+        .btn-publish:hover {
+          background: #10b981;
+          color: white;
+          transform: scale(1.1);
+        }
+        
+        .btn-unpublish {
+          background: rgba(245, 158, 11, 0.1);
+          color: #f59e0b;
+        }
+        
+        .btn-unpublish:hover {
+          background: #f59e0b;
+          color: white;
+          transform: scale(1.1);
         }
         
         .btn-delete {
@@ -1981,20 +2121,7 @@ export default function AdminProducts() {
         .btn-delete:hover {
           background: #ef4444;
           color: white;
-          transform: scale(1.05);
-        }
-        
-        /* Alert */
-        .alert-error {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px;
-          background: rgba(239, 68, 68, 0.1);
-          border: 2px solid rgba(239, 68, 68, 0.2);
-          border-radius: 12px;
-          color: #ef4444;
-          margin-bottom: 24px;
+          transform: scale(1.1);
         }
         
         /* Modals */
@@ -2018,10 +2145,12 @@ export default function AdminProducts() {
           to { opacity: 1; }
         }
         
-        .modal-content-modern {
+        .modal-content-modern,
+        .preview-modal-content,
+        .cropper-modal-content {
           background: white;
           border-radius: 16px;
-          max-width: 600px;
+          max-width: 700px;
           width: 90%;
           max-height: 90vh;
           overflow: hidden;
@@ -2029,35 +2158,52 @@ export default function AdminProducts() {
           animation: slideUp 0.3s;
         }
         
-        @keyframes slideUp {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+        .preview-modal-content {
+          max-width: 1000px;
         }
         
-        .modal-header-modern {
+        .cropper-modal-content {
+          max-width: 800px;
+        }
+        
+        @keyframes slideUp {
+          from {
+            transform: translateY(20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        
+        .modal-header-modern,
+        .preview-modal-header {
           padding: 24px;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid #e5e7eb;
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
         
-        .modal-header-modern h2 {
+        .modal-header-modern h2,
+        .preview-modal-header h2 {
           font-size: 20px;
           font-weight: 700;
-          color: #1a202c;
+          color: #0f172a;
           margin: 0;
           display: flex;
           align-items: center;
+          gap: 8px;
         }
         
         .btn-close {
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
           border: none;
           background: rgba(0, 0, 0, 0.05);
-          color: #4a5568;
+          color: #64748b;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -2072,63 +2218,293 @@ export default function AdminProducts() {
         
         .modal-body-modern {
           padding: 24px;
-          max-height: calc(90vh - 200px);
+          max-height: calc(90vh - 180px);
           overflow-y: auto;
         }
         
-        .modal-content {
-          background: #14151d;
-          border: 1px solid #2a2b36;
-          border-radius: 12px;
-          padding: 24px;
-          max-width: 600px;
-          width: 90%;
-          max-height: 90vh;
-          overflow-y: auto;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal-content::-webkit-scrollbar,
         .modal-body-modern::-webkit-scrollbar {
           width: 8px;
         }
         
-        .modal-content::-webkit-scrollbar-track,
         .modal-body-modern::-webkit-scrollbar-track {
           background: #f1f1f1;
         }
         
-        .modal-content::-webkit-scrollbar-thumb,
         .modal-body-modern::-webkit-scrollbar-thumb {
           background: #667eea;
           border-radius: 4px;
         }
         
+        .modal-footer {
+          padding: 20px 24px;
+          border-top: 1px solid #e5e7eb;
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+        
+        /* Preview Modal */
+        .preview-image-container {
+          background: #0f172a;
+          padding: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 500px;
+        }
+        
+        .preview-image-container img {
+          max-width: 100%;
+          max-height: 500px;
+          object-fit: contain;
+          border-radius: 8px;
+        }
+        
+        .preview-controls {
+          padding: 20px 24px;
+          border-top: 1px solid #e5e7eb;
+          border-bottom: 1px solid #e5e7eb;
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+        
+        .btn-nav {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          background: white;
+          color: #64748b;
+          border: 2px solid #e5e7eb;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .btn-nav:hover:not(:disabled) {
+          background: #f8fafc;
+          border-color: #cbd5e1;
+          color: #475569;
+        }
+        
+        .btn-nav:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        
+        .btn-crop-main {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          background: #667eea;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .btn-crop-main:hover {
+          background: #5568d3;
+        }
+        
+        .btn-remove-main {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .btn-remove-main:hover {
+          background: #dc2626;
+        }
+        
+        .preview-thumbnails {
+          padding: 20px 24px;
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+        }
+        
+        .preview-thumbnail {
+          position: relative;
+          flex-shrink: 0;
+          width: 80px;
+          height: 80px;
+          border-radius: 10px;
+          overflow: hidden;
+          border: 3px solid transparent;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .preview-thumbnail:hover {
+          border-color: #cbd5e1;
+        }
+        
+        .preview-thumbnail.active {
+          border-color: #667eea;
+        }
+        
+        .preview-thumbnail img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .thumbnail-number {
+          position: absolute;
+          top: 4px;
+          left: 4px;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          padding: 2px 8px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
+        }
+        
+        /* Cropper Modal */
+        .cropper-container {
+          position: relative;
+          width: 100%;
+          height: 450px;
+          background: #0f172a;
+        }
+        
+        .cropper-controls {
+          padding: 20px 24px;
+          border-top: 1px solid #e5e7eb;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .zoom-label {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #475569;
+          margin-bottom: 12px;
+        }
+        
+        .zoom-slider {
+          width: 100%;
+          height: 6px;
+          border-radius: 3px;
+          background: #e5e7eb;
+          outline: none;
+          cursor: pointer;
+        }
+        
+        .zoom-slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #667eea;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .zoom-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+        }
+        
         /* Responsive */
-        @media (max-width: 1200px) {
-          .table-header, .table-row {
-            grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+        @media (max-width: 1024px) {
+          .form-grid {
+            grid-template-columns: 1fr;
           }
-          .td-slug, .th-slug {
-            display: none;
+          
+          .page-header-stats {
+            grid-template-columns: repeat(3, 1fr);
           }
         }
         
-        @media (max-width: 900px) {
-          .table-header, .table-row {
-            grid-template-columns: 2fr 1fr 80px;
+        @media (max-width: 768px) {
+          .products-page {
+            padding: 16px;
           }
-          .td-price, .th-price, .td-stock, .th-stock, .td-status, .th-status {
-            display: none;
+          
+          .page-title {
+            font-size: 24px;
           }
+          
+          .title-icon-wrapper {
+            width: 40px;
+            height: 40px;
+          }
+          
           .page-header-stats {
             grid-template-columns: 1fr;
           }
-          .form-grid {
-            grid-template-columns: 1fr;
+          
+          .stat-card {
+            padding: 16px;
+          }
+          
+          .stat-value {
+            font-size: 24px;
+          }
+          
+          .card-header {
+            flex-direction: column;
+            gap: 12px;
+          }
+          
+          .badge-count-lg {
+            align-self: flex-start;
+          }
+          
+          .products-table {
+            min-width: 800px;
+          }
+          
+          .table-header,
+          .table-row {
+            grid-template-columns: 2fr 1fr 100px;
+          }
+          
+          .th-slug, .td-slug,
+          .th-price, .td-price,
+          .th-stock, .td-stock {
+            display: none;
+          }
+          
+          .preview-image-container {
+            min-height: 300px;
+            padding: 20px;
+          }
+          
+          .preview-image-container img {
+            max-height: 300px;
+          }
+          
+          .preview-controls {
+            flex-direction: column;
+          }
+          
+          .cropper-container {
+            height: 300px;
           }
         }
       `}</style>
     </div>
   )
-}    
+}

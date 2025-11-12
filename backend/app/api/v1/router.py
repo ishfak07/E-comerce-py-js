@@ -13,6 +13,7 @@ from .endpoints.admin_metrics import router as admin_metrics_router
 from .endpoints.admin_products import router as admin_products_router
 from .endpoints.admin_users import router as admin_users_router
 from .endpoints.admin_migrate import router as admin_migrate_router
+from .endpoints.admin_settings import router as admin_settings_router
 
 
 api_router_v1 = APIRouter()
@@ -31,5 +32,6 @@ api_router_v1.include_router(admin_metrics_router, tags=["admin"])
 api_router_v1.include_router(admin_products_router, tags=["admin"])
 api_router_v1.include_router(admin_users_router, tags=["admin"])
 api_router_v1.include_router(admin_migrate_router, tags=["admin"])
+api_router_v1.include_router(admin_settings_router, tags=["admin"])
 
 

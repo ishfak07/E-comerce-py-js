@@ -47,6 +47,8 @@ type SiteSettings = {
   currency: Currency
   brandColor: string
   bankTransferNote: string
+  heroImage1: string
+  heroImage2: string
 }
 
 /* =========================
@@ -60,6 +62,8 @@ const defaultSettings: SiteSettings = {
   currency: 'LKR',
   brandColor: '#6D74FF',
   bankTransferNote: '',
+  heroImage1: '/images/hero-1.jpg',
+  heroImage2: '/images/hero-2.jpg',
 }
 
 /* =========================
@@ -301,6 +305,26 @@ export default function AdminDashboard() {
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
 
+  // Load data
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const response = await fetch('/api/v1/admin/settings', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setSettings({ ...defaultSettings, ...data })
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error)
+      }
+    }
+    loadSettings()
+  }, [])
+
   const onSort = useCallback((key: string) => {
     setSortKey((prev) => {
       if (prev === key) {
@@ -418,6 +442,28 @@ export default function AdminDashboard() {
     setShowOrderModal(false)
   }
 
+  // Settings
+  async function saveSettings() {
+    try {
+      const response = await fetch('/api/v1/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(settings),
+      })
+      if (response.ok) {
+        window.alert('Settings saved successfully!')
+      } else {
+        window.alert('Failed to save settings')
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      window.alert('Error saving settings')
+    }
+  }
+
   // Dashboard metrics
   const totalRevenue = useMemo(() => orders.reduce((a, b) => a + b.total, 0), [orders])
   const totalOrders = orders.length
@@ -453,6 +499,12 @@ export default function AdminDashboard() {
             onClick={() => setTab('dashboard')}
             type="button"
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
             Dashboard
           </button>
           <button
@@ -460,6 +512,10 @@ export default function AdminDashboard() {
             onClick={() => setTab('products')}
             type="button"
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+              <path d="M20 7h-3V6a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
             Products
           </button>
           <button
@@ -467,6 +523,12 @@ export default function AdminDashboard() {
             onClick={() => setTab('orders')}
             type="button"
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
             Orders
           </button>
           <button
@@ -474,13 +536,22 @@ export default function AdminDashboard() {
             onClick={() => setTab('customers')}
             type="button"
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
             Customers
           </button>
+          <div style={{borderTop: '1px solid var(--line)', margin: '8px 0', opacity: 0.5}}></div>
           <button
-            className={`menu-item ${tab === 'settings' ? 'active' : ''}`}
+            className={`menu-item settings-btn ${tab === 'settings' ? 'active' : ''}`}
             onClick={() => setTab('settings')}
             type="button"
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
             Settings
           </button>
         </nav>
@@ -744,11 +815,31 @@ export default function AdminDashboard() {
                       onChange={(e) => setSettings({ ...settings, bankTransferNote: e.target.value })}
                     />
                   </div>
+                  <div className="field">
+                    <label htmlFor="heroImage1">Hero image 1 URL</label>
+                    <input
+                      id="heroImage1"
+                      type="url"
+                      value={settings.heroImage1}
+                      onChange={(e) => setSettings({ ...settings, heroImage1: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="heroImage2">Hero image 2 URL</label>
+                    <input
+                      id="heroImage2"
+                      type="url"
+                      value={settings.heroImage2}
+                      onChange={(e) => setSettings({ ...settings, heroImage2: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
                 </div>
                 <div className="actions">
                   <button
                     className="btn btn-primary"
-                    onClick={() => window.alert('Settings saved (TODO: wire API)')}
+                    onClick={saveSettings}
                     type="button"
                   >
                     Save settings
@@ -933,9 +1024,11 @@ export default function AdminDashboard() {
         .sidebar{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column}
         .brand{padding:16px;font-weight:800;letter-spacing:.2px;color:white;border-bottom:1px solid var(--line)}
         .menu{display:flex;flex-direction:column;padding:8px}
-        .menu-item{appearance:none;border:none;background:transparent;text-align:left;color:var(--text);padding:10px 12px;border-radius:8px;cursor:pointer}
+        .menu-item{appearance:none;border:none;background:transparent;text-align:left;color:var(--text);padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center}
         .menu-item:hover{background:var(--ghost)}
         .menu-item.active{background:var(--brand);color:white}
+        .settings-btn{background:var(--ghost);border:1px solid var(--line);font-weight:600}
+        .settings-btn:hover{background:var(--brand);color:white;border-color:var(--brand)}
         .sidebar-foot{margin-top:auto;padding:8px;border-top:1px solid var(--line)}
         .main{display:flex;flex-direction:column;min-width:0}
         .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg, rgba(109,116,255,0.07), transparent 80%)}

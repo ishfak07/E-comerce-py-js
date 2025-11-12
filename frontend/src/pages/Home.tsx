@@ -2,13 +2,48 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthProvider'
 
+type SiteSettings = {
+  siteName: string
+  supportEmail: string
+  supportPhone: string
+  currency: string
+  brandColor: string
+  bankTransferNote: string
+  heroImage1: string
+  heroImage2: string
+}
+
 export default function Home() {
   const { user } = useAuth()
   const [mounted, setMounted] = useState(false)
+  const [settings, setSettings] = useState<SiteSettings>({
+    siteName: 'Own Setup 💼',
+    supportEmail: '',
+    supportPhone: '',
+    currency: 'LKR',
+    brandColor: '#6D74FF',
+    bankTransferNote: '',
+    heroImage1: '/images/hero-1.jpg',
+    heroImage2: '/images/hero-2.jpg',
+  })
 
   useEffect(() => {
     // Trigger animations after mount
     setMounted(true)
+
+    // Load settings
+    async function loadSettings() {
+      try {
+        const response = await fetch('/api/v1/admin/settings')
+        if (response.ok) {
+          const data = await response.json()
+          setSettings(prev => ({ ...prev, ...data }))
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error)
+      }
+    }
+    loadSettings()
   }, [])
 
   return (
@@ -93,14 +128,14 @@ export default function Home() {
           <div className="hero-images">
             <div className="image-wrapper img-1">
               <img
-                src="/images/hero-1.jpg"
+                src={settings.heroImage1}
                 alt="Lifestyle banner"
               />
               <div className="image-shine"></div>
             </div>
             <div className="image-wrapper img-2">
               <img
-                src="/images/hero-2.jpg"
+                src={settings.heroImage2}
                 alt="Crafted details"
               />
               <div className="image-shine"></div>

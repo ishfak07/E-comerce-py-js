@@ -16,6 +16,7 @@ import AdminOrders from './pages/AdminOrders'
 import AdminDashboardHome from './pages/AdminDashboardHome'
 import AdminProducts from './pages/AdminProducts'
 import AdminUsers from './pages/AdminUsers'
+import AdminSettings from './pages/AdminSettings'
 import AdminRoute from './components/AdminRoute'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminShell from './AdminShell'
@@ -86,6 +87,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   <Route path="products" element={<AdminProducts />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="orders" element={<AdminOrders />} />
+                  <Route path="settings" element={<AdminSettings />} />
                 </Route>
               </Routes>
             </CartProvider>

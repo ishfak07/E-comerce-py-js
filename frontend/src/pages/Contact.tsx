@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { getFormspreeEndpoint } from '../lib/config'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 
 type FormState = {
   name: string
@@ -23,11 +26,22 @@ export default function Contact() {
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [isLocked, setIsLocked] = useState(false)
   const liveRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     // Trigger animations after mount
     setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Fix Leaflet default marker icon issue
+    delete (L.Icon.Default.prototype as any)._getIconUrl
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    })
   }, [])
 
   useEffect(() => {
@@ -97,6 +111,42 @@ export default function Contact() {
   const whatsappHref = `https://wa.me/94768976222?text=${encodeURIComponent(
     `Hello, I need help with my order.\nName: ${form.name}\nEmail: ${form.email}\nOrder ID: ${form.orderId || '-'}\nSubject: ${form.subject}\nMessage: ${form.message}`
   )}`
+
+  const LockButton = () => {
+    const map = useMap()
+    useEffect(() => {
+      if (isLocked) {
+        map.dragging.disable()
+        map.scrollWheelZoom.disable()
+        map.doubleClickZoom.disable()
+        map.touchZoom.disable()
+      } else {
+        map.dragging.enable()
+        map.scrollWheelZoom.enable()
+        map.doubleClickZoom.enable()
+        map.touchZoom.enable()
+      }
+    }, [map, isLocked])
+    return (
+      <button
+        onClick={() => setIsLocked(!isLocked)}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          zIndex: 1000,
+          background: 'white',
+          border: '1px solid #ccc',
+          padding: '5px 10px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '12px'
+        }}
+      >
+        {isLocked ? '🔒 Unlock Map' : '🔓 Lock Map'}
+      </button>
+    )
+  }
 
   return (
     <>
@@ -475,13 +525,20 @@ export default function Contact() {
             </ul>
 
             <div className="mapbox">
-              <div className="map-fallback">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span>Map Coming Soon</span>
-              </div>
+              {/* @ts-ignore */}
+              <MapContainer center={[8.0386019, 79.8309999]} zoom={15} style={{ height: '300px', width: '100%' }}>
+                {/* @ts-ignore */}
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={[8.0386019, 79.8309999]}>
+                  <Popup>
+                    Palace of Rumiii<br />87 Nedumkulam Rd, Puttalam
+                  </Popup>
+                </Marker>
+                <LockButton />
+              </MapContainer>
             </div>
           </aside>
         </div>

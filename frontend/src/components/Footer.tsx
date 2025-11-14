@@ -92,7 +92,7 @@ export default function Footer() {
             <Link to="/support">Support</Link>
           </div>
           <div className="right">
-            <Link to="/sitemap">Sitemap</Link>
+            <a href="https://maps.app.goo.gl/dPpVDHJhGM17a5RN7" target="_blank" rel="noopener noreferrer">Site Map</a>
             <span className="dot">•</span>
             <button
               className="btn btn-ghost"

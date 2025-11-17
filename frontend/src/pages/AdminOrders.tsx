@@ -28,6 +28,14 @@ type Order = {
   additional_notes?: string
   created_at?: string
   payment_status?: string
+  items?: {
+    product_id?: string | number
+    title?: string
+    name?: string
+    quantity?: number
+    qty?: number
+    price?: number
+  }[]
 }
 
 type OrdersResponse = {
@@ -401,6 +409,32 @@ export default function AdminOrders() {
                           </>
                         ) : (
                           <div className="text-muted">No address provided</div>
+                        )}
+                      </div>
+
+                      <h4 className="section-title-order" style={{ marginTop: '20px' }}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                        </svg>
+                        Order Items
+                      </h4>
+                      <div className="items-list">
+                        {o.items && o.items.length > 0 ? (
+                          o.items.map((item, index) => {
+                            const productName = item.title || item.name || `Product ID: ${item.product_id || 'N/A'}`
+                            const quantity = item.quantity || item.qty || 0
+                            return (
+                              <div key={index} className="item-row">
+                                <div className="item-name">
+                                  {productName}
+                                  <span className="item-qty-inline">× {quantity}</span>
+                                </div>
+                                <div className="item-quantity">Qty: {quantity}</div>
+                              </div>
+                            )
+                          })
+                        ) : (
+                          <div className="text-muted">No items found</div>
                         )}
                       </div>
                     </div>
@@ -1305,6 +1339,56 @@ export default function AdminOrders() {
             width: 48px;
             height: 48px;
           }
+        }
+
+        .items-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .item-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          padding: 12px 16px;
+          background: var(--surface);
+          border-radius: 8px;
+          border: 1px solid var(--line);
+          transition: all 0.2s ease;
+        }
+
+        .item-row:hover {
+          background: var(--surface-alt);
+          border-color: var(--brand);
+          transform: translateX(2px);
+        }
+
+        .item-name {
+          font-weight: 500;
+          color: var(--text);
+          font-size: 15px;
+          flex: 1;
+        }
+
+        .item-qty-inline {
+          margin-left: 8px;
+          color: var(--muted);
+          font-weight: 600;
+        }
+
+        .item-quantity {
+          font-size: 13px;
+          background: var(--brand);
+          color: white;
+          padding: 4px 12px;
+          border-radius: 14px;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          white-space: nowrap;
+          margin-left: 12px;
         }
       `}</style>
     </div>

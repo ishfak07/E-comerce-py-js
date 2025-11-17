@@ -57,14 +57,13 @@ export default function AdminOrders() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
 
-  // Keep latest page in a ref to avoid stale value inside interval callback
   const pageRef = useRef(page)
   useEffect(() => {
     pageRef.current = page
   }, [page])
 
-  // Fetch a page (with cancellation)
   async function fetchPage(p: number) {
     setLoading(true)
     setError(null)
@@ -77,7 +76,6 @@ export default function AdminOrders() {
       const data = res.data
       setOrders(Array.isArray(data.items) ? data.items : [])
       setTotal(Number.isFinite(data.total) ? data.total : 0)
-      // Trust backend page echo if present, else keep requested page
       setPage(Number.isFinite(data.page) ? data.page : p)
     } catch (err) {
       const e = err as ApiError
@@ -86,18 +84,13 @@ export default function AdminOrders() {
         try { window.location.href = '/login' } catch {}
         return
       }
-      // Ignore abort errors silently
       setError('Failed to fetch orders')
-      // Keep previous data on error
-      // console.error('Failed to fetch orders', err)
     } finally {
       setLoading(false)
     }
-    // Return aborter for external cancellation when needed
     return () => controller.abort()
   }
 
-  // Initial load
   useEffect(() => {
     let cancelled = false
     const controller = new AbortController()
@@ -130,10 +123,8 @@ export default function AdminOrders() {
       cancelled = true
       controller.abort()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Poll every 5s without stale closure
   useEffect(() => {
     const id = window.setInterval(() => {
       const currentPage = pageRef.current
@@ -142,12 +133,9 @@ export default function AdminOrders() {
     return () => window.clearInterval(id)
   }, [])
 
-  // Fetch when page changes (user pagination)
   useEffect(() => {
-    // Skip immediate refetch on very first mount (already fetched)
     if (page <= 0) return
     fetchPage(page)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
 
   const pages = useMemo(() => {
@@ -167,7 +155,6 @@ export default function AdminOrders() {
         resubmit_required: false,
         estimated_delivery_date: null
       })
-      // Refresh current page to reflect the change
       await fetchPage(pageRef.current)
     } catch (err) {
       const e = err as ApiError
@@ -184,7 +171,6 @@ export default function AdminOrders() {
   const canPrev = page > 1
   const canNext = page < pages
 
-  // Get status badge styling
   function getStatusBadge(status: string) {
     const configs: Record<string, { bg: string; color: string; icon: string; label: string }> = {
       pending_verification: { bg: '#fff4e5', color: '#d97706', icon: '⏳', label: 'Pending Verification' },
@@ -199,7 +185,6 @@ export default function AdminOrders() {
 
   return (
     <div className="orders-page">
-      {/* Page Header */}
       <div className="page-header">
         <div className="page-header-content">
           <h1 className="page-title">
@@ -219,7 +204,6 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      {/* Statistics Cards */}
       <div className="stats-grid">
         <div className="stat-card-modern total">
           <div className="stat-icon-modern">
@@ -283,7 +267,6 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <div className="alert-error">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -293,7 +276,6 @@ export default function AdminOrders() {
         </div>
       )}
 
-      {/* Orders Card */}
       <div className="card-modern">
         <div className="card-header-orders">
           <div>
@@ -313,7 +295,6 @@ export default function AdminOrders() {
           </button>
         </div>
 
-        {/* Loading State */}
         {loading && orders.length === 0 && (
           <div className="loading-state">
             <div className="loading-spinner-modern">
@@ -325,7 +306,6 @@ export default function AdminOrders() {
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && orders.length === 0 && (
           <div className="empty-state-large">
             <svg width="80" height="80" viewBox="0 0 20 20" fill="currentColor">
@@ -336,14 +316,13 @@ export default function AdminOrders() {
           </div>
         )}
 
-        {/* Orders List */}
         {orders.length > 0 && (
           <div className="orders-list">
             {orders.map((o) => {
               const statusConfig = getStatusBadge(o.status)
+              const isExpanded = expandedOrder === o.id
               return (
                 <div key={o.id} className="order-card">
-                  {/* Order Header */}
                   <div className="order-header">
                     <div className="order-id-section">
                       <div className="order-id-badge">
@@ -364,144 +343,160 @@ export default function AdminOrders() {
                         </p>
                       </div>
                     </div>
-                    <div className="order-amount">{formatMoney(o.total_amount)}</div>
+                    <div className="order-header-right">
+                      <div className="order-amount">{formatMoney(o.total_amount)}</div>
+                      <button 
+                        className="expand-btn"
+                        onClick={() => setExpandedOrder(isExpanded ? null : o.id)}
+                        type="button"
+                      >
+                        <svg 
+                          width="20" 
+                          height="20" 
+                          viewBox="0 0 20 20" 
+                          fill="currentColor"
+                          style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
+                        >
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Order Content - 2 Columns */}
-                  <div className="order-content">
-                    {/* Left Column - Customer Info */}
-                    <div className="order-section">
-                      <h4 className="section-title-order">
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-                        </svg>
-                        Customer Information
-                      </h4>
-                      <div className="info-grid">
-                        <div className="info-item">
-                          <span className="info-label">Name:</span>
-                          <span className="info-value">{o.customer_name || 'N/A'}</span>
-                        </div>
-                        <div className="info-item">
-                          <span className="info-label">Phone:</span>
-                          <span className="info-value">{o.customer_phone || 'N/A'}</span>
-                        </div>
-                        {o.customer_email && (
+                  {isExpanded && (
+                    <div className="order-content">
+                      <div className="order-section">
+                        <h4 className="section-title-order">
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+                          </svg>
+                          Customer Information
+                        </h4>
+                        <div className="info-grid">
                           <div className="info-item">
-                            <span className="info-label">Email:</span>
-                            <span className="info-value">{o.customer_email}</span>
+                            <span className="info-label">Name:</span>
+                            <span className="info-value">{o.customer_name || 'N/A'}</span>
                           </div>
-                        )}
-                      </div>
+                          <div className="info-item">
+                            <span className="info-label">Phone:</span>
+                            <span className="info-value">{o.customer_phone || 'N/A'}</span>
+                          </div>
+                          {o.customer_email && (
+                            <div className="info-item">
+                              <span className="info-label">Email:</span>
+                              <span className="info-value">{o.customer_email}</span>
+                            </div>
+                          )}
+                        </div>
 
-                      <h4 className="section-title-order" style={{ marginTop: '20px' }}>
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
-                        </svg>
-                        Delivery Address
-                      </h4>
-                      <div className="address-box">
-                        {o.shipping_address ? (
-                          <>
-                            <div>{o.shipping_address.line1}</div>
-                            <div>{o.shipping_address.city}, {o.shipping_address.postal_code}</div>
-                            <div>{o.shipping_address.country}</div>
-                          </>
-                        ) : (
-                          <div className="text-muted">No address provided</div>
-                        )}
-                      </div>
+                        <h4 className="section-title-order" style={{ marginTop: '20px' }}>
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
+                          </svg>
+                          Delivery Address
+                        </h4>
+                        <div className="address-box">
+                          {o.shipping_address ? (
+                            <>
+                              <div>{o.shipping_address.line1}</div>
+                              <div>{o.shipping_address.city}, {o.shipping_address.postal_code}</div>
+                              <div>{o.shipping_address.country}</div>
+                            </>
+                          ) : (
+                            <div className="text-muted">No address provided</div>
+                          )}
+                        </div>
 
-                      <h4 className="section-title-order" style={{ marginTop: '20px' }}>
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                        </svg>
-                        Order Items
-                      </h4>
-                      <div className="items-list">
-                        {o.items && o.items.length > 0 ? (
-                          o.items.map((item, index) => {
-                            const productName = item.title || item.name || `Product ID: ${item.product_id || 'N/A'}`
-                            const quantity = item.quantity || item.qty || 0
-                            return (
-                              <div key={index} className="item-row">
-                                <div className="item-name">
-                                  {productName}
-                                  <span className="item-qty-inline">× {quantity}</span>
+                        <h4 className="section-title-order" style={{ marginTop: '20px' }}>
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                          </svg>
+                          Order Items
+                        </h4>
+                        <div className="items-list">
+                          {o.items && o.items.length > 0 ? (
+                            o.items.map((item, index) => {
+                              const productName = item.title || item.name || `Product ID: ${item.product_id || 'N/A'}`
+                              const quantity = item.quantity || item.qty || 0
+                              const price = item.price || 0
+                              return (
+                                <div key={index} className="item-row">
+                                  <div className="item-name">
+                                    {productName}
+                                    <span className="item-qty-inline">× {quantity}</span>
+                                  </div>
+                                  <div className="item-price">{formatMoney(price * quantity)}</div>
                                 </div>
-                                <div className="item-quantity">Qty: {quantity}</div>
-                              </div>
-                            )
-                          })
-                        ) : (
-                          <div className="text-muted">No items found</div>
-                        )}
+                              )
+                            })
+                          ) : (
+                            <div className="text-muted">No items found</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Right Column - Payment Info */}
-                    <div className="order-section">
-                      <h4 className="section-title-order">
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
-                          <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"/>
-                        </svg>
-                        Payment Information
-                      </h4>
-                      <div className="info-grid">
-                        <div className="info-item">
-                          <span className="info-label">Bank:</span>
-                          <span className="info-value">{o.selected_bank || 'N/A'}</span>
-                        </div>
-                        <div className="info-item">
-                          <span className="info-label">Status:</span>
-                          <span className="info-value">{o.payment_status || 'N/A'}</span>
-                        </div>
-                        {o.transaction_reference && (
+                      <div className="order-section">
+                        <h4 className="section-title-order">
+                          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                            <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"/>
+                          </svg>
+                          Payment Information
+                        </h4>
+                        <div className="info-grid">
                           <div className="info-item">
-                            <span className="info-label">Reference:</span>
-                            <span className="info-value">{o.transaction_reference}</span>
+                            <span className="info-label">Bank:</span>
+                            <span className="info-value">{o.selected_bank || 'N/A'}</span>
                           </div>
+                          <div className="info-item">
+                            <span className="info-label">Status:</span>
+                            <span className="info-value">{o.payment_status || 'N/A'}</span>
+                          </div>
+                          {o.transaction_reference && (
+                            <div className="info-item">
+                              <span className="info-label">Reference:</span>
+                              <span className="info-value">{o.transaction_reference}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {o.transfer_receipt_url && (
+                          <>
+                            <h4 className="section-title-order" style={{ marginTop: '20px' }}>
+                              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
+                              </svg>
+                              Transfer Receipt
+                            </h4>
+                            <a 
+                              href={o.transfer_receipt_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="receipt-link"
+                            >
+                              <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
+                              </svg>
+                              View Receipt
+                            </a>
+                          </>
+                        )}
+
+                        {o.additional_notes && (
+                          <>
+                            <h4 className="section-title-order" style={{ marginTop: '20px' }}>
+                              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/>
+                              </svg>
+                              Notes
+                            </h4>
+                            <div className="notes-box">{o.additional_notes}</div>
+                          </>
                         )}
                       </div>
-
-                      {o.transfer_receipt_url && (
-                        <>
-                          <h4 className="section-title-order" style={{ marginTop: '20px' }}>
-                            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
-                            </svg>
-                            Transfer Receipt
-                          </h4>
-                          <a 
-                            href={o.transfer_receipt_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="receipt-link"
-                          >
-                            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
-                            </svg>
-                            View Receipt
-                          </a>
-                        </>
-                      )}
-
-                      {o.additional_notes && (
-                        <>
-                          <h4 className="section-title-order" style={{ marginTop: '20px' }}>
-                            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/>
-                            </svg>
-                            Notes
-                          </h4>
-                          <div className="notes-box">{o.additional_notes}</div>
-                        </>
-                      )}
                     </div>
-                  </div>
+                  )}
 
-                  {/* Order Actions */}
                   <div className="order-footer">
                     <div className="status-badge-order" style={{ 
                       backgroundColor: statusConfig.bg,
@@ -530,7 +525,6 @@ export default function AdminOrders() {
           </div>
         )}
 
-        {/* Pagination */}
         {orders.length > 0 && (
           <div className="pagination-footer">
             <div className="pagination-info">
@@ -568,7 +562,6 @@ export default function AdminOrders() {
       </div>
 
       <style>{`
-        /* Global Styles */
         * {
           box-sizing: border-box;
         }
@@ -587,7 +580,6 @@ export default function AdminOrders() {
           to { opacity: 1; }
         }
         
-        /* Page Header */
         .page-header {
           display: flex;
           justify-content: space-between;
@@ -674,7 +666,6 @@ export default function AdminOrders() {
           }
         }
         
-        /* Statistics Grid */
         .stats-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -795,7 +786,6 @@ export default function AdminOrders() {
           line-height: 1;
         }
         
-        /* Alert */
         .alert-error {
           display: flex;
           align-items: center;
@@ -811,7 +801,6 @@ export default function AdminOrders() {
           box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
         }
         
-        /* Card Modern */
         .card-modern {
           background: white;
           border-radius: 16px;
@@ -892,7 +881,6 @@ export default function AdminOrders() {
           to { transform: rotate(360deg); }
         }
         
-        /* Loading State */
         .loading-state {
           text-align: center;
           padding: 80px 40px;
@@ -943,7 +931,6 @@ export default function AdminOrders() {
           margin: 0;
         }
         
-        /* Empty State */
         .empty-state-large {
           text-align: center;
           padding: 80px 40px;
@@ -966,7 +953,6 @@ export default function AdminOrders() {
           margin: 0;
         }
         
-        /* Orders List */
         .orders-list {
           display: flex;
           flex-direction: column;
@@ -994,6 +980,12 @@ export default function AdminOrders() {
           padding-bottom: 20px;
           border-bottom: 2px solid #f1f5f9;
           margin-bottom: 20px;
+        }
+
+        .order-header-right {
+          display: flex;
+          align-items: center;
+          gap: 16px;
         }
         
         .order-id-section {
@@ -1032,12 +1024,44 @@ export default function AdminOrders() {
           font-weight: 700;
           color: #667eea;
         }
+
+        .expand-btn {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          border: 2px solid #e5e7eb;
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s;
+          color: #64748b;
+        }
+
+        .expand-btn:hover {
+          background: #f8fafc;
+          border-color: #667eea;
+          color: #667eea;
+        }
         
         .order-content {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 24px;
           margin-bottom: 20px;
+          animation: expandDown 0.3s ease-out;
+        }
+
+        @keyframes expandDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         
         .order-section {
@@ -1171,7 +1195,6 @@ export default function AdminOrders() {
           box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        /* Pagination */
         .pagination-footer {
           padding: 20px 24px;
           border-top: 1px solid #e5e7eb;
@@ -1233,8 +1256,57 @@ export default function AdminOrders() {
           text-align: center;
           box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
+
+        .items-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .item-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          padding: 12px 16px;
+          background: #f8fafc;
+          border-radius: 8px;
+          border: 1px solid #e5e7eb;
+          transition: all 0.2s ease;
+        }
+
+        .item-row:hover {
+          background: #f1f5f9;
+          border-color: #667eea;
+          transform: translateX(2px);
+        }
+
+        .item-name {
+          font-weight: 500;
+          color: #0f172a;
+          font-size: 15px;
+          flex: 1;
+        }
+
+        .item-qty-inline {
+          margin-left: 8px;
+          color: #64748b;
+          font-weight: 600;
+        }
+
+        .item-price {
+          font-size: 14px;
+          background: #667eea;
+          color: white;
+          padding: 6px 14px;
+          border-radius: 14px;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          white-space: nowrap;
+          margin-left: 12px;
+        }
         
-        /* Responsive */
         @media (max-width: 1024px) {
           .order-content {
             grid-template-columns: 1fr;
@@ -1295,6 +1367,11 @@ export default function AdminOrders() {
             align-items: flex-start;
             gap: 12px;
           }
+
+          .order-header-right {
+            width: 100%;
+            justify-content: space-between;
+          }
           
           .order-amount {
             font-size: 20px;
@@ -1339,56 +1416,6 @@ export default function AdminOrders() {
             width: 48px;
             height: 48px;
           }
-        }
-
-        .items-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-top: 12px;
-        }
-
-        .item-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-          padding: 12px 16px;
-          background: var(--surface);
-          border-radius: 8px;
-          border: 1px solid var(--line);
-          transition: all 0.2s ease;
-        }
-
-        .item-row:hover {
-          background: var(--surface-alt);
-          border-color: var(--brand);
-          transform: translateX(2px);
-        }
-
-        .item-name {
-          font-weight: 500;
-          color: var(--text);
-          font-size: 15px;
-          flex: 1;
-        }
-
-        .item-qty-inline {
-          margin-left: 8px;
-          color: var(--muted);
-          font-weight: 600;
-        }
-
-        .item-quantity {
-          font-size: 13px;
-          background: var(--brand);
-          color: white;
-          padding: 4px 12px;
-          border-radius: 14px;
-          font-weight: 600;
-          letter-spacing: 0.3px;
-          white-space: nowrap;
-          margin-left: 12px;
         }
       `}</style>
     </div>

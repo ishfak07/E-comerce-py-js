@@ -76,7 +76,6 @@ export default function AdminOrders() {
       const data = res.data
       setOrders(Array.isArray(data.items) ? data.items : [])
       setTotal(Number.isFinite(data.total) ? data.total : 0)
-      setPage(Number.isFinite(data.page) ? data.page : p)
     } catch (err) {
       const e = err as ApiError
       const status = e?.response?.status
@@ -103,7 +102,6 @@ export default function AdminOrders() {
         if (cancelled) return
         setOrders(Array.isArray(res.data.items) ? res.data.items : [])
         setTotal(Number.isFinite(res.data.total) ? res.data.total : 0)
-        setPage(Number.isFinite(res.data.page) ? res.data.page : 1)
         setError(null)
       } catch (err) {
         if (cancelled) return
@@ -533,7 +531,7 @@ export default function AdminOrders() {
             <div className="pagination-controls">
               <button
                 className="btn-page"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => { const prev = Math.max(1, page - 1); pageRef.current = prev; setPage(prev); }}
                 disabled={!canPrev}
                 type="button"
               >
@@ -547,7 +545,7 @@ export default function AdminOrders() {
               </div>
               <button
                 className="btn-page"
-                onClick={() => setPage((p) => Math.min(pages, p + 1))}
+                onClick={() => { const next = Math.min(pages, page + 1); pageRef.current = next; setPage(next); }}
                 disabled={!canNext}
                 type="button"
               >

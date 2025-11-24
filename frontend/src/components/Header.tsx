@@ -1082,7 +1082,7 @@ export default function Header() {
         
         .auth-btn:not(.active):focus-visible {
           outline:2px solid var(--brand);
-          outline-offset:2px;
+          outline-offset:2px; 
         }
         
         .user-wrap{position:relative;display:flex;align-items:center;gap:8px}

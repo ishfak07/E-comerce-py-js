@@ -1644,7 +1644,7 @@ export default function AdminProducts() {
         /* Image Preview Grid */
         .image-preview-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
           gap: 16px;
           margin-top: 16px;
         }
@@ -1657,6 +1657,7 @@ export default function AdminProducts() {
           border: 2px solid #e5e7eb;
           transition: all 0.3s;
           background: #f8fafc;
+          min-height: 140px;
         }
         
         .image-preview-item:hover {
@@ -1669,6 +1670,7 @@ export default function AdminProducts() {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          display: block;
         }
         
         .image-overlay {
@@ -1677,30 +1679,42 @@ export default function AdminProducts() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(0, 0, 0, 0.65);
           opacity: 0;
-          transition: opacity 0.3s;
+          transition: opacity 0.25s ease;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
+          gap: 10px;
+          padding: 10px;
+          pointer-events: none;
         }
         
         .image-preview-item:hover .image-overlay {
           opacity: 1;
+          pointer-events: auto;
         }
         
         .btn-overlay {
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
+          width: 42px;
+          height: 42px;
+          min-width: 42px;
+          min-height: 42px;
+          border-radius: 10px;
           border: none;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           font-weight: 600;
+          flex-shrink: 0;
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+          position: relative;
+        }
+        
+        .btn-overlay:active {
+          transform: scale(0.92);
         }
         
         .btn-crop-overlay {
@@ -1710,19 +1724,22 @@ export default function AdminProducts() {
         
         .btn-crop-overlay:hover {
           background: #5568d3;
-          transform: scale(1.1);
+          transform: scale(1.08);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
         }
         
         .btn-remove-overlay {
           background: #ef4444;
           color: white;
-          font-size: 24px;
+          font-size: 26px;
           line-height: 1;
+          font-weight: 400;
         }
         
         .btn-remove-overlay:hover {
           background: #dc2626;
-          transform: scale(1.1);
+          transform: scale(1.08);
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
         }
         
         .image-badge {
@@ -2251,13 +2268,21 @@ export default function AdminProducts() {
           align-items: center;
           justify-content: center;
           min-height: 500px;
+          position: relative;
+          overflow: hidden;
         }
         
         .preview-image-container img {
           max-width: 100%;
           max-height: 500px;
+          width: auto;
+          height: auto;
           object-fit: contain;
           border-radius: 8px;
+        }
+        
+        .preview-modal-content .image-overlay {
+          display: none !important;
         }
         
         .preview-controls {
@@ -2502,6 +2527,32 @@ export default function AdminProducts() {
           
           .cropper-container {
             height: 300px;
+          }
+          
+          .image-preview-grid {
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+          }
+          
+          .image-preview-item {
+            min-height: 110px;
+          }
+          
+          .btn-overlay {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+          }
+          
+          .btn-overlay svg {
+            width: 14px;
+            height: 14px;
+          }
+          
+          .image-overlay {
+            gap: 6px;
+            padding: 6px;
           }
         }
       `}</style>

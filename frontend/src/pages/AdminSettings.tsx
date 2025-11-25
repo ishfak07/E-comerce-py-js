@@ -27,7 +27,7 @@ export default function AdminSettings() {
   const navigate = useNavigate()
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState<{[key: string]: boolean}>({})
+  const [uploading, setUploading] = useState<{ [key: string]: boolean }>({})
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -77,13 +77,13 @@ export default function AdminSettings() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      
+
       const res = await fetch('/api/v1/admin/settings/upload', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` },
         body: formData,
       })
-      
+
       if (res.ok) {
         const data = await res.json()
         setSettings(prev => ({ ...prev, [field]: data.url }))
@@ -105,11 +105,11 @@ export default function AdminSettings() {
       <div className={`page-header ${mounted ? 'animate-in' : ''}`}>
         <div className="header-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 1v6m0 6v6"/>
-            <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/>
-            <path d="M1 12h6m6 0h6"/>
-            <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/>
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 1v6m0 6v6" />
+            <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24" />
+            <path d="M1 12h6m6 0h6" />
+            <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24" />
           </svg>
         </div>
         <div className="header-content">
@@ -120,131 +120,8 @@ export default function AdminSettings() {
 
       {/* Content Container */}
       <div className="content-container">
-        {/* Settings Form */}
-        <div className={`settings-section ${mounted ? 'animate-in' : ''}`}>
-          <div className="section-header">
-            <div className="section-icon">⚙️</div>
-            <div>
-              <h2 className="section-title">General Settings</h2>
-              <p className="section-subtitle">Basic store configuration and contact information</p>
-            </div>
-          </div>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="siteName">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                </svg>
-                Site Name <span className="required">*</span>
-              </label>
-              <input 
-                id="siteName" 
-                type="text"
-                value={settings.siteName} 
-                onChange={(e) => setSettings({ ...settings, siteName: e.target.value })} 
-                placeholder="e.g., Own Setup Store"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="supportEmail">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
-                Support Email <span className="required">*</span>
-              </label>
-              <input 
-                id="supportEmail" 
-                type="email" 
-                value={settings.supportEmail} 
-                onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })} 
-                placeholder="e.g., support@example.com"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="supportPhone">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                </svg>
-                Support Phone
-              </label>
-              <input 
-                id="supportPhone" 
-                type="tel"
-                value={settings.supportPhone} 
-                onChange={(e) => setSettings({ ...settings, supportPhone: e.target.value })} 
-                placeholder="e.g., +94 76 897 6222"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="currency">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="12" y1="1" x2="12" y2="23"/>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                Currency <span className="required">*</span>
-              </label>
-              <select 
-                id="currency" 
-                value={settings.currency} 
-                onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
-              >
-                <option value="USD">USD - US Dollar</option>
-                <option value="LKR">LKR - Sri Lankan Rupee</option>
-                <option value="EUR">EUR - Euro</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="brandColor">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                </svg>
-                Brand Color
-              </label>
-              <div className="color-input-group">
-                <input 
-                  id="brandColor" 
-                  type="color" 
-                  value={settings.brandColor} 
-                  onChange={(e) => setSettings({ ...settings, brandColor: e.target.value })} 
-                  className="color-picker"
-                />
-                <input 
-                  type="text" 
-                  value={settings.brandColor} 
-                  onChange={(e) => setSettings({ ...settings, brandColor: e.target.value })} 
-                  placeholder="#6D74FF"
-                  className="color-text-input"
-                />
-              </div>
-            </div>
-
-            <div className="form-group full-width">
-              <label htmlFor="bankTransferNote">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="2" y="5" width="20" height="14" rx="2"/>
-                  <line x1="2" y1="10" x2="22" y2="10"/>
-                </svg>
-                Bank Transfer Note
-              </label>
-              <textarea 
-                id="bankTransferNote" 
-                rows={4} 
-                value={settings.bankTransferNote} 
-                onChange={(e) => setSettings({ ...settings, bankTransferNote: e.target.value })} 
-                placeholder="Add instructions for customers making bank transfers..."
-              />
-            </div>
-          </div>
-        </div>
-
         {/* Hero Images Section */}
-        <div className={`settings-section ${mounted ? 'animate-in delay-1' : ''}`}>
+        <div className={`settings-section ${mounted ? 'animate-in' : ''}`}>
           <div className="section-header">
             <div className="section-icon">🖼️</div>
             <div>
@@ -259,39 +136,39 @@ export default function AdminSettings() {
               <div className="image-card-header">
                 <h3 className="image-title">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21 15 16 10 5 21"/>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
                   </svg>
                   Hero Image 1
                 </h3>
               </div>
-              
+
               {settings.heroImage1 && (
                 <div className="image-preview">
                   <img src={settings.heroImage1} alt="Hero 1" />
                   <div className="image-overlay">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="16 12 12 8 8 12"/>
-                      <line x1="12" y1="16" x2="12" y2="8"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="16 12 12 8 8 12" />
+                      <line x1="12" y1="16" x2="12" y2="8" />
                     </svg>
                   </div>
                 </div>
               )}
-              
+
               <div className="form-group">
                 <label htmlFor="heroImage1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                   </svg>
                   Image URL
                 </label>
-                <input 
-                  id="heroImage1" 
-                  type="url" 
-                  value={settings.heroImage1} 
-                  onChange={(e) => setSettings({ ...settings, heroImage1: e.target.value })} 
+                <input
+                  id="heroImage1"
+                  type="url"
+                  value={settings.heroImage1}
+                  onChange={(e) => setSettings({ ...settings, heroImage1: e.target.value })}
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -300,9 +177,9 @@ export default function AdminSettings() {
                 <p className="upload-label">Or upload from device:</p>
                 <label className="upload-btn">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
                   </svg>
                   {uploading.heroImage1 ? (
                     <>
@@ -312,9 +189,9 @@ export default function AdminSettings() {
                   ) : (
                     'Choose File'
                   )}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
+                  <input
+                    type="file"
+                    accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
                       if (file) uploadImage('heroImage1', file)
@@ -331,39 +208,39 @@ export default function AdminSettings() {
               <div className="image-card-header">
                 <h3 className="image-title">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21 15 16 10 5 21"/>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
                   </svg>
                   Hero Image 2
                 </h3>
               </div>
-              
+
               {settings.heroImage2 && (
                 <div className="image-preview">
                   <img src={settings.heroImage2} alt="Hero 2" />
                   <div className="image-overlay">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="16 12 12 8 8 12"/>
-                      <line x1="12" y1="16" x2="12" y2="8"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="16 12 12 8 8 12" />
+                      <line x1="12" y1="16" x2="12" y2="8" />
                     </svg>
                   </div>
                 </div>
               )}
-              
+
               <div className="form-group">
                 <label htmlFor="heroImage2">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                   </svg>
                   Image URL
                 </label>
-                <input 
-                  id="heroImage2" 
-                  type="url" 
-                  value={settings.heroImage2} 
-                  onChange={(e) => setSettings({ ...settings, heroImage2: e.target.value })} 
+                <input
+                  id="heroImage2"
+                  type="url"
+                  value={settings.heroImage2}
+                  onChange={(e) => setSettings({ ...settings, heroImage2: e.target.value })}
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -372,9 +249,9 @@ export default function AdminSettings() {
                 <p className="upload-label">Or upload from device:</p>
                 <label className="upload-btn">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
                   </svg>
                   {uploading.heroImage2 ? (
                     <>
@@ -384,9 +261,9 @@ export default function AdminSettings() {
                   ) : (
                     'Choose File'
                   )}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
+                  <input
+                    type="file"
+                    accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
                       if (file) uploadImage('heroImage2', file)
@@ -401,21 +278,21 @@ export default function AdminSettings() {
         </div>
 
         {/* Action Buttons */}
-        <div className={`action-buttons ${mounted ? 'animate-in delay-2' : ''}`}>
-          <button 
-            className="btn btn-secondary" 
+        <div className={`action-buttons ${mounted ? 'animate-in delay-1' : ''}`}>
+          <button
+            className="btn btn-secondary"
             onClick={() => navigate('/admin')}
             type="button"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15 18 9 12 15 6"/>
+              <polyline points="15 18 9 12 15 6" />
             </svg>
             Cancel
           </button>
-          <button 
-            className="btn btn-primary" 
-            onClick={saveSettings} 
-            disabled={saving} 
+          <button
+            className="btn btn-primary"
+            onClick={saveSettings}
+            disabled={saving}
             type="button"
           >
             {saving ? (
@@ -426,9 +303,9 @@ export default function AdminSettings() {
             ) : (
               <>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                  <polyline points="17 21 17 13 7 13 7 21"/>
-                  <polyline points="7 3 7 8 15 8"/>
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
                 </svg>
                 Save Settings
               </>
@@ -481,10 +358,10 @@ export default function AdminSettings() {
           transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .action-buttons.animate-in.delay-2 {
+        .action-buttons.animate-in.delay-1 {
           opacity: 1;
           transform: translateY(0);
-          transition-delay: 0.4s;
+          transition-delay: 0.2s;
         }
 
         /* ========================================

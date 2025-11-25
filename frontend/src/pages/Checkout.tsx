@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useCart } from '../lib/cart'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthProvider'
+import { useNavigate } from 'react-router-dom'
 
 const SRI_LANKAN_BANKS = [
   'Commercial Bank of Ceylon',
@@ -30,6 +31,7 @@ const COMPANY_BANK_DETAILS = {
 export default function Checkout() {
   const { items, clear } = useCart()
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const [address, setAddress] = useState({ line1: '', city: '', postal_code: '', country: 'LK' })
   const [orderId, setOrderId] = useState<string | null>(null)
@@ -37,6 +39,7 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  const [showAdminBlock, setShowAdminBlock] = useState(false)
 
   // New fields for bank transfer
   const [customerName, setCustomerName] = useState('')
@@ -48,6 +51,14 @@ export default function Checkout() {
   const [uploadingReceipt, setUploadingReceipt] = useState(false)
   const [transactionRef, setTransactionRef] = useState('')
   const [additionalNotes, setAdditionalNotes] = useState('')
+
+  // Block Admin access
+  useEffect(() => {
+    if (user?.is_staff || user?.is_superuser) {
+      setShowAdminBlock(true)
+      setTimeout(() => navigate('/'), 3000)
+    }
+  }, [user, navigate])
 
   // Auto-fill email if user is logged in
   useEffect(() => {
@@ -142,6 +153,153 @@ export default function Checkout() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (showAdminBlock) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.85)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        animation: 'fadeIn 0.3s ease-out'
+      }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          padding: '3rem',
+          borderRadius: '24px',
+          maxWidth: '500px',
+          width: '90%',
+          boxShadow: '0 20px 60px rgba(245, 87, 108, 0.4), 0 0 0 1px rgba(255,255,255,0.1)',
+          animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: 'hidden',
+            pointerEvents: 'none'
+          }}>
+            {[...Array(15)].map((_, i) => (
+              <div key={i} style={{
+                position: 'absolute',
+                width: Math.random() * 10 + 5 + 'px',
+                height: Math.random() * 10 + 5 + 'px',
+                background: 'rgba(255,255,255,0.3)',
+                borderRadius: '50%',
+                left: Math.random() * 100 + '%',
+                top: Math.random() * 100 + '%',
+                animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 2}s`
+              }} />)
+            )}
+          </div>
+          
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '1.5rem',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '80px',
+              height: '80px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '50%',
+              animation: 'pulse 2s ease-in-out infinite'
+            }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{
+                animation: 'shake 0.5s ease-in-out'
+              }}>
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </div>
+          </div>
+          
+          <div style={{
+            textAlign: 'center',
+            color: 'white',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <h2 style={{
+              margin: '0 0 1rem 0',
+              fontSize: '1.75rem',
+              fontWeight: '700',
+              textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+            }}>Checkout Restricted</h2>
+            <p style={{
+              margin: '0 0 1.5rem 0',
+              fontSize: '1.1rem',
+              opacity: 0.95,
+              lineHeight: 1.6
+            }}>
+              Admin accounts cannot proceed with checkout. This platform belongs to you!
+            </p>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              fontSize: '0.9rem',
+              opacity: 0.8
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 11 12 14 22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              Redirecting to home...
+            </div>
+          </div>
+        </div>
+        
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes slideUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px) scale(0.95);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+          }
+          @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+        `}</style>
+      </div>
+    )
   }
 
   return (

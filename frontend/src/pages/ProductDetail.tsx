@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { useCart } from '../lib/cart'
 import { animateFlyToCart } from '../lib/flyToCart'
+import { useAuth } from '../context/AuthProvider'
 
 type Product = {
   id: number
@@ -20,6 +21,7 @@ export default function ProductDetail() {
   const { add } = useCart()
   const navigate = useNavigate()
   const mainImgRef = useRef<HTMLImageElement | null>(null)
+  const { user } = useAuth()
 
   useEffect(() => {
     if (!slug) return
@@ -184,27 +186,33 @@ export default function ProductDetail() {
           <h1 style={{ marginTop: 0 }}>{product.name}</h1>
           <div className="price" style={{ fontSize: 22 }}>LKR {product.price}</div>
           <p style={{ color: 'var(--muted)' }}>{product.description || 'A beautiful product made for you.'}</p>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              className="btn"
-              onClick={() => {
-                if (mainImgRef.current) animateFlyToCart(mainImgRef.current)
-                add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
-              }}
-            >
-              Add to Cart
-            </button>
-            <button
-              className="btn"
-              onClick={() => {
-                if (mainImgRef.current) animateFlyToCart(mainImgRef.current)
-                add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
-                navigate('/cart')
-              }}
-            >
-              Buy Now
-            </button>
-          </div>
+          {user?.is_staff || user?.is_superuser ? (
+            <div style={{ padding: '12px 16px', background: 'rgba(109, 116, 255, 0.1)', border: '1px solid rgba(109, 116, 255, 0.3)', borderRadius: 8, color: 'var(--text)' }}>
+              <strong>Admin Account:</strong> You cannot purchase products as an administrator.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn"
+                onClick={() => {
+                  if (mainImgRef.current) animateFlyToCart(mainImgRef.current)
+                  add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
+                }}
+              >
+                Add to Cart
+              </button>
+              <button
+                className="btn"
+                onClick={() => {
+                  if (mainImgRef.current) animateFlyToCart(mainImgRef.current)
+                  add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: images[0] })
+                  navigate('/cart')
+                }}
+              >
+                Buy Now
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

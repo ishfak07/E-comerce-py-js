@@ -1,17 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useCart } from '../lib/cart'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthProvider'
 
 export default function Cart() {
   const { items, update, remove, clear } = useCart()
   const navigate = useNavigate()
   const [showTransfer, setShowTransfer] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const { user } = useAuth()
+  const [showAdminBlock, setShowAdminBlock] = useState(false)
 
   useEffect(() => {
+    // Block Admin access
+    if (user?.is_staff || user?.is_superuser) {
+      setShowAdminBlock(true)
+      setTimeout(() => navigate('/'), 3000)
+      return
+    }
     // Trigger animations after mount
     setMounted(true)
-  }, [])
+  }, [user, navigate])
 
   const subtotal = useMemo(
     () => items.reduce((a, b) => a + b.price * b.qty, 0),
@@ -31,6 +40,155 @@ export default function Cart() {
 
   return (
     <>
+      {/* Admin Block Modal */}
+      {showAdminBlock && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            padding: '3rem',
+            borderRadius: '24px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(102, 126, 234, 0.4), 0 0 0 1px rgba(255,255,255,0.1)',
+            animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Animated background particles */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'hidden',
+              pointerEvents: 'none'
+            }}>
+              {[...Array(15)].map((_, i) => (
+                <div key={i} style={{
+                  position: 'absolute',
+                  width: Math.random() * 10 + 5 + 'px',
+                  height: Math.random() * 10 + 5 + 'px',
+                  background: 'rgba(255,255,255,0.3)',
+                  borderRadius: '50%',
+                  left: Math.random() * 100 + '%',
+                  top: Math.random() * 100 + '%',
+                  animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                  animationDelay: `${Math.random() * 2}s`
+                }} />)
+              )}
+            </div>
+            
+            {/* Icon */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '1.5rem',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '80px',
+                height: '80px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{
+                  animation: 'shake 0.5s ease-in-out'
+                }}>
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div style={{
+              textAlign: 'center',
+              color: 'white',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <h2 style={{
+                margin: '0 0 1rem 0',
+                fontSize: '1.75rem',
+                fontWeight: '700',
+                textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+              }}>Admin Access Restricted</h2>
+              <p style={{
+                margin: '0 0 1.5rem 0',
+                fontSize: '1.1rem',
+                opacity: 0.95,
+                lineHeight: 1.6
+              }}>
+                Admin accounts cannot access the shopping cart. This feature is exclusively for customers.
+              </p>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                fontSize: '0.9rem',
+                opacity: 0.8
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 11 12 14 22 4"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                Redirecting to home...
+              </div>
+            </div>
+          </div>
+          
+          <style>{`
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes slideUp {
+              from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            @keyframes pulse {
+              0%, 100% { transform: scale(1); }
+              50% { transform: scale(1.1); }
+            }
+            @keyframes shake {
+              0%, 100% { transform: rotate(0deg); }
+              25% { transform: rotate(-10deg); }
+              75% { transform: rotate(10deg); }
+            }
+            @keyframes float {
+              0%, 100% { transform: translateY(0px); }
+              50% { transform: translateY(-20px); }
+            }
+          `}</style>
+        </div>
+      )}
+      
       {/* Animated Background */}
       <div className="page-background">
         <div className="gradient-orb orb-1"></div>

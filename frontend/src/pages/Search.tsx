@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useCart } from '../lib/cart'
 import { animateFlyToCart } from '../lib/flyToCart'
+import { useAuth } from '../context/AuthProvider'
 
 type Product = {
   id: string | number
@@ -23,6 +24,7 @@ export default function Search() {
   const query = searchParams.get('q') || ''
 
   const { add } = useCart()
+  const { user } = useAuth()
 
   useEffect(() => {
     if (!query.trim()) {
@@ -149,7 +151,9 @@ export default function Search() {
                       <div className="card-actions">
                         <button
                           className="btn btn-primary"
+                          disabled={user?.is_staff || user?.is_superuser}
                           onClick={(e) => handleAddToCart(product, e)}
+                          title={user?.is_staff || user?.is_superuser ? 'Admin accounts cannot purchase' : ''}
                         >
                           Add to Cart
                         </button>

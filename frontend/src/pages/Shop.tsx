@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useCart } from '../lib/cart'
 import { animateFlyToCart } from '../lib/flyToCart'
+import { useAuth } from '../context/AuthProvider'
 
 type Product = {
   id: string | number  // Can be MongoDB ObjectId string or number
@@ -30,6 +31,7 @@ export default function Shop() {
   const [perPage, setPerPage] = useState<number>(12)
 
   const { add } = useCart()
+  const { user } = useAuth()
 
   useEffect(() => {
     // Trigger animations after mount
@@ -381,6 +383,7 @@ export default function Shop() {
                   <div className="card-actions">
                     <button
                       className="btn btn-primary"
+                      disabled={user?.is_staff || user?.is_superuser}
                       onClick={(e) => {
                         const card = (e.currentTarget as HTMLElement).closest('.card') as HTMLElement | null
                         const img = card?.querySelector('img') as HTMLImageElement | null
@@ -393,6 +396,7 @@ export default function Shop() {
                           image: p.images?.[0],
                         })
                       }}
+                      title={user?.is_staff || user?.is_superuser ? 'Admin accounts cannot purchase' : ''}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="9" cy="21" r="1"/>

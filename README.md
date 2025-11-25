@@ -1,53 +1,107 @@
-E-commerce App (FastAPI + React)
+# 🛍️ E-Commerce Platform
 
-Quick start (Docker)
+A modern, full-stack e-commerce application built with **FastAPI** (Python) and **React** (TypeScript).
 
-1. Set envs before compose (Stripe optional): STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
-2. Start services:
+## ✨ Features
 
+- 🔐 **Authentication** - JWT-based auth with admin and user roles
+- 🛒 **Shopping Cart** - Persistent cart with local storage
+- 📦 **Product Management** - Multiple images, cropping, stock tracking
+- 💳 **Multiple Payment Methods** - COD, Bank Transfer, Stripe
+- 📄 **Invoice Generation** - Automatic PDF invoices
+- 📊 **Admin Dashboard** - User, product, and order management
+- 📱 **Responsive Design** - Modern UI with gradient themes
+
+## 🚀 Quick Start
+
+### Using Docker (Recommended)
 ```bash
 docker compose up --build
 ```
+- **Backend:** http://localhost:8000/api/docs
+- **Frontend:** http://localhost:5173
+- **MongoDB:** localhost:27017
 
-Services:
-- API: http://localhost:8000/api/docs
-- Frontend: http://localhost:5173
-- Postgres: localhost:5432 (user: postgres / password: postgres)
-
-Local dev (without Docker)
-
-Backend:
+### Local Development
 ```bash
+# Backend
 cd backend
-python -m venv .venv && . .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 uvicorn app.main:app --reload
-```
 
-Frontend:
-```bash
+# Frontend (new terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-Environment
-- DATABASE_URL e.g. postgresql+psycopg://postgres:postgres@localhost:5432/ecommerce
-- SECRET_KEY for JWT
-- STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET (optional)
+**Environment:** Create `.env` in root:
+```env
+MONGO_URL=mongodb://localhost:27017/ecommerce
+SECRET_KEY=your-secret-key
+```
 
-## 🌐 Deployment
+## 📚 Documentation
 
-### GitHub Pages (Frontend Only)
-The frontend is automatically deployed to GitHub Pages on every push to `main`.
+- **[Development Guide](DEVELOPMENT.md)** - Complete setup and development instructions
+- **[Deployment Guide](DEPLOYMENT.md)** - Production deployment guide
+- **[Quick Start](QUICK_START.md)** - Fast setup for beginners
+- **[FAQ](FAQ.md)** - Common questions and troubleshooting
 
-**Live Demo:** `https://ishfak07.github.io/E-comerce-py-js/`
+## 🌐 Live Demo
 
-**Documentation:**
-- [Complete Deployment Guide](DEPLOYMENT.md)
-- [GitHub Pages Fix Summary](GITHUB_PAGES_FIX.md)
+**Frontend:** [https://ishfak07.github.io/E-comerce-py-js/](https://ishfak07.github.io/E-comerce-py-js/)
 
-**Note:** GitHub Pages hosts only the static frontend. For full functionality, deploy the backend separately and configure the API URL.
+*Note: GitHub Pages hosts the static frontend only. Backend needs separate deployment.*
+
+## 🛠️ Tech Stack
+
+**Backend:**
+- FastAPI
+- MongoDB (Motor/PyMongo)
+- JWT Authentication
+- Stripe API
+- ReportLab (PDF generation)
+
+**Frontend:**
+- React 18
+- TypeScript
+- Vite
+- React Router
+- Axios
+
+## 🎯 Default Accounts
+
+After seeding the database:
+- **Admin:** admin@example.com / adminpass
+- **User:** user@example.com / userpass
+
+## 📝 Project Structure
+
+```
+├── backend/          # FastAPI application
+├── frontend/         # React application
+├── data/             # Database seeds
+└── docker-compose.yml
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push and create a Pull Request
+
+## 📄 License
+
+MIT License - Free to use for learning and commercial projects.
+
+## 📧 Support
+
+For issues or questions, please create a GitHub issue with details.
 
 ## CI/CD
 - GitHub Actions builds/lints backend and frontend

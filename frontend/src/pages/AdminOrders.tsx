@@ -58,6 +58,10 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [showDeleteAllFinal, setShowDeleteAllFinal] = useState(false)
+  const [deleteOrderId, setDeleteOrderId] = useState<string | null>(null)
 
   const pageRef = useRef(page)
   useEffect(() => {
@@ -167,15 +171,20 @@ export default function AdminOrders() {
   }
 
   async function remove(orderId: string) {
-    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
-      return
-    }
+    setDeleteOrderId(orderId)
+    setShowDeleteConfirm(true)
+  }
+
+  async function confirmDelete() {
+    if (!deleteOrderId) return
+    setShowDeleteConfirm(false)
     try {
       // Optimistic remove
       const snapshot = orders
-      setOrders((prev) => prev.filter((o) => o.id !== orderId))
-      await api.delete(`/admin/orders/${orderId}`)
+      setOrders((prev) => prev.filter((o) => o.id !== deleteOrderId))
+      await api.delete(`/admin/orders/${deleteOrderId}`)
       setTotal((prev) => prev - 1)
+      setDeleteOrderId(null)
     } catch (err) {
       const e = err as ApiError
       const s = e?.response?.status
@@ -186,16 +195,21 @@ export default function AdminOrders() {
       console.error('Failed to delete order', err)
       setError(e?.response?.data?.detail || e?.response?.data?.message || 'Failed to delete order')
       await fetchPage(pageRef.current)
+      setDeleteOrderId(null)
     }
   }
 
   async function removeAll() {
-    if (!confirm(`⚠️ WARNING: This will permanently delete ALL ${total} orders and their reviews!\n\nThis action CANNOT be undone. Are you absolutely sure?`)) {
-      return
-    }
-    if (!confirm('Final confirmation: Delete ALL orders? Type YES in your mind and click OK.')) {
-      return
-    }
+    setShowDeleteAllConfirm(true)
+  }
+
+  async function confirmDeleteAll() {
+    setShowDeleteAllConfirm(false)
+    setShowDeleteAllFinal(true)
+  }
+
+  async function finalDeleteAll() {
+    setShowDeleteAllFinal(false)
     setLoading(true)
     setError(null)
     try {
@@ -203,7 +217,6 @@ export default function AdminOrders() {
       setOrders([])
       setTotal(0)
       setPage(1)
-      alert('All orders have been deleted successfully.')
     } catch (err) {
       const e = err as ApiError
       const s = e?.response?.status
@@ -235,6 +248,530 @@ export default function AdminOrders() {
   }
 
   return (
+    <>
+      {/* Delete Single Order Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            padding: '3rem',
+            borderRadius: '24px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(102, 126, 234, 0.4), 0 0 0 1px rgba(255,255,255,0.1)',
+            animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Animated background particles */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'hidden',
+              pointerEvents: 'none'
+            }}>
+              {[...Array(15)].map((_, i) => (
+                <div key={i} style={{
+                  position: 'absolute',
+                  width: Math.random() * 10 + 5 + 'px',
+                  height: Math.random() * 10 + 5 + 'px',
+                  background: 'rgba(255,255,255,0.3)',
+                  borderRadius: '50%',
+                  left: Math.random() * 100 + '%',
+                  top: Math.random() * 100 + '%',
+                  animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                  animationDelay: `${Math.random() * 2}s`
+                }} />)
+              )}
+            </div>
+            
+            {/* Icon */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '1.5rem',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '80px',
+                height: '80px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{
+                  animation: 'shake 0.5s ease-in-out'
+                }}>
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div style={{
+              textAlign: 'center',
+              color: 'white',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <h2 style={{
+                margin: '0 0 1rem 0',
+                fontSize: '1.75rem',
+                fontWeight: '700',
+                textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+              }}>Delete Order?</h2>
+              <p style={{
+                margin: '0 0 2rem 0',
+                fontSize: '1.1rem',
+                opacity: 0.95,
+                lineHeight: 1.6
+              }}>
+                Are you sure you want to delete this order? This action cannot be undone.
+              </p>
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false)
+                    setDeleteOrderId(null)
+                  }}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    padding: '12px 32px',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  style={{
+                    background: 'white',
+                    color: '#667eea',
+                    border: 'none',
+                    padding: '12px 32px',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'
+                  }}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete All Orders Warning Modal */}
+      {showDeleteAllConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            padding: '3rem',
+            borderRadius: '24px',
+            maxWidth: '520px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(245, 87, 108, 0.4), 0 0 0 1px rgba(255,255,255,0.1)',
+            animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Animated background particles */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'hidden',
+              pointerEvents: 'none'
+            }}>
+              {[...Array(15)].map((_, i) => (
+                <div key={i} style={{
+                  position: 'absolute',
+                  width: Math.random() * 10 + 5 + 'px',
+                  height: Math.random() * 10 + 5 + 'px',
+                  background: 'rgba(255,255,255,0.3)',
+                  borderRadius: '50%',
+                  left: Math.random() * 100 + '%',
+                  top: Math.random() * 100 + '%',
+                  animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                  animationDelay: `${Math.random() * 2}s`
+                }} />)
+              )}
+            </div>
+            
+            {/* Warning Icon */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '1.5rem',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '90px',
+                height: '90px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}>
+                <div style={{
+                  fontSize: '48px',
+                  animation: 'shake 0.5s ease-in-out'
+                }}>⚠️</div>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div style={{
+              textAlign: 'center',
+              color: 'white',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <h2 style={{
+                margin: '0 0 1rem 0',
+                fontSize: '1.85rem',
+                fontWeight: '700',
+                textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+              }}>CRITICAL WARNING!</h2>
+              <p style={{
+                margin: '0 0 0.75rem 0',
+                fontSize: '1.15rem',
+                fontWeight: 600,
+                opacity: 0.95,
+                lineHeight: 1.5
+              }}>
+                This will permanently delete ALL {total} orders and their reviews!
+              </p>
+              <p style={{
+                margin: '0 0 2rem 0',
+                fontSize: '1rem',
+                opacity: 0.9,
+                lineHeight: 1.6
+              }}>
+                This action CANNOT be undone. Are you absolutely sure?
+              </p>
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={() => setShowDeleteAllConfirm(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    padding: '12px 32px',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteAll}
+                  style={{
+                    background: 'white',
+                    color: '#f5576c',
+                    border: 'none',
+                    padding: '12px 32px',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'
+                  }}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Final Delete All Confirmation Modal */}
+      {showDeleteAllFinal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            padding: '3rem',
+            borderRadius: '24px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(250, 112, 154, 0.4), 0 0 0 1px rgba(255,255,255,0.1)',
+            animation: 'slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Animated background particles */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              overflow: 'hidden',
+              pointerEvents: 'none'
+            }}>
+              {[...Array(15)].map((_, i) => (
+                <div key={i} style={{
+                  position: 'absolute',
+                  width: Math.random() * 10 + 5 + 'px',
+                  height: Math.random() * 10 + 5 + 'px',
+                  background: 'rgba(255,255,255,0.3)',
+                  borderRadius: '50%',
+                  left: Math.random() * 100 + '%',
+                  top: Math.random() * 100 + '%',
+                  animation: `float ${Math.random() * 3 + 2}s ease-in-out infinite`,
+                  animationDelay: `${Math.random() * 2}s`
+                }} />)
+              )}
+            </div>
+            
+            {/* Final Icon */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '1.5rem',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '80px',
+                height: '80px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{
+                  animation: 'shake 0.5s ease-in-out'
+                }}>
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div style={{
+              textAlign: 'center',
+              color: 'white',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <h2 style={{
+                margin: '0 0 1rem 0',
+                fontSize: '1.75rem',
+                fontWeight: '700',
+                textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+              }}>Final Confirmation</h2>
+              <p style={{
+                margin: '0 0 2rem 0',
+                fontSize: '1.1rem',
+                opacity: 0.95,
+                lineHeight: 1.6
+              }}>
+                Last chance! Delete ALL orders permanently?
+              </p>
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={() => setShowDeleteAllFinal(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    padding: '12px 32px',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={finalDeleteAll}
+                  style={{
+                    background: 'white',
+                    color: '#fa709a',
+                    border: 'none',
+                    padding: '12px 32px',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'
+                  }}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+        @keyframes shake {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-10deg); }
+          75% { transform: rotate(10deg); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+      `}</style>
+
     <div className="orders-page">
       <div className="page-header">
         <div className="page-header-content">
@@ -1551,5 +2088,6 @@ export default function AdminOrders() {
         }
       `}</style>
     </div>
+    </>
   )
 }

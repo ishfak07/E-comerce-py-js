@@ -84,8 +84,39 @@ def update_product(pid: str, payload: dict, db=Depends(get_mongo_db), _admin=Dep
 
 @router.delete("/{pid}")
 def delete_product(pid: str, db=Depends(get_mongo_db), _admin=Depends(require_admin)):
+    """Delete product and cascade delete related data (images from filesystem, cart items)."""
     products = db.get_collection("products")
+    carts = db.get_collection("carts")
+    
+    # Get product before deletion to access images
+    product = products.find_one({"_id": _maybe_oid(pid)})
+    if not product:
+        raise HTTPException(status_code=404, detail="not found")
+    
+    # Delete physical image files from filesystem
+    if product.get("images"):
+        uploads_dir = Path(__file__).parents[4] / 'backend' / 'static' / 'uploads'
+        for image_url in product.get("images", []):
+            try:
+                # Extract filename from URL (e.g., /static/uploads/filename.jpg)
+                if image_url and '/uploads/' in image_url:
+                    filename = image_url.split('/uploads/')[-1]
+                    filepath = uploads_dir / filename
+                    if filepath.exists():
+                        filepath.unlink()
+            except Exception as e:
+                # Log but don't fail deletion if file cleanup fails
+                print(f"Warning: Could not delete image file {image_url}: {e}")
+    
+    # Remove product from all user carts
+    carts.update_many(
+        {},
+        {"$pull": {"items": {"productId": pid}}}
+    )
+    
+    # Delete the product
     res = products.delete_one({"_id": _maybe_oid(pid)})
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="not found")
-    return {"ok": True}
+    
+    return {"ok": True, "message": "Product and related data deleted successfully"}

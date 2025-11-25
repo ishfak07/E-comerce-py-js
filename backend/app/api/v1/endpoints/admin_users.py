@@ -44,8 +44,36 @@ def block_user(uid: str, block: bool = True, db=Depends(get_mongo_db), _admin=De
 
 @router.delete("/{uid}")
 def delete_user(uid: str, db=Depends(get_mongo_db), _admin=Depends(require_admin)):
+    """Delete user and cascade delete all related data (carts, orders, reviews)."""
     users = db.get_collection("users")
+    carts = db.get_collection("carts")
+    orders = db.get_collection("orders")
+    reviews = db.get_collection("reviews")
+    
+    # Get user email before deletion
+    user = users.find_one({"_id": _maybe_oid(uid)})
+    if not user:
+        raise HTTPException(status_code=404, detail="not found")
+    
+    user_email = user.get("email")
+    user_id_str = str(user.get("_id"))
+    
+    # Delete user's cart
+    if user_email:
+        carts.delete_many({"user_email": user_email})
+    
+    # Delete user's orders
+    orders.delete_many({"$or": [
+        {"user_id": user_id_str},
+        {"customer_email": user_email}
+    ]})
+    
+    # Delete user's reviews
+    reviews.delete_many({"user_id": user_id_str})
+    
+    # Delete the user
     res = users.delete_one({"_id": _maybe_oid(uid)})
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="not found")
-    return {"ok": True}
+    
+    return {"ok": True, "message": "User and all related data deleted successfully"}

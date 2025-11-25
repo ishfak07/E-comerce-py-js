@@ -166,6 +166,29 @@ export default function AdminOrders() {
     }
   }
 
+  async function remove(orderId: string) {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      return
+    }
+    try {
+      // Optimistic remove
+      const snapshot = orders
+      setOrders((prev) => prev.filter((o) => o.id !== orderId))
+      await api.delete(`/admin/orders/${orderId}`)
+      setTotal((prev) => prev - 1)
+    } catch (err) {
+      const e = err as ApiError
+      const s = e?.response?.status
+      if (s === 401) {
+        try { window.location.href = '/login' } catch {}
+        return
+      }
+      console.error('Failed to delete order', err)
+      setError(e?.response?.data?.detail || e?.response?.data?.message || 'Failed to delete order')
+      await fetchPage(pageRef.current)
+    }
+  }
+
   const canPrev = page > 1
   const canNext = page < pages
 
@@ -504,18 +527,31 @@ export default function AdminOrders() {
                       {statusConfig.label}
                     </div>
 
-                    <select
-                      onChange={(e) => setStatus(o.id, e.target.value)}
-                      value={o.status}
-                      className="status-select"
-                    >
-                      <option value="pending_verification">⏳ Pending Verification</option>
-                      <option value="payment_verified">✓ Payment Verified</option>
-                      <option value="processing">⚙️ Processing</option>
-                      <option value="shipped">🚚 Shipped</option>
-                      <option value="delivered">✓ Delivered</option>
-                      <option value="cancelled">✕ Cancelled</option>
-                    </select>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <select
+                        onChange={(e) => setStatus(o.id, e.target.value)}
+                        value={o.status}
+                        className="status-select"
+                      >
+                        <option value="pending_verification">⏳ Pending Verification</option>
+                        <option value="payment_verified">✓ Payment Verified</option>
+                        <option value="processing">⚙️ Processing</option>
+                        <option value="shipped">🚚 Shipped</option>
+                        <option value="delivered">✓ Delivered</option>
+                        <option value="cancelled">✕ Cancelled</option>
+                      </select>
+                      
+                      <button 
+                        onClick={() => remove(o.id)} 
+                        type="button"
+                        className="btn-delete-order"
+                        title="Delete order"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )
@@ -1191,6 +1227,31 @@ export default function AdminOrders() {
           outline: none;
           border-color: #667eea;
           box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-delete-order {
+          padding: 10px 14px;
+          background: #fee2e2;
+          border: 2px solid #fecaca;
+          border-radius: 10px;
+          color: #dc2626;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 44px;
+        }
+        
+        .btn-delete-order:hover {
+          background: #fecaca;
+          border-color: #fca5a5;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+        }
+        
+        .btn-delete-order:active {
+          transform: translateY(0);
         }
         
         .pagination-footer {

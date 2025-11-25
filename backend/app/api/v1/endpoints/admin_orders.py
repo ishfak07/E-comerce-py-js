@@ -170,3 +170,30 @@ def reject_payment(
     return {"ok": True, "message": "Payment rejected"}
 
 
+@router.delete("/{order_id}")
+def delete_order(order_id: str, db=Depends(get_mongo_db), _admin=Depends(require_admin)):
+    """Delete order and related data (reviews for this order)."""
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    orders = db.get_collection("orders")
+    reviews = db.get_collection("reviews")
+    
+    # Convert string ID to ObjectId
+    try:
+        obj_id = ObjectId(order_id)
+    except:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Invalid order ID format")
+    
+    # Delete reviews associated with this order
+    reviews.delete_many({"order_id": order_id})
+    
+    # Delete the order
+    res = orders.delete_one({"_id": obj_id})
+    if res.deleted_count == 0:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    return {"ok": True, "message": "Order and related data deleted successfully"}
+
+

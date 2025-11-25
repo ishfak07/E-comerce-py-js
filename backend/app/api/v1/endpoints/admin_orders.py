@@ -197,3 +197,24 @@ def delete_order(order_id: str, db=Depends(get_mongo_db), _admin=Depends(require
     return {"ok": True, "message": "Order and related data deleted successfully"}
 
 
+@router.delete("")
+def delete_all_orders(db=Depends(get_mongo_db), _admin=Depends(require_admin)):
+    """Delete all orders and their related reviews. USE WITH EXTREME CAUTION!"""
+    if db is None:
+        raise RuntimeError("MongoDB is not configured")
+    orders = db.get_collection("orders")
+    reviews = db.get_collection("reviews")
+    
+    # Delete all reviews
+    reviews_result = reviews.delete_many({})
+    
+    # Delete all orders
+    orders_result = orders.delete_many({})
+    
+    return {
+        "ok": True, 
+        "message": f"Deleted {orders_result.deleted_count} orders and {reviews_result.deleted_count} reviews successfully"
+    }
+
+
+

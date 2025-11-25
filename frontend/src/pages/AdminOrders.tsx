@@ -189,6 +189,36 @@ export default function AdminOrders() {
     }
   }
 
+  async function removeAll() {
+    if (!confirm(`⚠️ WARNING: This will permanently delete ALL ${total} orders and their reviews!\n\nThis action CANNOT be undone. Are you absolutely sure?`)) {
+      return
+    }
+    if (!confirm('Final confirmation: Delete ALL orders? Type YES in your mind and click OK.')) {
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      await api.delete('/admin/orders')
+      setOrders([])
+      setTotal(0)
+      setPage(1)
+      alert('All orders have been deleted successfully.')
+    } catch (err) {
+      const e = err as ApiError
+      const s = e?.response?.status
+      if (s === 401) {
+        try { window.location.href = '/login' } catch {}
+        return
+      }
+      console.error('Failed to delete all orders', err)
+      setError(e?.response?.data?.detail || e?.response?.data?.message || 'Failed to delete all orders')
+      await fetchPage(1)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const canPrev = page > 1
   const canNext = page < pages
 
@@ -308,12 +338,28 @@ export default function AdminOrders() {
             </h2>
             <p className="card-subtitle-orders">Manage and track order status</p>
           </div>
-          <button className="btn-refresh" onClick={() => fetchPage(1)} disabled={loading} type="button">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" className={loading ? 'spinner' : ''}>
-              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"/>
-            </svg>
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn-refresh" onClick={() => fetchPage(1)} disabled={loading} type="button">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" className={loading ? 'spinner' : ''}>
+                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"/>
+              </svg>
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </button>
+            {total > 0 && (
+              <button 
+                className="btn-delete-all" 
+                onClick={removeAll} 
+                disabled={loading} 
+                type="button"
+                title="Delete all orders"
+              >
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
+                </svg>
+                Delete All ({total})
+              </button>
+            )}
+          </div>
         </div>
 
         {loading && orders.length === 0 && (
@@ -902,6 +948,33 @@ export default function AdminOrders() {
         }
         
         .btn-refresh:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        
+        .btn-delete-all {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-weight: 600;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+        
+        .btn-delete-all:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .btn-delete-all:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
